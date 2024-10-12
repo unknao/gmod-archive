@@ -1,0 +1,49 @@
+@name Slave Gyro-steering + Simulated Bodyroll
+@inputs A D [Base BaseSlave Axle1 Axle2 AxleSlave LeftSlave RightSlave]:entity
+@outputs L R Curve Bodyroll_Vel
+@persist Width Length Curve AD Bodyroll_Vel Bodyroll_Mul Bodyroll_Max TickFix
+@persist [Vel_Offset Vel_Offset_Pos]:vector Gyro Gyro_Mul Gyro_Max
+@trigger 
+
+#Made by unknao
+if(first() | dupefinished()){
+    Width = 34.998 #Distance from the wheel to the base widthwise.
+    Length = 104.998 #Distance between the front and back wheels.
+    
+    Vel_Offset_Pos = vec(-60, 0, 0) #Base velocity according to an offset point local to the Base prop, set this to be between your rear wheels.
+    Gyro_Mul = -0.8 #How strong is the gyro compensation.
+    Gyro_Max = 45 #Maximum angle that the gyro compensation can go to.
+    
+    Bodyroll_Mul = 0.5 #Bodyroll multiplier according to the force received.
+    Bodyroll_Max = 350 #Maximum amount of bodyroll the code will simulate.
+    
+    rangerPersist(1)
+    rangerFilter(Base:getConnectedEntities())
+    Curve = 0, N = 0, L = 0, R = 0, TickFix = 66 * tickInterval()
+}
+
+AD = (A - D) * 30
+
+event tick(){
+    #Simulated Bodyroll
+    Bodyroll_Vel = (Base:velL():y() + Base:angVelVector():z() * 3)
+     * rangerOffset(30, Base:pos(), -Base:up()):hit() #Don't do cartwheels in the sky.
+    
+    Base:applyTorque(vec(clamp(-Bodyroll_Vel * Bodyroll_Mul, -Bodyroll_Max, Bodyroll_Max), 0, 0) * Base:inertia() * TickFix)
+    
+    Vel_Offset = Base:toWorld(Vel_Offset_Pos)
+    Gyro = asin($Vel_Offset:normalized():dot(Base:right())) * max(sign(Base:velL():x()), 0) * (Base:vel():length() > 50)
+    Gyro = clamp((Gyro - clamp(Gyro, -2, 2)) * Gyro_Mul, -Gyro_Max, Gyro_Max)
+    
+    #Steering
+    Curve += clamp((clamp(AD + Gyro, -45, 45) - Curve) * 0.2, -4, 4) * TickFix
+    if(changed(Curve)){
+        N = Length * tan(Curve + 90)
+        L = atan(Length / (N + Width))
+        R = atan(Length / (N - Width))
+    }
+    BaseSlave:setAng(Base:angles())                     if(!BaseSlave:isFrozen()){ BaseSlave:propFreeze(1) }
+    AxleSlave:setAng(Axle1:angles())    if(!AxleSlave:isFrozen()){ AxleSlave:propFreeze(1) }
+    LeftSlave:setAng(Axle2:toWorld(ang(0, -L, 0)))     if(!LeftSlave:isFrozen()){ LeftSlave:propFreeze(1) }
+    RightSlave:setAng(Axle2:toWorld(ang(0, -R, 0)))    if(!RightSlave:isFrozen()){ RightSlave:propFreeze(1) }
+}

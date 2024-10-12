@@ -1,0 +1,130 @@
+@name GLuaTimers
+@persist GLuaTimers:table GLuaTimers_SimpleTimerCheat
+
+if(first()){
+    GLuaTimers = table()
+    GLuaTimers_SimpleTimerCheat = 1
+}
+
+
+function timerCreate(Identifier:string, Delay:number, Repetitions:number, Callback:function){
+    if(GLuaTimers:exists(Identifier)){
+        stoptimer(Identifier) #Override existing timer
+    }
+    
+    local Reps = (floor(Repetitions) == 0) ? _INF : max(Repetitions, 1)
+    GLuaTimers[Identifier, table] = table(
+        "Delay" = Delay, 
+        "Reps" = Reps, 
+        "Callback" = Callback,
+        "TimeStarted" = curtime(),
+        "Paused" = 0,
+        "Stopped" = 0
+    )
+    timer(Identifier, Delay * 1000)
+}
+
+function timerAdjust(Identifier:string, Delay:number, Repetitions:number, Callback:function){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    
+    local Tbl = GLuaTimers[Identifier, table]
+    local Reps = (floor(Repetitions) == 0) ? _INF : max(Repetitions, 1)
+    
+    Tbl["Delay", number] = Delay
+    Tbl["Reps", number] = Reps
+    Tbl["Callback", function] = Callback
+}
+
+function timerAdjust(Identifier:string, Delay:number, Repetitions:number){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    
+    local Tbl = GLuaTimers[Identifier, table]
+    local Reps = (floor(Repetitions) == 0) ? _INF : max(Repetitions, 1)
+    
+    Tbl["Delay", number] = Delay
+    Tbl["Reps", number] = Reps
+}
+
+function timerAdjust(Identifier:string, Delay:number){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    
+    local Tbl = GLuaTimers[Identifier, table]
+    Tbl["Delay", number] = Delay
+}
+
+function timerRemove(Identifier:string){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    
+    GLuaTimers:remove(Identifier)
+}
+
+function timerRepsLeft(Identifier:string){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    
+    return GLuaTimers[Identifier, table]["Reps", number]
+}
+
+function timerExists(Identifier:string){
+    return GLuaTimers:exists(Identifier)
+}
+
+function timerSimple(Delay:number, Callback:function){
+    timerCreate("GLuaSimpleTimer_" + GLuaTimers_SimpleTimerCheat:toString(), Delay, 1, Callback)
+    GLuaTimers_SimpleTimerCheat++
+}
+
+function timerStop(Identifier:string){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    local Tbl = GLuaTimers[Identifier, table]
+    if(Tbl["Stopped", number]){ return }
+    
+    Tbl["Stopped", number] = 1
+    Tbl["Paused", number] = 0
+    stoptimer(Identifier)
+}
+
+function timerStart(Identifier:string){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    local Tbl = GLuaTimers[Identifier, table]
+    if(!Tbl["Stopped", number]){ return }
+    
+    timer(Identifier, Tbl["Delay", number] * 1000)
+}
+
+function timerPause(Identifier:string){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    local Tbl = GLuaTimers[Identifier, table]
+    if(Tbl["Stopped", number]){ return }
+    if(Tbl["Paused", number]){ return }
+    
+    Tbl["Paused", number] = 1
+    Tbl["PausedFraction", number] = curtime() - Tbl["TimeStarted", number]
+    stoptimer(Identifier)
+}
+
+function timerUnPause(Identifier:string){
+    if(!GLuaTimers:exists(Identifier)){ return }
+    local Tbl = GLuaTimers[Identifier, table]
+    if(!Tbl["Paused", number]){ return }
+    
+    Tbl["Paused", number] = 0
+    timer(Identifier, Tbl["PausedFraction", number] * 1000)
+    Tbl:remove("PausedFraction")
+}
+
+
+#Do the timer logic
+if(GLuaTimers:exists(clkName())){
+    local Tbl = GLuaTimers[clkName(), table]
+    local Delay = Tbl["Delay", number]
+    Tbl["Reps", number] = Tbl["Reps", number] - 1
+    local Callback = Tbl["Callback", function]
+    Tbl["TimeStarted", number] = curtime()
+    
+    Callback()
+    if(Tbl["Reps", number] == 0){
+        GLuaTimers:remove(clkName())
+    }else{
+        timer(clkName(), Delay * 1000)
+    }
+}

@@ -1,0 +1,161 @@
+@name ACF2 Master Controller
+@inputs [Engine Gearbox]:wirelink Base:entity Starter GearUp GearDown Forward Reverse Handbrake Clutch Light Fuel
+@outputs Gyro Brake ClutchOutput Vel Throttle LightOutput HB_Out
+@persist [Engine_Ent Engine_Slave]:entity Powerband_Min Idle Engine_Sound:string Starting Throttle
+@persist Gear_Entity:entity Gear_Max Gear WS
+@trigger 
+
+if(first() | dupefinished()){
+    #Engine
+    Starting = 0
+    Engine["Throttle", number] = 0
+    
+    Engine_Ent = Engine:entity()
+    Idle = Engine_Ent:acfIdleRPM()
+    Powerband_Min = (Engine_Ent:acfPowerbandMin() - Idle)
+    
+    Engine_Slave = holoCreate(1, Engine_Ent:toWorld(vec()),vec())
+    holoParent(1, Engine_Ent)
+    
+    Engine_Sound = "acf_extra/vehiclefx/engines/rover.wav" #ACF1 doesn't have a function for getting the engine sound.
+    
+    #Gearbox
+    Gear_Entity = Gearbox:entity()
+    Gear_Max = Gear_Entity:acfNumGears() - 1 #Last gear is reverse.
+    Gear = Gear_Entity:acfGear()
+    
+    Base:propInertia(vec(20, 60, 60) * 6)
+    foreach(_:number, E:entity = Base:getConnectedEntities()){
+        #Parented Seat Fix
+        if(E:parent()){ 
+            if(E:type() == "prop_vehicle_prisoner_pod"){
+                E["PSF", number] = 1
+            }
+            continue
+        }else{
+            #Wheel Inertia
+            if(E:model() == "models/sprops/trans/wheel_e/t_wheel25.mdl"){ 
+                E:propInertia(vec(5, 5, 3)) 
+                continue
+            }
+        }
+    }
+    
+    WS = 0, HB_Out = 0, LightOutput = 0
+}
+
+if(clkName():toNumber()){
+    entity(clkName():toNumber()):lockPod(0)
+}
+
+#Engine start/stop
+if(~Starter & Starter & !Starting){
+    if(Engine["RPM", number]){
+        Engine["Active", number] = 0
+        
+        #Rev down
+        Engine_Slave:soundPlay("Rev", 0, Engine_Sound)
+        soundPitch("Rev", 40)
+        soundPitch("Rev", 30, 0.6)
+        soundVolume("Rev", 0.3)
+        soundStop("Rev", 0.6)
+    }else{
+        Starting = 1
+        timer("EngineStart", 500)
+        Engine_Slave:soundPlay("EngineStart", 0, "acf_extra/vehiclefx/starters/starter1.wav")
+    }
+}
+
+if(clk("EngineStart")){
+    #Only properly start w/ fuel
+    if(Fuel){ 
+        soundStop("EngineStart", 0.2)
+        Starting = 0
+        Engine["Active", number] = 1
+        Engine_Slave:soundPlay("Rev", 0, Engine_Sound)
+        
+        soundPitch("Rev", 50)
+        soundPitch("Rev", 75, 0.5)
+        soundVolume("Rev", 0.5)
+        soundVolume("Rev", 1, 0.5)
+        timer("RevUp1", 500)
+    }else{
+        timer("FailStart", 2000)  
+    }      
+}
+
+#Start success
+if(clk("RevUp1")){
+    timer("RevUp2", 200) 
+}
+if(clk("RevUp2")){
+    soundPitch("Rev", 30, 0.8)
+    soundStop("Rev", 0.8)  
+}
+
+#Start failiure
+if(clk("FailStart")){
+    Starting = 0  
+}
+
+#Ran out of fuel
+if(~Fuel){
+    if(!Fuel){
+        Engine["Active", number] = 0
+        
+        #Rev down
+        Engine_Slave:soundPlay("Rev", 0, Engine_Sound)
+        soundPitch("Rev", 40)
+        soundPitch("Rev", 30, 0.6)
+        soundVolume("Rev", 0.3)
+        soundStop("Rev", 0.6)
+    }
+}
+
+#Throttle/Reverse/Brake
+if((~Forward | ~Reverse) & !HB_Out){
+    Vel = sign(Base:velL():x() * max(abs(Base:velL():x()) - 50, 0))
+    WS = Forward - Reverse
+    Throttle = abs(sign(Vel - WS) * WS) * 100
+    
+    if(!Vel & WS){
+        Gear = 1 + (Gear_Entity:acfNumGears() - 1) * max(-WS, 0)
+        Gearbox["Gear", number] = Gear
+    }
+    
+    Brake = abs(!Throttle * WS) * 5
+    Engine["Throttle", number] = Throttle * 100 
+}
+
+#Changing gears
+if((~GearUp & GearUp) | (~GearDown & GearDown)){
+    #Only change gear when clutch is held
+    if(Clutch & !Throttle){
+        Gear = clamp(Gear + (GearUp - GearDown), 0, Gear_Max)
+        Gearbox["Gear", number] = Gear
+    }
+}
+
+if(~Handbrake & Handbrake){
+    HB_Out = !HB_Out  
+}
+
+
+if(~Light & Light){
+    Base:soundPlay("Light", 0.5, "items/flashlight1.wav")
+    LightOutput = !LightOutput
+}
+
+#Launch control
+event tick(){
+    if(!Clutch){
+        ClutchOutput = max(easeOutExpo((Powerband_Min - (Engine["RPM", number] - Idle)) / Powerband_Min) + Clutch, 0)
+        Gearbox["Clutch", number] = ClutchOutput
+    }
+}
+
+if(~Clutch){
+    Gearbox["Clutch", number] = Clutch
+}
+
+

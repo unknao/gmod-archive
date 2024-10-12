@@ -1,0 +1,73 @@
+@name weapons/Homing Missiles
+@inputs EGP:wirelink Seat:entity
+@outputs Target:entity
+@persist Range FOV TargetPos:vector [XEO Missiles]:array [Target Missile]:entity [Tracker Text]:egpobject
+
+if(first()|duped()){
+    XEO = array(), Missiles = array(), Target = noentity(), Missile = noentity()
+    Range = 5000
+    FOV = 30
+    
+    findExcludePlayer(owner():name())
+    findExcludePlayerProps(owner():name())
+    
+    Tracker = EGP:egp3DTracker(1,Target:pos())
+    
+    XEO:pushEgpobject(EGP:egpBoxOutline(2, vec2(0), vec2(40)))
+    EGP:egpColor(2, vec4(0,255,0,200))
+    EGP:egpParent(2,1)
+    
+    XEO:pushEgpobject(EGP:egpBox(3,vec2(0),vec2(5)))
+    EGP:egpColor(3, vec4(255,0,0,200))
+    EGP:egpParent(3,1)
+    
+    Text = EGP:egpText(4,"",vec2(0,20))
+    EGP:egpParent(4,1)
+    XEO:pushEgpobject(Text)  
+}
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player == Seat:driver() & Down & KeyBind == "reload" & propCanCreate() & Target:isValid()){
+        Missile = propSpawn("models/props_phx/mk-82.mdl", entity():pos(), entity():angles(), 0)
+        Missile:soundPlay(1,0,"weapons/rpg/ignite_trail.wav")
+        Missile:setTrails(0,10,100,"trails/smoke",vec(255),255)
+        Missiles:pushEntity(Missile)
+    }
+}
+
+event tick(){
+    findInCone(entity():pos(), entity():forward(), Range, FOV)
+    findClipToClass("player")
+    Target = findClosest(entity():pos())
+    
+    if(changed(Target)){
+        if(Target:isValid()){
+            Text:setText(Target:name())
+            foreach(_:number, E:egpobject = XEO){
+              E:draw()  
+            }
+        }else{
+            foreach(_:number, E:egpobject = XEO){
+              E:hide()  
+            }
+        }
+    }
+    
+    if(Target:isValid()){
+        TargetPos = Target:boxCenterW()
+        Tracker:setPos(TargetPos)
+    }
+    
+    foreach(I:number, E:entity = Missiles){
+        if(!E:isValid()){
+            Missiles:remove(I)
+            continue
+        }
+        
+        local Pos = E:pos()
+        if(TargetPos:distance(Pos) < 100){Missile:propBreak(), continue}
+        
+        local Ang = (TargetPos - Pos):toAngle()
+        E:applyAngForce((E:toLocal(Ang) * 500 - E:angVel() * 20)*shiftL(ang(E:inertia())))
+        E:applyForce(E:forward() * E:mass() * 300)
+    }
+}

@@ -1,0 +1,29 @@
+@name parentseatfix
+@inputs Base:entity
+
+if(first() | dupefinished()){
+    foreach(_:number, E:entity = Base:getConnectedEntities()){
+        if(E:type() != "prop_vehicle_prisoner_pod"){ continue }
+        
+        E:lockPod(0)   
+    }
+}
+
+event playerEnteredVehicle(_:entity, Vehicle:entity){
+    if(Vehicle:parent() == Base){
+        Vehicle:lockPod(1)  
+    }
+}
+
+event playerLeftVehicle(_:entity, Vehicle:entity){
+    if(Vehicle:parent() == Base){
+        timer("PSF" + Vehicle:id(), 500)
+    }    
+}
+
+if(clkName():find("PSF")){
+    local Seat = entity(clkName():sub(4):toNumber())
+    if(Seat:owner() == owner()){
+        Seat:lockPod(0)  
+    }
+}

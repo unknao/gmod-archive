@@ -1,0 +1,11 @@
+@name 
+@inputs 
+@outputs 
+@persist 
+@trigger
+
+if( first() ){
+    E = entity()
+    E:emitSound("ambient/levels/citadel/zapper_loop1.wav", 85, 200, 1)
+    E:emitSound("^ambient/levels/citadel/portal_beam_shoot5.wav", 85, 200, 1)
+}

@@ -1,0 +1,33 @@
+@name Hydraulic engine
+@inputs [Base Crank]:entity W S
+@outputs Bearing Constant Damping H1 H2 H3 H4 RPM T
+@persist TW:vector Dist Width T
+@trigger 
+
+
+if(first() | dupefinished()){
+    TW = Base:toLocal(Crank:pos()) - Base:toLocalAxis(vec(0, 0, 1))
+    Constant = 10000
+    Damping = 0.0001
+    Dist = 9
+    
+    Crank:propInertia(vec(5, 5, 3))
+    Crank:soundPlay("engine", 0, "^acf_engines/i4_petrolsmall.wav")
+}
+
+if(~W | ~S){
+    soundVolume("engine", 0.2 + abs(W + S) * 0.8, 0.1)   
+}
+
+event tick(){
+    Bearing = Crank:bearing(Base:toWorld(TW)) + Crank:angVel():yaw() * tickInterval()
+    T = ((RPM < 1500) * 150 * (W - S)) - (RPM < 100)
+    
+    H1 = Dist + sin(Bearing) * T
+    H2 = Dist + sin(Bearing + 90) * T
+    H3 = Dist + sin(Bearing + 180) * T
+    H4 = Dist + sin(Bearing + 270) * T
+    
+    RPM = abs(Crank:angVel():yaw() / 6)
+    soundPitch("engine", RPM * 0.2, 0.3)
+}

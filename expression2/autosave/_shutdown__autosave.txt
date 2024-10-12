@@ -1,0 +1,378 @@
+@name CPA Caledus
+@inputs Active Duck Light Alt Mouse1 [Chair Turret Gun Driver]:entity [Cam EGP]:wirelink
+@outputs TurretAng_Target TurretAng_Current GunAng_Target GunAng_Current HoloProjectiles:array
+@persist CamParams:table D_CamState CamState FLIR TrackMouse ZeroAngle On_Speed_Time SoundMod GunReady HoloIndex [HoloProjectiles XEO]:array Tracker:egpobject ScrW ScrH
+
+#include "includes/base/hover/hoverbase_v5"
+#include "includes/util/parentseatfix"
+
+
+if(first() | dupefinished()){
+        
+    #Cam
+    CamParams = table(
+        "Pos" = array(
+            vec(0, 12, 46.132),
+            vec(0, -20, 30)
+        ),
+        "Distance" = array(
+            250,
+            0
+        ),
+        "Parent" = array(
+            Base,
+            Turret
+        ),
+        "DoLag" = array(
+            1,
+            0
+        )
+    )
+    D_CamState = 0
+    CamState = 1
+    FLIR = 0
+    Cam["Parent", entity] = holoCreate(1, Base:toWorld(vec()), vec())
+    holoParent(1, CamParams["Parent", array][CamState, entity])
+    
+    Cam["Distance", number] = CamParams["Distance", array][CamState, number]
+    Cam["Position", vector] = CamParams["Pos", array][CamState, vector]
+    
+    Turret:setLocalAng(ang())
+    Gun:setLocalAng(ang())
+    Cam["FilterEntities", array] = Base:getConnectedEntities()
+    
+    #PID for hovering
+    PID = vec(0.5, 0, 2)
+    PIDMin = -Mass
+    PIDMax = Mass
+    
+    #Target distance off the floor
+    Target = 45
+    Dist = Target + 10 
+    
+    #Directions
+    Dir_Forward = vec(0, -1, 0)
+    Dir_Up = vec(0, 0, 1)
+    
+    Offsets = array( #Offsets for rangers local to the base prop
+        vec(0, 0, 0),
+        vec(-47.45, -94.9, 0),
+        vec(47.45, -94.9, 0),
+        vec(-47.45, 94.9, 0),
+        vec(47.45, 94.9, 0),        
+        vec(-47.45, -94.9, 0) * 0.5,
+        vec(47.45, -94.9, 0) * 0.5,
+        vec(-47.45, 94.9, 0) * 0.5,
+        vec(47.45, 94.9, 0) * 0.5
+    )
+    OffsetsNum = Offsets:count()
+    Lookahead_Mul = 0.2
+    Angvel_Mul = 0.5
+    
+    #Angle control
+    PD = vec2(1200, 15) #Upright strength & damping
+    AD_Mul = vec(0, 0, 130) #Turn axis & turn strength
+    Angvel_Mul = 1
+    
+    #Throttle
+    WS_Mul = 40
+    Base_Vel_Damping = 0.03
+    Shift_Mul = -0.5
+    
+    #Jump
+    JumpImpulse_Mul = 800
+    Jump_Cooldown = 5
+    
+    #Lean
+    Lean_Max = 8
+    Lean_Coef = 0.05
+    Lean_Vel_Coef = 0.0005
+    
+    #Slow enable speed coefficient
+    On_Speed = 0.01
+    
+    #Turret tracking
+    TrackMouse = 0
+    
+    Turret:soundPlay("TurretSound", 0, "vehicles/tank_turret_loop1.wav")
+    soundVolume("TurretSound", 0)
+    Gun:soundPlay("GunSound", 0, "vehicles/tank_turret_loop1.wav")
+    soundVolume("GunSound", 0)
+
+    holoCreate(2)
+    holoParent(2, Gun)
+    
+    #EGP
+    XEO = array()
+    ScrW = egpScrW(owner()), ScrH = egpScrH(owner())
+    
+    Tracker = EGP:egp3DTracker(1, holoEntity(2):pos())
+    Tracker:trackerParent(holoEntity(2))
+    EGP:egpPos(1, holoEntity(2):pos())
+    print(Tracker:globalPos() ,holoEntity(2):pos())
+    
+    XEO:pushEgpobject(EGP:egpCircle(2, vec2(), vec2(10)))
+    EGP:egpColor(2, vec4(0, 0, 0, 200))   
+    EGP:egpParent(2, 1)    
+    
+    XEO:pushEgpobject(EGP:egpCircle(3, vec2(), vec2(9)))
+    EGP:egpColor(3, vec4(255, 255, 255, 200))   
+    EGP:egpParent(3, 1)
+    EGP:egpClear()
+    
+    XEO:pushEgpobject(EGP:egpCircleOutline(4, vec2(ScrW / 2, ScrH / 2), vec2(29)))
+    EGP:egpColor(4, vec4(255, 255, 255, 200))
+    
+    XEO:pushEgpobject(EGP:egpCircleOutline(5, vec2(ScrW / 2, ScrH / 2), vec2(31)))
+    EGP:egpColor(5, vec4(0, 0, 0, 200))   
+    
+    XEO:pushEgpobject(EGP:egpCircleOutline(6, vec2(ScrW / 2, ScrH / 2), vec2(27)))
+    EGP:egpColor(6, vec4(0, 0, 0, 200))
+    
+    On_Speed_Time = (1 / On_Speed) / (1 / tickInterval())
+    TurretAng_Target = 90, TurretAng_Current = 90, GunAng_Target = 0, GunAng_Current = 0, GunReady = 1, HoloIndex = 0, HoloProjectiles = array()
+}
+
+if(~Active){
+    Chair:setLocalPos(Active ? vec(0, 9.5, 17.5) : vec(0, -94.9, 0))
+    Chair:setLocalAng(ang(0, 180, 0))
+    
+    soundVolume("TurretSound", 0, 0.2)
+    soundPitch("TurretSound", 30, 0.2)
+    soundVolume("GunSound", 0, 0.2)
+    soundPitch("GunSound", 20, 0.2)
+}
+
+if(~Driver & Driver){
+    ScrW = egpScrW(Driver), ScrH = egpScrH(Driver)
+    EGP:egpPos(4, vec2(ScrW / 2, ScrH / 2))
+    EGP:egpPos(5, vec2(ScrW / 2, ScrH / 2))
+    EGP:egpPos(6, vec2(ScrW / 2, ScrH / 2))
+    
+    EGP:egpCircle(2, vec2(), vec2(20))
+    EGP:egpColor(2, vec4(0,255,0,200))
+    #EGP:egpParent(2,1)
+    
+    EGP:egpBox(3,vec2(),vec2(10))
+    EGP:egpColor(3, vec4(255,0,0,200))
+}
+
+#Shooting logic
+if(~Mouse1 & Mouse1 & GunReady){
+    timer("GunRecharge", 2000)
+    GunReady = 0
+    local RandMod = random(0.95, 1.05)
+    Gun:soundPlay("Fire1", 0, "^ambient/energy/weld2.wav", 1.5)
+    soundPitch("Fire1", 70 * RandMod)    
+    Gun:soundPlay("Fire2", 0, "^ambient/explosions/explode_1.wav", 1)
+    soundPitch("Fire2", 170 * RandMod)    
+    
+    Gun:soundPlay("Fire3", 0, "^ambient/machines/floodgate_stop1.wav")
+    soundPitch("Fire3", 140 * RandMod)    
+    
+    Gun:soundPlay("Recharge1", 0, "^ambient/energy/force_field_loop1.wav")
+    soundPitch("Recharge1", 70 * RandMod)
+    soundPitch("Recharge1", 130 * RandMod, 2)
+    
+    soundVolume("Recharge1", 0)
+    soundVolume("Recharge1", 0.3 * RandMod, 2)    
+    
+    Gun:soundPlay("Recharge2", 0, "^vehicles/tank_readyfire1.wav")
+    soundPitch("Recharge2", 90 * RandMod)
+    
+    effect():setMagnitude(0.13):setOrigin(Gun:toWorld(vec(0, -80, 0))):setNormal(Gun:right()):play("thruster_ring")
+    effect():setOrigin(Gun:toWorld(vec(0, -100, 0))):setNormal(Gun:right()):setRadius(70):play("AR2Explosion")
+    Base:applyOffsetForce(Gun:pos(), -Gun:right() * 800)
+    
+    local Projectile = holoCreate(HoloIndex + 3, Gun:toWorld(vec(0, -100, 0)), vec(), ang(), vec4())
+    Projectile["velocity", vector] = Gun:right() * 150 * Tick_Fix
+    Projectile:setTrails(20, 0, 0.2, "trails/physbeam", vec(255), 255)
+    
+    HoloProjectiles:pushNumber(HoloIndex + 3)
+    for(I = 4, 6){
+        holoCreate(HoloIndex + I, Projectile:toWorld(randvec(-12, 12)), vec(), ang(), vec4()):setTrails(10, 0, 0.2, "trails/physbeam", vec(255), 255)
+        HoloProjectiles:pushNumber(HoloIndex + I)
+        holoParent(HoloIndex + I, HoloIndex + 3)
+        
+        local E = propSpawn("models/props_phx/torpedo.mdl", Projectile:pos(), ang(), 1)
+        E:parentTo(Projectile)
+        E:setLocalPos(vec())
+        E:propNotSolid(1)
+        E:propDraw(0)
+        E["Break", number] = 1
+    }
+    HoloIndex = (HoloIndex + 4) % 100
+}
+
+if(clk("GunRecharge")){
+    GunReady = 1
+    soundVolume("Recharge1", 0, 0.3)
+    soundVolume("Recharge2", 0, 0.3)
+}
+
+#Cam controls
+if(~Duck & Duck){
+    D_CamState = (D_CamState + 1) % CamParams["Pos", array]:count()
+    CamState = D_CamState + 1
+    
+    holoUnparent(1)
+    holoParent(1, CamParams["Parent", array][CamState, entity])
+    holoPos(1, CamParams["Parent", array][CamState, entity]:toWorld(vec()))
+    holoAng(1, CamParams["Parent", array][CamState, entity]:toWorld(ang()))
+    
+    Cam["Distance", number] = CamParams["Distance", array][CamState, number]
+    Cam["Position", vector] = CamParams["Pos", array][CamState, vector]
+}
+
+#FLIR
+if(~Light & Light){
+    FLIR = !FLIR
+    Cam["FLIR", number] = FLIR
+    Base:emitSound(FLIR ? "buttons/button1.wav" : "buttons/button18.wav")
+}
+
+#Activate / deactivate turret
+if(~Alt){
+    if(Alt){
+        TrackMouse = !TrackMouse
+        ZeroAngle = 0
+        timer("ZeroAngle", 1000)
+        Turret:emitSound(TrackMouse ? "buttons/button18.wav" : "buttons/button16.wav")
+        if(!TrackMouse){
+            soundVolume("TurretSound", 0, 0.2)
+            soundPitch("TurretSound", 30, 0.2)
+            soundVolume("GunSound", 0, 0.2)
+            soundPitch("GunSound", 20, 0.2)
+        }
+    }else{
+        stoptimer("ZeroAngle")
+    }
+}
+if(clk("ZeroAngle")){
+    ZeroAngle = 1    
+    TrackMouse = 0
+    Turret:emitSound("buttons/button16.wav")
+}
+
+#On / off sounds
+if(~R & R){
+    Base:soundPlay("Toggle2", 0, On ? "ambient/machines/thumper_startup1.wav" : "ambient/machines/thumper_shutdown1.wav")  
+    soundPitch("Toggle2", 90)
+    
+    if(On){
+        Base:emitSound("buttons/button18.wav")
+        Base:soundPlay("Engine1", 0, "^ambient/levels/citadel/citadel_drone_loop4.wav")
+        soundVolume("Engine1", 1, On_Speed_Time)
+        soundPitch("Engine1", 80)        
+        
+        Base:soundPlay("Engine2", 0, "Phx.HoverHeavy")
+        soundVolume("Engine2", 0.7, On_Speed_Time)
+        soundPitch("Engine2", 40)        
+        
+        Base:soundPlay("Engine3", 0, "^ambient/atmosphere/indoor1.wav")
+        soundVolume("Engine3", 0.7, On_Speed_Time)
+        soundPitch("Engine3", 80)        
+        
+        Base:soundPlay("Engine4", 0, "^ambient/levels/citadel/portal_beam_loop1.wav")
+        soundVolume("Engine4", 1, On_Speed_Time)
+        soundPitch("Engine4", 60)
+    }else{
+        Base:emitSound("buttons/button16.wav")
+        soundPitch("Engine1", 30, On_Speed_Time)
+        soundStop("Engine1", On_Speed_Time)        
+        
+        soundPitch("Engine2", 70, On_Speed_Time)
+        soundStop("Engine2", On_Speed_Time)        
+        
+        soundPitch("Engine3", 70, On_Speed_Time)
+        soundStop("Engine3", On_Speed_Time)        
+        
+        soundPitch("Engine4", 80, On_Speed_Time)
+        soundStop("Engine4", On_Speed_Time)
+    }
+}
+
+event tick(){
+    if(Active){
+        holoPos(2, rangerOffset(32767, Gun:pos(), Gun:right()):position())
+        #Tracker:setPos(holoEntity(2):pos())
+    }
+    
+    if((TrackMouse & Active) | ZeroAngle){
+        if(ZeroAngle){
+            TurretAng_Target = 90
+            GunAng_Target = 0         
+        }else{
+            TurretAng_Target = Base:toLocal((Turret:pos() - Cam["HitPos", vector]):toAngle()):yaw()
+            GunAng_Target = clamp(Turret:toLocal((Turret:pos() - Cam["HitPos", vector]):toAngle()):pitch(), -20, 35)
+        }
+        
+        local D_TurretAng = TurretAng_Current
+        TurretAng_Current += clamp(angnorm(TurretAng_Target - TurretAng_Current) * 0.1, -3, 3) * Tick_Fix
+        Turret:setLocalAng(ang(0, TurretAng_Current - 90, 0)) 
+        D_TurretAng = abs(D_TurretAng - TurretAng_Current)
+        
+        local D_GunAng = GunAng_Current
+        GunAng_Current += clamp(angnorm(GunAng_Target - GunAng_Current) * 0.1, -3, 3) * Tick_Fix
+        Gun:setLocalAng(ang(0, 0, -GunAng_Current))
+        D_GunAng = abs(D_GunAng - GunAng_Current)
+        
+        
+        if(D_TurretAng){
+            soundVolume("TurretSound", D_TurretAng * 0.33, 0.2)
+            soundPitch("TurretSound", 30 + D_TurretAng * 40, 0.2)
+        }        
+        if(D_GunAng){
+            soundVolume("GunSound", D_GunAng * 0.5, 0.2)
+            soundPitch("GunSound", 20 + D_GunAng * 50, 0.2)
+        }
+        if(TurretAng_Current == 90 & GunAng_Current == 0 & ZeroAngle){
+            ZeroAngle = 0
+        }
+    }
+    
+    if(CamParams["DoLag", array][CamState, number]){
+        holoPos(1, Base:toWorld(-Vel_L * 0.1))   
+    }
+    
+    if(On){
+        SoundMod = abs(Vel_L:y())
+        soundVolume("Engine1", SoundMod * 0.024, On_Speed_Time)
+        soundPitch("Engine1", 80 + SoundMod * 0.1, 0.2)        
+        
+        soundVolume("Engine2", SoundMod * 0.015, On_Speed_Time)
+        soundPitch("Engine2", 50 + SoundMod * 0.4, 0.2)        
+        
+        soundPitch("Engine3", 80 + SoundMod * 0.2, 0.2)         
+        soundPitch("Engine4", 60 + SoundMod * 0.2, 0.2) 
+    }
+    
+    if(HoloProjectiles:count()){
+        foreach(I:number, N:number = HoloProjectiles){
+            local E = holoEntity(N)
+            if(!E:isValid()){
+                HoloProjectiles:remove(I)
+                continue
+            }
+            if(E:parent()){
+                holoPos(N, E:parent():toWorld(randvec(-12, 12)))
+                continue
+            }
+            local Ranger = rangerOffsetHull(E:pos(), E:pos() + E["velocity", vector], vec(-3), vec(3))
+            holoPos(N, Ranger:position())
+            if(Ranger:hit()){
+                HoloProjectiles:remove(I)
+                if(!Ranger:hitSky()){
+                    foreach(_:number, EE:entity = E:getConnectedEntities()){
+                        if(!EE["Break", number]){ continue }
+                        EE:deparent()
+                        EE:propBreak()
+                    }
+                }
+                holoDelete(N)
+            }else{
+                E["velocity", vector] = E["velocity", vector] + propGravity() * tickInterval() * 0.012
+            }
+        } 
+    }
+}

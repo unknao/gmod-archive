@@ -1,0 +1,93 @@
+@name Hypersonic cannon + Ballistics
+@inputs 
+@outputs 
+@persist Shoot Projectile:string Ballistics:array [BulletVel BulletPos Grav]:vector2
+@persist Divisor ShootVel BuildBallistics TimeStep TotalTime 
+@trigger 
+
+if(first()){
+    Projectile = "models/props_phx/misc/potato_launcher_explosive.mdl"   
+    ShootVel = 4000
+    
+    BuildBallistics = 1
+    Ballistics = array(
+        0 = vec()
+    )
+    TimeStep = tickInterval()
+    TotalTime = 0
+    BulletVel = vec2(ShootVel, 0)
+    BulletPos = vec2(0, 0)
+    Grav = vec2(0, propGravity()[3])
+    rangerPersist(1)
+    
+}
+
+if(BuildBallistics){
+    while(BuildBallistics & perf()){
+        if(BulletVel:toAngle() <= -45){
+            Divisor = Ballistics[1, vector]:x()
+            BuildBallistics = 0
+            break
+        }
+        TotalTime += TimeStep
+        local Correction = Grav * TimeStep
+        
+        BulletPos += (BulletVel + Correction) * TimeStep
+        BulletVel += Grav * TimeStep
+        
+        
+        Ballistics:pushVector(vec(BulletPos:x(), BulletPos:y(), TotalTime))
+    }   
+    if(BuildBallistics){
+        timer("ballistics", 0)   
+    }
+}
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player == owner()){
+        if(KeyBind == "reload"){
+            Shoot = Down
+            if(Shoot){
+                interval(10)
+            }
+        }
+    }   
+}
+
+if(Shoot & clk("interval")){
+    interval(100)
+    concmd("gm_spawn " + Projectile)
+}
+
+event entityCreated(E:entity) {
+    if(E:owner() == owner() & E:model() == Projectile){
+        local Pos = owner():shootPos() + owner():eye() * 100 + randvec(-2, 2) + owner():eyeAngles():up() * 15
+        E:setPos(Pos)
+        E:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+        E:setTrails(40, 0, 2, "trails/physbeam", vec(255), 255)
+        
+        rangerFilter(E)
+        local Ranger = rangerOffset(32767, Pos, owner():eye())
+        local Dist = Pos:distance(Ranger:position())
+        local Lerp = lerp(Ballistics[ceil(Dist / Divisor) - 1, vector], Ballistics[ceil(Dist / Divisor), vector], (Dist % Divisor + 1) / Divisor)
+        local Ang = vec2(Lerp:x(), Lerp:y()):toAngle()
+        
+        E:propDrag(0)
+        local Vel = owner():eye():rotateAroundAxis(owner():eye():toAngle():right(), -Ang)
+        
+        E:setAng(Vel:toAngle() + ang(90, 0, 0))
+        E:propSetVelocity(Vel * ShootVel)
+        E:emitSound("Weapon_ELITE.Single")
+        
+        soundPitch(E:id(), random(50, 60))
+        timer(toString(E:id()), Lerp:z() * 1000)
+    }   
+}
+
+ID = clkName():toNumber()
+
+if(ID){
+    if(entity(ID):isValid() & entity(ID):owner() == owner()){
+        entity(ID):propBreak() 
+    }  
+}

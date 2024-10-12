@@ -1,0 +1,54 @@
+@name Hypersonic plank gun
+@inputs 
+@outputs 
+@persist Shoot Projectile:string ShootVel
+@trigger 
+
+if(first()){
+    Projectile = "models/props_phx/construct/wood/wood_boardx1.mdl"   
+    ShootVel = 4000
+        
+}
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player == owner()){
+        if(KeyBind == "reload"){
+            Shoot = Down
+            if(Shoot){
+                interval(10)
+            }
+        }
+    }   
+}
+
+if(Shoot & clk("interval")){
+    interval(10)
+    concmd("gm_spawn " + Projectile)
+}
+
+event entityCreated(E:entity) {
+    if(E:owner() == owner() & E:model() == Projectile){
+        local Pos = owner():shootPos()
+        E:setPos(Pos)
+        E:setMass(1000)
+        
+        E:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+        
+        E:propDrag(0)
+        local Vel = (owner():eye() + randvec(-0.06, 0.06)):normalized()
+        
+        E:setAng(Vel:toAngle())
+        E:propSetVelocity(Vel * ShootVel)
+        E:emitSound("Weapon_ELITE.Single")
+        
+        soundPitch(E:id(), random(50, 60))
+        timer(toString(E:id()), 5000)
+    }   
+}
+
+ID = clkName():toNumber()
+
+if(ID){
+    if(entity(ID):isValid() & entity(ID):owner() == owner()){
+        entity(ID):propBreak() 
+    }  
+}

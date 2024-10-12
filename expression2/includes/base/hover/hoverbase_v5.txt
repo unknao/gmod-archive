@@ -1,0 +1,154 @@
+@name Hoverbase V5
+@inputs W A S D Space Shift R Base:entity
+@outputs On SlowOn PIDOutput Vel_L:vector
+@persist WS WS_Mul AD [AD_Mul VelL Vel_L]:vector Offsets:array OffsetsNum Tick_Fix 
+@persist [NormAvg PID Angvel]:vector PIDMin PIDMax Integral Error Mass Dist Target JumpImpulse_Mul JumpImpulse Jump_Cooldown JumpTime On_Speed
+@persist [Cross Inertia Dir_Forward Dir_Up]:vector PD:vector2 Lean_Max Lean_Coef Lean_Vel_Coef Base_Drag Lookahead_Mul Shift_Mul Base_Ang_Drag
+@trigger 
+#[
+    Hovercraft base version 5 by unknao
+    Made to be #include'able and pain free to tune
+    Controls:
+        WASD - Movement,
+        R - Toggle between on and off,
+        Shift - Boost/Slow depending on Shift_Mul,
+        Space - Jump
+]#
+#include "includes/lib/vector"
+
+if(first() | dupefinished()){
+    Mass = Base:mass()
+    Inertia = Base:inertia()
+
+    rangerPersist(1)
+    rangerHitWater(1)
+    rangerFilter(Base:getConnectedEntities())
+    rangerFilter(players())
+    
+    ##If #include'ing, copy all these things from here if you intend to change it
+    #Keep in mind that if you don't want to change something you dont have to copy it
+    
+    #PID for hovering
+    PID = vec(0.5, 0, 2)
+    PIDMin = -Mass
+    PIDMax = Mass
+    
+    #Target distance off the floor
+    Target = 45
+    Dist = Target + 10 
+    
+    #Directions
+    Dir_Forward = vec(1, 0, 0)
+    Dir_Up = vec(0, 0, 1)
+    
+    Offsets = array( #Offsets for rangers local to the base prop
+        vec(0, 0, 0),
+        vec(-26, 47, 0),
+        vec(26, 47, 0),
+        vec(26, -47, 0),
+        vec(-26, -47, 0)
+    )
+    OffsetsNum = Offsets:count()
+    Lookahead_Mul = 0.2
+    
+    #Angle control
+    PD = vec2(1200, 15) #Upright strength & damping
+    AD_Mul = vec(0, 0, 200) #Turn axis & turn strength
+    Base_Ang_Drag = 1
+    
+    #Throttle
+    WS_Mul = 80
+    Base_Drag = 0.05
+    Shift_Mul = -0.5
+    
+    #Jump
+    JumpImpulse_Mul = 500
+    Jump_Cooldown = 5
+    
+    #Lean
+    Lean_Max = 15
+    Lean_Coef = 0.1
+    Lean_Vel_Coef = 0.001
+    
+    #Slow enable speed coefficient
+    On_Speed = 0.02
+    ##Stop copying here
+    
+    Error = 0, Integral = 0, On = 0, SlowOn = 0, NormAvg = vec(), JumpTime = 0, Cross = vec(), Tick_Fix = 66 * tickInterval()
+}
+
+event entityCreated(Ent:entity){
+    if(Ent:isNPC() | Ent:isPlayer()){ rangerFilter(Ent) }
+}
+
+#Controls
+if(~W | ~S | ~Shift){ WS = max(W - S, -0.8) * WS_Mul * (1 + Shift * Shift_Mul) }
+if(~A | ~D){ AD = (A - D) }
+if(~R & R){ On = !On }
+
+if(~Space & Space & NormAvg & JumpTime <= curtime() & SlowOn) { 
+    JumpImpulse = JumpImpulse_Mul 
+    JumpTime = curtime() + Jump_Cooldown
+    timer("JumpCallback", 0) #Use this for jumping sounds
+    timer("JumpReady", Jump_Cooldown * 1000) #Use this to notify the user that theyre ready to jump
+}
+
+event tick(){
+    SlowOn = clamp(SlowOn - (1 - 2 * On) * On_Speed * Tick_Fix, 0, 1)
+    if(SlowOn){
+        Angvel = Base:angVelVector()
+        
+        local DistAvg = 0
+        local D_Hitnorm = _VECTOR_ORIGIN
+        NormAvg = vec()
+        VelL = Base:velL() * Lookahead_Mul
+        Vel_L = VelL - vec(0, 0, clamp(VelL:z(), -20, 20))
+        local Base_Forward = Base:toWorldAxis(Dir_Forward)
+        local Base_Up = Base:toWorldAxis(Dir_Up)
+        
+        foreach(_:number, V:vector = Offsets){
+            local Ranger = rangerOffsetHull(Base:toWorld(V), Base:toWorld(V + Vel_L) - Base_Up * Dist, vec(-4), vec(4))
+            DistAvg += Ranger:distance() #Necessary evil
+            if(!Ranger:hit() | Ranger:hitSky()){ continue }
+                
+            local RangerResult = Ranger:hitNormal()
+            local Dot = Base_Up:dot(RangerResult)
+            if(RangerResult & Dot < 0.2){ #If the angle between hitnormal & the base up vector is too great, default to vec(0, 0, 1) or last valid vector
+                NormAvg += D_Hitnorm ?: _VECTOR_UP
+                continue
+            }
+            
+            local Result = RangerResult ?: _VECTOR_UP
+            NormAvg += Result
+            D_Hitnorm = Result
+        }   
+        DistAvg /= OffsetsNum
+        NormAvg /= OffsetsNum 
+        
+        if(NormAvg){
+            NormAvg = NormAvg:rotateAroundAxis(Base_Forward, clamp((Angvel * Base_Up):collapse() * Lean_Coef * Vel_L:y() * Lean_Vel_Coef, -Lean_Max, Lean_Max))
+            
+            #Hover
+            local D_Error = Error
+            local Target_Hypo = sqrt(Target ^ 2 + Vel_L:length() ^ 2)
+            Error = Target_Hypo - DistAvg
+            D_Error = Error - D_Error
+            
+            Integral = clamp(Integral + Error * PID:y(), PIDMin, PIDMax) * !JumpImpulse
+            
+            PIDOutput = clamp(Error * PID:x() + Integral + D_Error * PID:z(), PIDMin, PIDMax) * !JumpImpulse
+            
+            Base:applyForce((((NormAvg * PIDOutput + Base_Forward * WS * Tick_Fix) - Base:vel() * Base_Drag * Tick_Fix) - propGravity() * tickInterval() + NormAvg * JumpImpulse) * Mass * SlowOn)
+            
+            #Angle
+            local D_Cross = Cross
+            Cross = Base_Up:cross(NormAvg) * PD:x()
+            D_Cross = (Cross - D_Cross) * PD:y()
+            
+            Base:applyTorque(((Base:toLocalAxis(Cross + D_Cross) + AD_Mul * AD) - Angvel * Base_Ang_Drag) * Inertia * SlowOn * Tick_Fix)
+        }else{
+            Base:applyTorque((AD * AD_Mul - Angvel * Base_Ang_Drag * 0.5) * Inertia * SlowOn * Tick_Fix)
+        }
+    }
+    JumpImpulse = 0
+}

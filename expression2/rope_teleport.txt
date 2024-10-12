@@ -1,0 +1,81 @@
+@name rope teleport
+@persist [E E2]:entity Use TTL Crouching [Eye OldPos]:vector
+@trigger 
+
+#Usage: hold "use" bind to move teleport probe out, release to teleport
+
+if(first()){
+    propSpawnUndo(0)
+    E = seatSpawn("models/hunter/blocks/cube05x05x05.mdl", entity():pos(), owner():eyeAngles(), 1)
+    E:propDraw(0)
+    E:propNotSolid(1)
+    
+    E2 = propSpawn("models/hunter/blocks/cube05x05x05.mdl", owner():boxCenterW(), ang(), 1)
+    E2:propNotSolid(1)
+    E2:propDraw(0)
+    E2:parentTo(owner())
+}
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player == owner()){
+        if(KeyBind == "reload"){
+            Use = Down
+            if(Use){
+                TTL = curtime() + 1.5
+                E:emitSoundStop("ambient/levels/citadel/weapon_disintegrate2.wav")
+                E:emitSoundStop("^ambient/levels/citadel/portal_beam_shoot5.wav")
+                E2:emitSound("ambient/levels/citadel/zapper_warmup1.wav")
+                E2:emitSound("buttons/combine_button1.wav")
+                
+                rope(1, E, vec(), E2, vec(), 0, 15, "cable/cable2", 1, vec(255))
+                E:setPos(owner():shootPos())
+            }
+            elseif(!Use & TTL > curtime()){
+                E:setAng(owner():eyeAngles())
+                Eye = owner():eye()
+                timer("doTeleport", 0)
+            }
+        }
+        elseif(KeyBind == "duck"){
+            Crouching = Down
+        }
+    }
+}
+
+event tick(){
+    if(Use){
+        E:setPos(E:pos() + owner():eye() * 20 * 66 * tickInterval())
+    }
+    if(TTL <= curtime() & Use){
+        Use = 0
+        Eye = owner():eye()
+        E:setAng(owner():eyeAngles())
+        timer("doTeleport", 0)
+    }
+}
+
+if(clk("doTeleport")){
+    E2:emitSoundStop("ambient/levels/citadel/zapper_warmup1.wav")
+    E:emitSound("ambient/levels/citadel/weapon_disintegrate2.wav")
+    E:emitSound("^ambient/levels/citadel/portal_beam_shoot5.wav")
+    
+    OldPos = E2:pos()
+     
+    E:use()
+    E:constraintBreak()
+    timer("instantEject", 50)
+}
+
+if(clk("instantEject")){
+    Ef = effect()
+    Ef:setEntity(owner())
+    Ef:setOrigin(owner():pos() + (OldPos - E:pos()):normalized() * owner():radius())
+    Ef:play("jump_in")
+    
+    E:ejectPod()
+    #ifdef e:plyApplyForce(v)
+        if(Crouching){
+            owner():plyApplyForce(Eye * ((curtime() + 1.5) - TTL) * 1500 )
+        }
+    #endif
+}

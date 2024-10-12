@@ -1,0 +1,5 @@
+@name vectorlib
+
+function number vector:collapse(){
+    return This:x() + This:y() + This:z()
+}

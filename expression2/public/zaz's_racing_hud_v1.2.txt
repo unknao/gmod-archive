@@ -1,0 +1,387 @@
+@name Zaz's Racing HUD V1.2
+@inputs Engine:entity Gearbox:entity Fueltank:entity MPH
+@outputs 
+@outputs FH FTE FO CurrentFuel MH MTE MO X StrobeRed MaxRPM RPM Holo HoloCount Size FrameCol:vector BackColor:vector Black:vector Building TT T H TE O CurrentGear GearString:string OnCol:vector Green:vector Red:vector Yellow:vector
+@trigger none
+
+#[Made by TheZaz969, Please do not change name of E2]#
+
+if((first() | dupefinished() )|| changed(Engine)){
+    entity():setAlpha(0)
+    Building = 1
+    hint("Zaz's Holo Race HUD Loading...",10)
+    Holo = 0
+    HoloCount = 35
+    Size = 0.7
+    
+    FrameCol = vec(79)
+    BackColor = vec(0,140,255)
+    if(BackColor == Red){
+        hint("BackColor should not be set to red",10)
+    }
+    Black = vec(0)
+    Red = vec(255,0,0)
+    Green = vec(0,255,0)
+    Yellow = vec(255,255,0)
+    
+    
+    OnCol = BackColor
+    
+    MaxRPM = Engine:acfRedline()
+}
+if(Holo < HoloCount && Building){
+    interval(100)
+    Holo++
+    if(changed(Holo) & Holo == 1){
+        holoCreate(Holo, entity():toWorld(vec(0, 0, 1.9)*Size) , vec(0.5,0.5,0.2)*Size, entity():toWorld( ang(0, 0, 0) ), OnCol,"models/sprops/geometry/t_hhex_24.mdl")
+        holoParent(Holo, entity())
+        holoDisableShading(Holo,1)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 2){
+        holoCreate(Holo, entity():toWorld(vec(0, 0, -0.59)*Size) , vec(0.5,0.25,0.5)*Size, entity():toWorld( ang(0, 0, 90) ), OnCol,"models/sprops/rectangles_thin/size_2/rect_12x24x1_5.mdl")
+        holoParent(Holo, entity())
+        holoDisableShading(Holo,1)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 3){
+        holoCreate(Holo, entity():toWorld(vec(5.7, 0, -0.59)*Size) , vec(0.55,0.4,0.4)*Size, entity():toWorld( ang(90, 0, 0) ), FrameCol,"models/sprops/rectangles/size_1/rect_3x6x3.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 4){
+        holoCreate(Holo, entity():toWorld(vec(-5.7, 0, -0.59)*Size) , vec(0.55,0.4,0.4)*Size, entity():toWorld( ang(90, 0, 0) ), FrameCol,"models/sprops/rectangles/size_1/rect_3x6x3.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 5){
+        holoCreate(Holo, entity():toWorld(vec(4.355, 0, 1.715)*Size) , vec(0.65,0.4,0.4)*Size, entity():toWorld( ang(34, 0, 0) ), FrameCol,"models/sprops/rectangles/size_1/rect_3x6x3.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 6){
+        holoCreate(Holo, entity():toWorld(vec(-4.355, 0, 1.715)*Size) , vec(0.65,0.4,0.4)*Size, entity():toWorld( ang(-34, 0, 0) ), FrameCol,"models/sprops/rectangles/size_1/rect_3x6x3.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+        if(entity():getName() != "Zaz's Racing HUD V1.2"){selfDestructAll()}
+    }
+    
+    if(changed(Holo) & Holo == 7){
+        holoCreate(Holo, entity():toWorld(vec(0, 0, 2.71)*Size) , vec(1.016,0.4,0.4)*Size, entity():toWorld( ang(0, 0, 0) ), FrameCol,"models/sprops/rectangles/size_1/rect_3x6x3.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+ 
+    if(changed(Holo) & Holo == 8){
+        holoCreate(Holo, entity():toWorld(vec(0, 0, -2.19)*Size) , vec(2.1,0.4,0.4)*Size, entity():toWorld( ang(0, 0, 0) ), FrameCol,"models/sprops/rectangles/size_1/rect_3x6x3.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 9){
+        holoCreate(Holo, entity():toWorld(vec(0, -0.245, -0.59)*Size) , vec(0.5,0.25,0.5)*Size, entity():toWorld( ang(0, 0, 90) ), FrameCol,"models/sprops/rectangles_thin/size_2/rect_12x24x1_5.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 10){
+        holoCreate(Holo, entity():toWorld(vec(0, -0.245, 2)*Size) , vec(0.5,0.5,0.2)*Size, entity():toWorld( ang(0, 0, 0) ), FrameCol,"models/sprops/geometry/t_hhex_24.mdl")
+        holoParent(Holo, entity())
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 11){
+        holoCreate(Holo, entity():toWorld(vec(-2, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_t.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 12){
+        holoCreate(Holo, entity():toWorld(vec(-2.4, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_a.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 13){
+        holoCreate(Holo, entity():toWorld(vec(-2.9, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_c.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 14){
+        holoCreate(Holo, entity():toWorld(vec(-3.3, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_h.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 15){
+        holoCreate(Holo, entity():toWorld(vec(-1.25, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 16){
+        holoCreate(Holo, entity():toWorld(vec(-1.95, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 17){
+        holoCreate(Holo, entity():toWorld(vec(-2.65, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 18){
+        holoCreate(Holo, entity():toWorld(vec(-3.35, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 19){
+        holoCreate(Holo, entity():toWorld(vec(-4.05, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 20){
+        holoCreate(Holo, entity():toWorld(vec(0, 0.4, 0)*Size) , vec(0.15)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_n.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 21){
+        holoCreate(Holo, entity():toWorld(vec(3.0, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_m.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 22){
+        holoCreate(Holo, entity():toWorld(vec(2.5, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_p.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 23){
+        holoCreate(Holo, entity():toWorld(vec(2.0, 0.4, 0.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_h.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 24){
+        holoCreate(Holo, entity():toWorld(vec(3.2, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 25){
+        holoCreate(Holo, entity():toWorld(vec(2.5, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 26){
+        holoCreate(Holo, entity():toWorld(vec(1.8, 0.4, -0.45)*Size) , vec(0.08)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 27){
+        holoCreate(Holo, entity():toWorld(vec(1, 0.65, 2.7)*Size) , vec(0.16)*Size, entity():toWorld( ang(0, 0, 90) ), Black,"models/bull/dynamicbuttonflat_small.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoDisableShading(Holo,1)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 28){
+        holoCreate(Holo, entity():toWorld(vec(-1, 0.65, 2.7)*Size) , vec(0.16)*Size, entity():toWorld( ang(0, 0, 90) ), Black,"models/bull/dynamicbuttonflat_small.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoDisableShading(Holo,1)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 29){
+        holoCreate(Holo, entity():toWorld(vec(2, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_f.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 30){
+        holoCreate(Holo, entity():toWorld(vec(1.5, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_u.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 31){
+        holoCreate(Holo, entity():toWorld(vec(1, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_e.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 32){
+        holoCreate(Holo, entity():toWorld(vec(0.5, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_l.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 33){
+        holoCreate(Holo, entity():toWorld(vec(-2, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 34){
+        holoCreate(Holo, entity():toWorld(vec(-1.5, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    if(changed(Holo) & Holo == 35){
+        holoCreate(Holo, entity():toWorld(vec(-1, 0.4, 1.5)*Size) , vec(0.05)*Size, entity():toWorld( ang(0, 0, 0) ), Black,"models/sprops/misc/alphanum/alphanum_0.mdl")
+        holoParent(Holo, entity())
+        holoBodygroup(Holo,0,3)
+        holoMaterial(Holo, "models/debug/debugwhite")
+    }
+    
+    
+    
+
+    
+    
+}
+else{
+    Building = 0
+    interval(80)
+}
+
+if(Engine:acfActive()){
+    OnCol = BackColor
+    holoColor(1,OnCol)
+    holoColor(2,OnCol)
+}
+else{
+    OnCol = Black
+    holoColor(1,OnCol)
+    holoColor(2,OnCol)
+}
+
+
+
+
+if(changed(MPH)){
+    MH = floor(MPH/100)
+    MTE = floor((MPH-(MH*100))/10)
+    MO = floor((MPH-(MH*100)-(MTE*10)))
+    holoModel(24,"models/sprops/misc/alphanum/alphanum_"+MH:toString()+".mdl")
+    holoModel(25,"models/sprops/misc/alphanum/alphanum_"+MTE:toString()+".mdl")
+    holoModel(26,"models/sprops/misc/alphanum/alphanum_"+MO:toString()+".mdl")
+}
+
+CurrentGear = Gearbox:acfGear()
+
+if(changed(CurrentGear) && !Building){
+    GearString = "models/sprops/misc/alphanum/alphanum_"+(CurrentGear-1)+".mdl"
+    if(CurrentGear == 0) {GearString="models/sprops/misc/alphanum/alphanum_n.mdl"}
+    if(CurrentGear == 1) {GearString="models/sprops/misc/alphanum/alphanum_r.mdl"}
+    holoModel(20,GearString)
+
+}
+
+
+RPM = Engine:acfRPM()
+
+if((changed(RPM) || RPM>(MaxRPM*19/21)) && Engine:acfActive() && !Building ){
+
+    holoModel(15,"models/sprops/misc/alphanum/alphanum_"+TT:toString()+".mdl")
+    holoModel(16,"models/sprops/misc/alphanum/alphanum_"+T:toString()+".mdl")
+    holoModel(17,"models/sprops/misc/alphanum/alphanum_"+H:toString()+".mdl")
+    holoModel(18,"models/sprops/misc/alphanum/alphanum_"+TE:toString()+".mdl")
+    holoModel(19,"models/sprops/misc/alphanum/alphanum_"+O:toString()+".mdl")
+    #TT T H TE O
+    TT = floor(RPM/10000)
+    T = floor((RPM-TT*10000)/1000)
+    H = floor((RPM-(TT*10000)-(T*1000))/100)
+    TE = floor((RPM-(TT*10000)-(T*1000)-(H*100))/10)
+    O = floor((RPM-(TT*10000)-(T*1000)-(H*100)-(TE*10)))
+    
+    if(RPM>(Engine:acfPowerbandMax())){
+        holoColor(28,Green)
+        holoColor(27,Green)
+    }
+    else{
+        holoColor(28,Black)
+        holoColor(27,Black)
+    }
+    
+    if(RPM>(MaxRPM*20/21)){
+        StrobeRed = 1
+    }
+    else{
+        StrobeRed = 0
+    }
+    
+}
+
+CurrentFuel = (Fueltank:acfFuel()/Fueltank:acfCapacity())*100
+
+if(changed(CurrentFuel)){
+    
+    
+    
+    FH = floor(CurrentFuel/100)
+    FTE = floor((CurrentFuel-(FH*100))/10)
+    FO = floor((CurrentFuel-(FH*100)-(FTE*10)))
+    
+    holoModel(35,"models/sprops/misc/alphanum/alphanum_"+FH:toString()+".mdl")
+    holoModel(34,"models/sprops/misc/alphanum/alphanum_"+FTE:toString()+".mdl")
+    holoModel(33,"models/sprops/misc/alphanum/alphanum_"+FO:toString()+".mdl")
+}
+
+if(StrobeRed && Engine:acfActive() && !Building){
+    X=sin(curtime()*5000)
+    if(X>0.5){
+        OnCol = Red
+        holoColor(1,OnCol)
+        holoColor(2,OnCol)
+    }
+    elseif(X<-0.5){
+        OnCol == BackColor
+        holoColor(1,OnCol)
+        holoColor(2,OnCol)
+    }
+}
+
+
+
+
+
+

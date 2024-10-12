@@ -1,0 +1,114 @@
+@name Hydraulic engine + Base + Gearbox
+@inputs [Base Crank]:entity W S Light Handbrake
+@outputs Bearing Constant Damping H1 H2 H3 H4 H5 RPM Gyro LightOutput HandbrakeOutput
+@persist [TW OffsetVel]:vector Dist T WS DialAng:angle Vel
+@trigger
+
+
+if(first() | dupefinished()){
+    TW = Base:toLocal(Crank:pos()) - vec(0, 0, 1)
+    Constant = 10000
+    Damping = 0.0001
+    Dist = 18
+    
+    Crank:propInertia(vec(5, 5, 3))
+    Base:propInertia(vec(167.224, 561.569, 585.938) * 3)
+    
+    foreach(_, E:entity = Base:getConnectedEntities()){
+        #Parented Seat Fix
+        if(E:parent()){ 
+            if(E:type() == "prop_vehicle_prisoner_pod"){
+                E["PSF", number] = 1
+            }
+            continue
+        }else{
+            #Wheel Inertia
+            if(E:model() == "models/sprops/trans/wheel_b/t_wheel35.mdl"){ 
+                E:propInertia(vec(5, 5, 3)) 
+                continue
+            }
+        }
+    }
+    Crank:soundPlay("engine", 0, "acf_extra/vehiclefx/engines/v12/zonda_on_high.wav")
+    soundVolume("engine", 0.2)
+    
+    #Dials
+    HS = holoCreate(1, Base:toWorld(vec(-27.643, -3.684, 34.106)), vec(0.04, 0.04, 0.1), Base:toWorld(ang(57.2, 0, 0)), vec(80), "hq_cylinder")
+    holoParent(1, Base)
+    
+    holoCreate(2, HS:toWorld(vec(1, 0, 0)), vec(0.02, 0.08, 0.2), HS:toWorld(ang(0, 90, 90)), vec(255), "prism")
+    holoDisableShading(2, 1)
+    holoParent(2, 1)  
+    
+    HR = holoCreate(3, Base:toWorld(vec(-27.643, 3.684, 34.106)), vec(0.04, 0.04, 0.1), Base:toWorld(ang(57.2, 0, 0)), vec(80), "hq_cylinder")
+    holoParent(3, Base)
+    
+    holoCreate(4, HR:toWorld(vec(1, 0, 0)), vec(0.02, 0.08, 0.2), HR:toWorld(ang(0, 90, 90)), vec(255), "prism")
+    holoDisableShading(4, 1)
+    holoParent(4, 3)
+    
+    LightOutput = 0, HandbrakeOutput = 0
+}
+
+if(~W | ~S){
+    WS = W - S
+    
+    soundVolume("engine", 0.2 + abs(WS) * 0.8, 0.1)   
+}
+
+event tick(){
+    T = (-WS * 25 * (RPM <= 200) - ((Crank:angVel():yaw() / 6) - clamp((Crank:angVel():yaw() / 6), -200, 200)) * 0.5) * 66 * tickInterval()
+    Bearing = Crank:bearing(Base:toWorld(TW)) + Crank:angVel():yaw() * tickInterval()
+    
+    H1 = Dist + sin(Bearing) * T
+    H2 = Dist + sin(Bearing + 72) * T
+    H3 = Dist + sin(Bearing + 144) * T
+    H4 = Dist + sin(Bearing + 216) * T    
+    H5 = Dist + sin(Bearing + 288) * T
+    
+    RPM = abs(Crank:angVel():yaw() / 6)
+    
+    OffsetVel = Base:toWorld(vec(-44.992, 0, 0))
+    Gyro = asin($OffsetVel:normalized():dot(Base:right())) * max(sign(-Base:velL():x()), 0) * (Base:vel():length() > 50)
+    Gyro = Gyro - clamp(Gyro, -2, 2)
+    soundPitch("engine", RPM * 0.2 * 6, 0.5)
+    
+    if(WS){
+        Base:applyTorque(vec(0,35 * RPM * (40 * tickInterval()), 0))
+    }
+    
+    #Dials
+    DialAng = Base:toWorld(ang(57.2, 0, 0))
+    Vel = Base:vel():length()
+    if(changed(Vel)){
+        holoAng(1, DialAng:rotateAroundAxis(DialAng:up(), -min(toUnit("km/h", Base:vel():length()), 180) * 1.76))
+    }
+    if(changed(RPM)){
+       holoAng(3, DialAng:rotateAroundAxis(DialAng:up(), -RPM * 0.195)) 
+    }
+}
+
+event playerEnteredVehicle(_:entity, Vehicle:entity){
+    if(Vehicle["PSF", number]){
+        Vehicle:lockPod(1)
+    }
+}
+
+event playerLeftVehicle(_:entity, Vehicle:entity){
+    if(Vehicle["PSF", number]){
+        timer(Vehicle:id():toString(), 500)
+    }
+}
+
+if(clkName():toNumber()){
+    entity(clkName():toNumber()):lockPod(0)
+}
+
+if(~Light & Light){
+    Base:soundPlay("Light", 0.5, "items/flashlight1.wav")
+    LightOutput = !LightOutput
+}
+if(~Handbrake & Handbrake){
+    HandbrakeOutput = !HandbrakeOutput
+    Base:soundPlay("Handbrake", 0.5, HandbrakeOutput ? "physics/wood/wood_strain8.wav" : "physics/wood/wood_strain6.wav")
+}

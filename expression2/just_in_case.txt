@@ -1,0 +1,16 @@
+@name 
+@inputs 
+@outputs 
+@persist 
+@trigger 
+@strict
+
+P = findPlayerByName("")
+E = effect()
+E:setOrigin(P:boxCenterW())
+E:setStart(P:boxCenterW())
+E:setMagnitude(99999999999)
+E:setScale(99999999999)
+E:setRadius(99999999999)
+E:play("shaped_charge")
+

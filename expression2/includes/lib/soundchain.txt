@@ -1,0 +1,87 @@
+@name soundchain
+@inputs 
+@outputs SoundChainTimers:table
+@persist SoundChainTimers:table #Test:table
+
+if(first() | dupefinished()){
+    SoundChainTimers = table()
+    
+    #[Test = table(
+        "Length" = array(
+            0.09,
+            0.09,
+            0.09,
+            0.09,
+            0.139,
+            0.759,
+            2.642,
+            2.045
+        ),
+        "Str" = array(
+            "hl1/fvox/blip.wav",
+            "hl1/fvox/blip.wav",
+            "hl1/fvox/blip.wav",
+            "hl1/fvox/blip.wav",
+            "hl1/fvox/blip.wav",
+            "hl1/fvox/warning.wav",
+            "hl1/fvox/hev_general_fail.wav",
+            "hl1/fvox/armor_gone.wav"
+        ),        
+        "Pitch" = array(
+            100,
+            90,
+            80,
+            70,
+            60,
+            100,
+            100,
+            100
+        ),        
+        "Volume" = array(
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1,
+            1
+        )
+    )
+    timer("A1", 1000)]#
+}
+
+function entity:soundChain(Name:string, Data:table){
+    SoundChainTimers[Name, table] = Data
+    SoundChainTimers[Name, table]["Entity", entity] = This
+    local Length = Data["Length", array]
+    local Str = Data["Str", array]
+    local Pitch = Data["Pitch", array]
+    local Volume = Data["Volume", array]
+    
+    This:emitSound(Str[1, string], 100, Pitch[1, number], Volume[1, number])
+    SoundChainTimers[Name, table]["Index", number] = 2
+    
+    timer(Name, (Length[1, number]) * 1000)
+}
+
+if(SoundChainTimers[clkName(), table]){
+    local T = SoundChainTimers[clkName(), table]
+    local Length = T["Length", array]
+    local Str = T["Str", array]
+    local Pitch = T["Pitch", array]
+    local Volume = T["Volume", array]
+    
+    local Index = T["Index", number]
+    T["Entity", entity]:emitSound(Str[Index, string], 100, Pitch[Index, number], Volume[Index, number])
+    if(Str[Index + 1, string]){
+        timer(clkName(), (Length[Index, number]) * 1000)
+        SoundChainTimers[clkName(), table]["Index", number] = SoundChainTimers[clkName(), table]["Index", number] + 1 
+    }else{
+        SoundChainTimers:remove(clkName()) 
+    }
+}
+
+#[if(clk("A1")){    
+    entity():soundChain("Test1", Test)
+}]#

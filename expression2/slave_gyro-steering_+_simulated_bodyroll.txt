@@ -1,0 +1,62 @@
+@name Slave Gyro-steering + Simulated Bodyroll
+@inputs A D [Base BaseSlave LeftSlave RightSlave]:entity
+@outputs L R Curve
+@persist Width Length Curve AD Bodyroll_Mul Bodyroll_Max TickFix
+@persist [Vel_Offset Vel_Offset_Pos Vel_Local]:vector Gyro Gyro_Mul Gyro_Max
+@trigger 
+
+#Made by unknao
+if(first() | dupefinished()){
+    Width = 31.506 #Distance from the wheel to the base widthwise.
+    Length = 106.000 #Distance between the front and back wheels.
+    
+    Vel_Offset_Pos = vec(53, 0, 0) #Base velocity according to an offset point local to the Base prop, set this to be between your rear wheels.
+    Gyro_Mul = 0.7 #How strong is the gyro compensation.
+    Gyro_Max = 45 #Maximum angle that the gyro compensation can go to.
+    
+    Bodyroll_Mul = 0.5 #Bodyroll multiplier according to the force received.
+    Bodyroll_Max = 350 #Maximum amount of bodyroll the code will simulate.
+    
+    Wheel_Model = "models/sprops/trans/wheel_c/t_wheel30.mdl"
+    
+    rangerPersist(1)
+    rangerFilter(Base:getConnectedEntities())
+    
+    foreach(_:number, E:entity = Base:getConnectedEntities()){
+        if(E:parent() & E:model() != Wheel_Model){ continue }
+        if(E:model() == Wheel_Model){
+            E:propInertia(vec(5, 3, 5))  
+        }
+    }
+    Curve = 0, L = 0, R = 0, TickFix = 66 * tickInterval()
+}
+
+AD = (A - D) * 30
+
+event tick(){
+	Vel_Local = Base:velL()
+	
+    #Simulated Bodyroll
+	Ranger_Bodyroll = rangerOffset(30, Base:pos(), -Base:up())
+	if(Ranger_Bodyroll:hit()){
+		Bodyroll_Vel = (Vel_Local:y() + Base:angVelVector():z() * 2)
+		Base:applyTorque(vec(clamp(-Bodyroll_Vel * Bodyroll_Mul, -Bodyroll_Max, Bodyroll_Max), 0, 0) * Base:inertia() * TickFix)
+	}
+
+	#Gyro
+    Vel_Offset = Base:toWorld(Vel_Offset_Pos)
+    Gyro = asin($Vel_Offset:normalized():dot(Base:right())) * max(sign(-Vel_Local:x()), 0) * (Base:vel():length() > 50)
+    Gyro = clamp((Gyro - clamp(Gyro, -2, 2)) * Gyro_Mul, -Gyro_Max, Gyro_Max)
+    
+    #Steering
+    Curve += clamp((clamp(AD + Gyro, -45, 45) - Curve) * 0.2, -4, 4) * TickFix
+    if(changed(Curve)){
+        N = Length * tan(Curve + 90)
+        L = atan(Length / (N + Width))
+        R = atan(Length / (N - Width))
+    }
+	
+    BaseSlave:setAng(Base:angles())                     if(!BaseSlave:isFrozen()){ BaseSlave:propFreeze(1) }
+    LeftSlave:setAng(Base:toWorld(ang(0, -L, 0)))     if(!LeftSlave:isFrozen()){ LeftSlave:propFreeze(1) }
+    RightSlave:setAng(Base:toWorld(ang(0, -R, 0)))    if(!RightSlave:isFrozen()){ RightSlave:propFreeze(1) }
+}

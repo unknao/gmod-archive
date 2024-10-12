@@ -1,0 +1,20 @@
+@name Gyro-steering + Prop Steering Wheel for bikes
+@inputs A D Gyro Wheel:entity
+@outputs Curve
+@persist Curve SCurve
+@trigger 
+
+if(first() | dupefinished()){
+    SCurve = 0
+}
+
+Curve = clamp((D - A) * 30 + Gyro * 0.95, -45, 45)
+
+event tick(){
+    SCurve += clamp(((Curve) - SCurve) * 0.5, -8, 8) * tickInterval() * 40
+    if(changed(SCurve) & Wheel:parent()){
+        Wheel:setLocalAng(ang(-67.17, 0, 90 - SCurve))
+    }
+    entity():setAng(Wheel:angles())
+    if(!entity():isFrozen()){ entity():propFreeze(1) }
+}

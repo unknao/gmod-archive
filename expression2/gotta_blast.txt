@@ -1,0 +1,26 @@
+@name gotta blast
+@persist MAX_PROPS BOMB_MODEL:string SQRT Count
+
+if(first()){
+    MAX_PROPS = 64
+    BOMB_MODEL = "models/props_phx/cannonball_solid.mdl"
+    SQRT = floor(sqrt(MAX_PROPS))
+    Count = 0
+}
+
+event entityCreated(Entity:entity) {
+    if(Entity:isValid() & Entity:owner() == owner() & Entity:model() == BOMB_MODEL){
+        Entity:propFreeze(1)
+        local X = (Count % SQRT)
+        local Y = floor(Count / SQRT)
+        local Adjust = floor(SQRT / 2)
+        Entity:setAng(ang())
+        Entity:setPos(entity():toWorld(vec(X - Adjust, Y - Adjust, 0.1) * 200))
+        Count++
+        Entity:propBreak()
+    }
+}
+
+for(_ = 1, MAX_PROPS){
+    concmd("gm_spawn " + BOMB_MODEL)   
+}

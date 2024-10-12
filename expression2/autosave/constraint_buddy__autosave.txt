@@ -1,0 +1,93 @@
+@name Constraint Buddy 
+@persist [E1 E2]:entity Ballsocket_Settings:table Enabled
+
+if(first() | dupefinished()){
+    Ballsocket_Settings = table(
+        "Mins" = array(
+            vec(-180, -0.01, -0.01),
+            vec(-180, -180, -0.01),
+            vec(-180, -0.01, -180),
+            vec(-180, 0.01, 0.01),
+            vec(-180, -180, 0.01),
+            vec(-180, 0.01, -180)
+        ),
+        "Maxs" = array(
+            vec(180, 0.01, 0.01),
+            vec(180, 180, 0.01),
+            vec(180, 0.01, 180),
+            vec(180, -0.01, -0.01),
+            vec(180, 180, -0.01),
+            vec(180, -0.01, 180)
+        )
+    )
+    
+    printColor(vec(255, 100, 100), "Constraint Buddy v1 by unknao, press use on the Expression 2 to get started. \nUsage: first 2 uses selects props, third constrains, reload to reset selection.")
+    E1 = noentity(), E2 = noentity(), Enabled = 0
+}
+
+
+
+event keyPressed(P:entity, _:string, D:number, KB:string) {
+    if(P == owner()){
+        if(D){
+            switch(KB){
+                #Reset Selection
+                case "reload", 
+                    if((E1 | E2) & Enabled){
+                        P:emitSound("buttons/combine_button_locked.wav")
+                        if(E1){ E1:setColor(E1["OldColor", vector4]) }
+                        if(E2){ E2:setColor(E2["OldColor", vector4]) }
+                        E1 = noentity(), E2 = noentity()
+                        hint("Constraining selection reset.", 1.5)
+                    }
+                break
+                
+                case "use",
+                    local AimEnt = P:aimEntity()
+                    #Select Entities
+                    if(AimEnt == entity()){
+                        Enabled = !Enabled
+                        printColor(vec(255, 100, 100), "Constraint Buddy " + (Enabled ? "Enabled." : "Disabled."))
+                        break
+                    }
+                    if(Enabled){
+                        if(AimEnt:owner() == P & !(E1 & E2)){
+                            if(!E1){
+                                P:emitSound("buttons/button9.wav")
+                                E1 = AimEnt
+                                E1["OldColor", vector4] = E1:getColor4()
+                                hint("Entity 1 selected: " + AimEnt:toString(), 1.5)
+                                E1:setColor(vec(255, 0, 0))
+                            }
+                            elseif(!E2 & AimEnt != E1){
+                                P:emitSound("buttons/button9.wav")
+                                E2 = AimEnt
+                                E2["OldColor", vector4] = E2:getColor4()
+                                hint("Entity 2 selected: " + AimEnt:toString(), 1.5)
+                                E2:setColor(vec(255, 0, 0))
+                            }
+                            Temp = 1
+                        }
+                        
+                        #Constrain Entities
+                        if(E1 & E2 & !Temp){
+                            P:emitSound("buttons/button24.wav")
+                            for(I = 1, 3){
+                                ballsocket(E1, vec(), E2, Ballsocket_Settings["Mins", array][I, vector], Ballsocket_Settings["Maxs", array][I, vector], vec(), 1)
+                            }                            
+                            for(I = 4, 6){
+                                ballsocket(E2, vec(), E1, Ballsocket_Settings["Mins", array][I, vector], Ballsocket_Settings["Maxs", array][I, vector], vec(), 1)
+                            }
+
+                            E1:setColor(E1["OldColor", vector4])
+                            E2:setColor(E2["OldColor", vector4])
+                            E1 = noentity(), E2 = noentity()
+                            hint("6 Ballsockets successfully made.", 1.5)
+                        }
+                    }
+                break
+            }
+        }
+    }
+}
+

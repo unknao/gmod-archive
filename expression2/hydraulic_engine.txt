@@ -1,0 +1,27 @@
+@name Hydraulic engine
+@inputs [Base Crank]:entity
+@outputs Bearing Constant Damping H1 H2 H3 H4 RPM
+@persist TW:vector Dist Width T
+@trigger 
+
+
+if(first() | dupefinished()){
+    TW = Base:toLocal(Crank:pos()) - Base:toLocalAxis(vec(0, 0, 1))
+    Constant = 10000
+    Damping = 0.0001
+    Dist = 9
+    
+    Crank:propInertia(vec(5, 5, 3))
+}
+
+event tick(){
+    Bearing = Crank:bearing(Base:toWorld(TW)) + Crank:angVel():yaw() * tickInterval()
+    T = (RPM < 500) * 10
+    
+    H1 = Dist + sin(Bearing) * T
+    H2 = Dist + sin(Bearing + 90) * T
+    H3 = Dist + sin(Bearing + 180) * T
+    H4 = Dist + sin(Bearing + 270) * T
+    
+    RPM = Crank:angVel():yaw() / 6
+}

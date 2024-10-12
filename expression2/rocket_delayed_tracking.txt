@@ -1,0 +1,63 @@
+@name rocket delayed tracking
+@inputs Clk
+@outputs F:entity
+@persist Missiles:array Dir:vector
+@trigger 
+
+if(first()){
+    Missiles = array(), F = entity(-1)
+}
+
+if(~Clk & Clk & propCanCreate() & F){
+    local M = propSpawn("models/props_phx/amraam.mdl", entity():toWorld(vec(0, 0, 150)), entity():toWorld(ang(-90, 0, 0)), 0)
+    M:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+    M:propSetVelocity(entity():up() * 500) #Initial velocity
+    
+    #Cool sounds
+    M:emitSound("EpicMetal_Heavy.ImpactHard")
+    M:emitSound("MVM.GiantDemoman_Grenadeshoot")
+    
+    M["Ignition", number] = curtime() + 1.5 #Store the ignition time on the entity
+    Missiles:pushEntity(M) #Push all the rockets into the array
+    
+    F = noentity()
+}
+
+event tick(){
+    if(!F:isValid()){ #Only run find operations if we have no target
+        findByClass("npc_*")
+        F = findClosest(entity():pos())
+    }
+    
+    foreach(I:number, E:entity = Missiles){
+        if(!E:isValid()){ #If missile doesn't exist, remove it from the array
+            Missiles:remove(I)   
+            continue #Skip to next entry on the array
+        }
+        
+        if(F){ #Only change the angle if theres a target
+            Dir = (F:boxCenterW() - E:massCenter()):normalized()
+            local D_Cross = E["Cross", vector] 
+            E["Cross", vector] = E:forward():cross(Dir) * 300
+            D_Cross = E["Cross", vector] - D_Cross
+            E:applyTorque((E:toLocalAxis(E["Cross", vector] + D_Cross * 20) - E:angVelVector()) * E:inertia())
+        }
+    
+        if(E["Activate", number]){ #Trigger all these things only once.
+            E["Activate", number] = 0
+            E["Active", number] = 1
+            E:emitSound("Building_Sentrygun.FireRocket")
+            E:soundPlay(E:id(), 0, "Phx.Afterburner3")
+                
+            #Neat missile trail trick (only visible if you have tf2)
+            holoCreate(E:id(), E:toWorld(vec(-70, 0, 8.6)), vec(1), E:toWorld(ang()), vec4(), "models/buildables/sentry3_rockets.mdl")
+            holoParent(E:id(), E)
+            
+        }
+        elseif(E["Active", number]){
+            if(E:boxCenterW():distance2(F:boxCenterW()) <= 62500){ E:propBreak() }
+            E:propSetVelocity(E:forward() * 3000)
+        }elseif(Dir:dot(E:forward()) >= 0.9){ E["Activate", number] = 1 }
+            
+    }
+}

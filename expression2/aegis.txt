@@ -1,0 +1,6 @@
+@name aegis
+@persist 
+
+if(first()){
+    propSpawnUndo(0)   
+}

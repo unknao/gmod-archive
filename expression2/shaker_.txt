@@ -1,0 +1,44 @@
+@name shaker 
+@persist [Angles D_Angles]:angle User:entity
+
+if(first()){
+    Angles = ang(), D_Angles = ang()
+    
+    E = holoCreate(1, entity():toWorld(vec()), vec(0.2, 0.2, 1.5), entity():toWorld(ang()), vec4(255))
+    
+    holoCreate(2, E:toWorld(vec(0, 0, 9)), vec(0.4), E:toWorld(ang()), vec4(255))
+    holoParent(2, 1)
+    
+    holoCreate(3, E:toWorld(vec(0, 0, -9)), vec(0.4), E:toWorld(ang()), vec4(255))
+    holoParent(3, 1)
+}
+
+event playerUse(Player:entity, Entity:entity) {
+    if(Entity == entity()){
+        User = Player
+        holoPos(1, User:attachmentPos("anim_attachment_LH"))
+        holoAng(1, User:attachmentAng("anim_attachment_LH"))
+        holoParentAttachment(1, User, "anim_attachment_LH")
+    }
+}
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player == User & Down & KeyBind == "reload"){
+        User = noentity()
+        holoUnparent(1)
+        holoPos(1, entity():toWorld(vec()))
+        holoAng(1, entity():toWorld(ang()))
+    }
+}
+
+event tick(){
+    if(User){
+        D_Angles = Angles
+        Angles = holoEntity(1):angles()
+        
+        D_Angles = Angles - D_Angles
+        if(((abs(D_Angles:pitch()) + abs(D_Angles:yaw()) + abs(D_Angles:roll())) / 3)   >= 20){
+            entity():emitSound(randint(0, 1) ? "weapons/sniper/sniper_zoomout.wav" : "weapons/sniper/sniper_zoomin.wav", 100, randint(170, 190))
+        }
+    }
+}

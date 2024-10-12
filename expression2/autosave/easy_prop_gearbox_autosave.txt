@@ -1,0 +1,38 @@
+@name Easy Prop Gearbox
+@inputs [Weight1 Weight2 Base]:entity Clutch GearUp GearDown
+@outputs Gear Weight
+@persist GearAngles:array MaxGears
+@trigger 
+
+if(first()){
+    Gear = 0
+    GearAngles = array(
+        ang(0, 18, 0),
+        ang(0, 36, 0),
+        ang(0, 54, 0),
+        ang(0, 72, 0),
+        ang(0, 90, 0),
+        ang(0, -18, 0)
+    )
+    
+    MaxGears = GearAngles:count() - 1 #Last is always reverse
+    Weight = 0.01
+}
+
+if((~GearUp & GearUp) | (~GearDown & GearDown)){
+    if(Clutch){
+        Gear = clamp(Gear + GearUp - GearDown, 0, MaxGears)
+        if(!Gear){ Weight = 0.01 }
+    }
+}
+
+if(~Clutch){
+    if(Gear){
+    Weight = max(!Clutch * 300, 0.01)
+    }
+}
+
+event tick(){
+    Weight1:setAng(Base:toWorld(-GearAngles[Gear, angle]))     if(!Weight1:isFrozen()){ Weight1:propFreeze(1) }
+    Weight2:setAng(Base:toWorld(GearAngles[Gear, angle]))    if(!Weight2:isFrozen()){ Weight2:propFreeze(1) }   
+}

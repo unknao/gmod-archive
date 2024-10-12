@@ -1,0 +1,51 @@
+@name Hydraulic Gyro-steering + Prop Steering Wheel
+@inputs [LSin RSin LCos RCos]:wirelink A D Gyro Wheel:entity
+@outputs N L R
+@persist Width Length Curve SCurve
+@trigger 
+
+#The problem of base shake at high speeds due to ballsocketing to the base makes this kind of steering obsolete
+#Only use for challenge purpose i guess
+#Hydraulics placed like this:
+#
+#          h         h
+#          |         |
+#          |         |
+#          |         |
+#      h---W--a   a--W---h  
+#
+#W - Wheel
+#a - Anchor point attached to the wheel (offset by 200 from the wheel units towards the base)
+#h - Hydraulic anchor points attached to the base (offset by 250 units from the wheel
+#Configure the Width and Length variables to match that of the distances between wheels
+#Do keep in mind that Width is divided by 2.
+
+if(first() | dupefinished()){
+    Width = 34.995
+    Length = 105.000
+    
+    foreach(_, W:wirelink = array(LSin, RSin, LCos, RCos)){
+        W["Constant", number] = 200 
+        W["Damping", number] = 15   
+    }
+    SCurve = 0
+}
+
+Curve = 90 + clamp((A - D) * 30 + Gyro * 0.4, -45, 45)
+
+N = Length * tan(Curve)
+L = atan(Length / (N + Width))
+R = atan(Length / (N - Width))
+
+LSin["Length", number] = sqrt((250 + sin(L) * 200) ^ 2 + (cos(L) * 200) ^ 2)
+LCos["Length", number] = sqrt((250 + cos(L) * 200) ^ 2 + (sin(L) * 200) ^ 2)
+
+RSin["Length", number] = sqrt((250 + sin(-R) * 200) ^ 2 + (cos(R) * 200) ^ 2)
+RCos["Length", number] = sqrt((250 + cos(R) * 200) ^ 2 + (sin(-R) * 200) ^ 2)
+
+event tick(){
+    SCurve += clamp(((Curve - 90) - SCurve) * 0.2, -4, 4) * tickInterval() * 40
+    if(changed(SCurve)){
+        Wheel:setLocalAng(ang(-33, -180, SCurve * 2))
+    }
+}

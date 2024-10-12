@@ -1,0 +1,52 @@
+@name Easy interior
+@inputs Gearstick:entity Gear
+@outputs GS_Angles:array
+@persist GS_Angles:array Gear_L Gear_I [Gearstick_Ang Gearstick_Targ]:angle TickFix
+@trigger 
+
+if(first() | dupefinished()){
+    TickFix = 66 * tickInterval()
+    GS_Angles = array(
+        ang(-12, 0, 25),
+        ang(12, 0, -25),
+        ang(12, 0, 25),
+        ang(35, 0, -25),
+        ang(35, 0, 25),
+        ang(-35, 0, -25)
+    )
+    
+    Gearstick_Ang = GS_Angles[Gear, angle]
+    Gearstick_Targ = GS_Angles[Gear, angle]
+    Gear_L = Gear, Gear_I = Gear 
+}
+
+if(~Gear){
+    Gear_L = Gear_I   
+    Gear_I = Gear
+
+    Gearstick:emitSound("buttons/lever7.wav", 45, 100, 1)
+    Gearstick:emitSound("acf_extra/vehiclefx/trans/default_shift.wav", 45, 100, 1)
+        
+    if(GS_Angles[Gear_L, angle]:pitch() == GS_Angles[Gear_I, angle]:pitch()){
+        Gearstick_Targ = GS_Angles[Gear_I, angle]
+    }else{
+        Gearstick_Targ = ang(GS_Angles[Gear_L, angle]:pitch(), 0, 0)
+        timer("Gearstick1", 5)  
+    }
+}
+
+if(clk("Gearstick1")){
+    Gearstick_Targ = ang(GS_Angles[Gear_I, angle]:pitch(), 0, 0)
+    timer("Gearstick2", 55) 
+}
+
+if(clk("Gearstick2")){
+    Gearstick_Targ = GS_Angles[Gear_I, angle]
+}
+
+event tick(){
+    Gearstick_Ang += clamp(Gearstick_Targ - Gearstick_Ang, -10, 10) * TickFix
+    if(changed(Gearstick_Ang)){
+        Gearstick:setLocalAng(Gearstick_Ang)
+    }
+}

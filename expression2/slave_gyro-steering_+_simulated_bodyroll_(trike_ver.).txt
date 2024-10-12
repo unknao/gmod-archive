@@ -1,0 +1,45 @@
+@name Slave Gyro-steering + Simulated Bodyroll (Trike ver.)
+@inputs A D [Wheel Base Axle AxleSlave SteerSlave]:entity
+@outputs Curve Bodyroll_Vel
+@persist Curve AD Bodyroll_Vel Bodyroll_Mul Bodyroll_Max TickFix
+@persist [Vel_Offset Vel_Offset_Pos]:vector Gyro Gyro_Mul Gyro_Max
+@trigger 
+
+#Made by unknao
+if(first() | dupefinished()){    
+    Vel_Offset_Pos = vec(26.167, 0, 0) #Base velocity according to an offset point local to the Base prop, set this to be between your rear wheels.
+    Gyro_Mul = 0.95 #How strong is the gyro compensation.
+    Gyro_Max = 45 #Maximum angle that the gyro compensation can go to.
+    
+    Bodyroll_Mul = 0.25 #Bodyroll multiplier according to the force received.
+    Bodyroll_Max = 200 #Maximum amount of bodyroll the code will simulate.
+    
+    rangerPersist(1)
+    rangerFilter(Base:getConnectedEntities())
+    Curve = 0, TickFix = 66 * tickInterval()
+}
+
+AD = (A - D) * 30
+
+event tick(){
+    #Simulated Bodyroll
+    Bodyroll_Vel = clamp((Base:velL():y() + Base:angVelVector():z() * 3) * Bodyroll_Mul, -Bodyroll_Max, Bodyroll_Max)
+     * rangerOffset(30, Base:pos(), -Base:up()):hit() #Don't do cartwheels in the sky.
+    
+    Base:applyTorque(vec(-Bodyroll_Vel, 0, 0) * Base:inertia() * TickFix)
+    
+    Vel_Offset = Base:toWorld(Vel_Offset_Pos)
+    Gyro = asin($Vel_Offset:normalized():dot(Base:right())) * max(sign(-Base:velL():x()), 0) * (Base:vel():length() > 50)
+    Gyro = clamp((Gyro - clamp(Gyro, -2, 2)) * Gyro_Mul, -Gyro_Max, Gyro_Max)
+    
+    #Steering
+    Curve += clamp((clamp(AD + Gyro, -45, 45) - Curve) * 0.2, -4, 4) * TickFix
+    if(changed(Curve)){
+        
+        if(Wheel:parent()){
+            Wheel:setLocalAng(ang(-67.17, 0, 90 + Curve))
+        }
+    }
+    AxleSlave:setAng(Axle:angles())       if(!AxleSlave:isFrozen()){ AxleSlave:propFreeze(1) }
+    SteerSlave:setAng(Wheel:angles())     if(!SteerSlave:isFrozen()){ SteerSlave:propFreeze(1) }
+}

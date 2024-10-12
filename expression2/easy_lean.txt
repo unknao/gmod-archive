@@ -1,0 +1,20 @@
+@name Easy Lean
+@inputs Base:entity Curve
+@outputs Ang:angle Lean Lean_Target
+@persist VelFWD Lean Lean_Target Ang:angle
+@trigger 
+
+if(first() | dupefinished()){
+    Lean = 0, Lean_Target = 0
+}
+
+event tick(){
+    VelFWD = abs(Base:velL():x())
+    Ang = Base:angles():setRoll(0)
+    
+    Lean_Target = min(VelFWD * 0.01, 20) * Curve / 30
+    Lean += clamp((Lean_Target - Lean) * 0.2, -3, 3) * 40 * tickInterval()
+    
+    entity():setAng(ang(Ang:pitch(), Ang:yaw(), Lean))
+    if(!entity():isFrozen()){ entity():propFreeze(1) }
+}

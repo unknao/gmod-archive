@@ -1,0 +1,53 @@
+@name Garland Saber
+@inputs 
+@outputs 
+@persist A:array Num Ready
+@trigger 
+@strict
+if(first()){
+    propSpawnUndo(0)
+    enableConstraintUndo(0)
+    Num = 20
+    A = array() 
+    
+}
+
+if(A:count() < Num){
+    if(propCanCreate()){
+        E = propSpawn("models/hunter/blocks/cube025x025x025.mdl", entity():pos(), ang(), 1)
+        
+        E:setMass(5000)
+        E:propDrag(0)
+        A:pushEntity(E)
+        E:setPos(entity():pos() + vec(0, 0, 20 * A:count()))
+        E:setColor(hsv2rgb(145 * A:count(), 1, 1))
+        E:setMaterial("engine/singlecolor")
+        if(A[A:count() - 1, entity]){
+            rope(E:id(), E, vec(), A[A:count() - 1, entity], vec(), -(2^16), 10, "cable/rope", 1, vec()) 
+        }
+    }
+    interval(100)
+}else{
+    rangerFilter(owner())
+    rangerFilter(A)
+    rangerPersist(1)
+    Ready = 1
+}
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player == owner() & KeyBind == "reload" & Ready){
+        foreach(I, E:entity = A){
+            if(I == 1 | I == A:count()){ continue }
+            E:propFreeze(!Down)   
+            if(Down){
+                E:setPos(owner():shootPos() + owner():eye() * 20 * I)
+            }
+        }
+    }
+}
+
+event tick(){
+    if(owner():keyReload() & Ready){
+        A[1, entity]:setPos(owner():shootPos() + owner():eye() * 100)
+        A[A:count(), entity]:setPos(rangerOffset(32767, owner():shootPos(), owner():eye()):position())
+    }
+}

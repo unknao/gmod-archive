@@ -1,0 +1,177 @@
+@name doturret
+@inputs Noclip HitPos:vector Base:entity Active
+@outputs Fire1 Fire2 PrimaryTurrets:array SecondaryTurrets:array
+@persist PRIMARY_MIN_MAX_PITCH:vector2 PRIMARY_TURNSPEED_MUL PRIMARY_TURNSPEED_MAX
+@persist SECONDARY_MIN_MAX_PITCH:vector2 SECONDARY_TURNSPEED_MUL SECONDARY_TURNSPEED_MAX
+@persist ZeroAngle TrackMouse PrimaryExists SecondaryExists
+
+#Doturret by unknao
+#An #include'able modular parented turret controller that aims to hard wire as few things as it can for fast setup
+#Supports both primary and secondary turrets
+#Turret and gun bases are identified by setting a specific material on them
+
+#turret_primary material for primary turret bases
+#gun_primary material for primary gun bases
+
+#turret_secondary material for secondary turret bases
+#gun_secondary material for secondary gun bases
+
+if(first() | dupefinished()){
+    PrimaryTurrets = array(), SecondaryTurrets = array()
+    
+    #Acquire turret and gun bases
+    foreach(_:number, E:entity = Base:getConnectedEntities()){
+        if(E:getMaterial() == "turret_primary"){ 
+            PrimaryTurrets:pushEntity(E)
+            foreach(_:number, EE:entity = E:children()){
+                if(EE:getMaterial() == "gun_primary"){
+                    E["gun", entity] = EE
+                    break
+                }
+            }
+            continue
+        }        
+        if(E:getMaterial() == "turret_secondary"){ 
+            SecondaryTurrets:pushEntity(E)
+            foreach(_:number, EE:entity = E:children()){
+                if(EE:getMaterial() == "gun_secondary"){
+                    E["gun", entity] = EE
+                    break
+                }
+            }
+            continue
+        }
+    }
+    PrimaryExists = PrimaryTurrets:count(), SecondaryExists = SecondaryTurrets:count()
+    
+    #Settings (copy this part over to the main e2 if change is desired)
+    TRACKING_SOUND_ON = "buttons/button18.wav"
+    TRACKING_SOUND_OFF = "buttons/button16.wav"
+    
+    PRIMARY_MIN_MAX_PITCH = vec2(-20, 35)
+    PRIMARY_TURNSPEED_MUL = 0.1
+    PRIMARY_TURNSPEED_MAX = 3
+    
+    SECONDARY_MIN_MAX_PITCH = vec2(-70, 70)
+    SECONDARY_TURNSPEED_MUL = 0.2
+    SECONDARY_TURNSPEED_MAX = 6
+    
+    timer("postFirst", 0)
+    Tick_Fix = 66 * tickInterval(), TrackMouse = 0
+}  
+
+if(clk("postFirst")){
+    PRIMARY_TURNSPEED_MUL *= Tick_Fix
+    PRIMARY_TURNSPEED_MAX *= Tick_Fix    
+    
+    SECONDARY_TURNSPEED_MUL *= Tick_Fix
+    SECONDARY_TURNSPEED_MAX *= Tick_Fix
+}
+
+if(~Noclip){
+    if(Noclip){
+        TrackMouse = !TrackMouse
+        ZeroAngle = 0
+        timer("ZeroAngle", 1000)
+        if(PrimaryExists){
+            foreach(_:number, E:entity = PrimaryTurrets){
+                E:emitSound(TrackMouse ? TRACKING_SOUND_ON : TRACKING_SOUND_OFF)
+            }
+        }        
+        if(SecondaryTurrets:count()){
+            foreach(_:number, E:entity = SecondaryTurrets){
+                E:emitSound(TrackMouse ? TRACKING_SOUND_ON : TRACKING_SOUND_OFF)
+            }
+        }
+        
+    }else{
+        stoptimer("ZeroAngle")
+    }
+}
+if(clk("ZeroAngle")){
+    ZeroAngle = 1    
+    TrackMouse = 0
+    if(PrimaryTurrets:count()){
+        foreach(_:number, E:entity = PrimaryTurrets){
+            E:emitSound(TrackMouse ? TRACKING_SOUND_ON : TRACKING_SOUND_OFF)
+        }
+    }        
+    if(SecondaryTurrets:count()){
+        foreach(_:number, E:entity = SecondaryTurrets){
+            E:emitSound(TrackMouse ? TRACKING_SOUND_ON : TRACKING_SOUND_OFF)
+        }
+    }
+}
+  
+event tick(){
+    if((TrackMouse & Active) | ZeroAngle){
+        if(PrimaryExists){
+            foreach(_:number, Turret:entity = PrimaryTurrets){
+                local Gun = Turret["Gun", entity]
+                if(ZeroAngle){
+                    Turret["Target", number] = 0
+                    Gun["Target", number] = 0       
+                }else{
+                    Turret["Target", number] = Base:toLocal((Turret:pos() - HitPos):toAngle()):yaw()
+                    Gun["Target", number] = clamp(Turret:toLocal((Turret:pos() - HitPos):toAngle()):pitch(), PRIMARY_MIN_MAX_PITCH:x(), PRIMARY_MIN_MAX_PITCH:y())
+                }
+                
+                local D_TurretAng = Turret["Current", number]
+                Turret["Current", number] = Turret["Current", number] + clamp(angnorm(Turret["Target", number] - Turret["Current", number]) * PRIMARY_TURNSPEED_MUL, -PRIMARY_TURNSPEED_MAX, PRIMARY_TURNSPEED_MAX)
+                Turret:setLocalAng(ang(0, Turret["Current", number] - 90, 0)) 
+                D_TurretAng = abs(D_TurretAng - Turret["Current", number])
+                
+                local D_GunAng = Gun["Current", number]
+                Gun["Current", number] = Gun["Current", number] + clamp(angnorm(Gun["Target", number] - Gun["Current", number]) * PRIMARY_TURNSPEED_MUL, -PRIMARY_TURNSPEED_MAX, PRIMARY_TURNSPEED_MAX)
+                Gun:setLocalAng(ang(Gun["Current", number], 0, 0))
+                D_GunAng = abs(D_GunAng - Gun["Current", number])
+                            
+                if(D_TurretAng){
+                    soundVolume("TurretSound", D_TurretAng * 0.33 / Tick_Fix, 0.2)
+                    soundPitch("TurretSound", 30 + D_TurretAng * 40 / Tick_Fix, 0.2)
+                }        
+                if(D_GunAng){
+                    soundVolume("GunSound", D_GunAng * 0.5 / Tick_Fix, 0.2)
+                    soundPitch("GunSound", 20 + D_GunAng * 50 / Tick_Fix, 0.2)
+                }
+                if(!Turret["Current", number] & !Gun["Current", number] & ZeroAngle){
+                    ZeroAngle = 0
+                }
+            }
+        }        
+        if(SecondaryExists){
+            foreach(_:number, Turret:entity = SecondaryTurrets){
+                local Gun = Turret["Gun", entity]
+                if(ZeroAngle){
+                    Turret["Target", number] = 0
+                    Gun["Target", number] = 0       
+                }else{
+                    Turret["Target", number] = Base:toLocal((Turret:pos() - HitPos):toAngle()):yaw()
+                    Gun["Target", number] = clamp(Turret:toLocal((Turret:pos() - HitPos):toAngle()):pitch(), SECONDARY_MIN_MAX_PITCH:x(), SECONDARY_MIN_MAX_PITCH:y())
+                }
+                
+                local D_TurretAng = Turret["Current", number]
+                Turret["Current", number] = Turret["Current", number] + clamp(angnorm(Turret["Target", number] - Turret["Current", number]) * SECONDARY_TURNSPEED_MUL, -SECONDARY_TURNSPEED_MAX, SECONDARY_TURNSPEED_MAX)
+                Turret:setLocalAng(ang(0, Turret["Current", number] - 90, 0)) 
+                D_TurretAng = abs(D_TurretAng - Turret["Current", number])
+                
+                local D_GunAng = Gun["Current", number]
+                Gun["Current", number] = Gun["Current", number] + clamp(angnorm(Gun["Target", number] - Gun["Current", number]) * SECONDARY_TURNSPEED_MUL, -SECONDARY_TURNSPEED_MAX, SECONDARY_TURNSPEED_MAX)
+                Gun:setLocalAng(ang(Gun["Current", number], 0, 0))
+                D_GunAng = abs(D_GunAng - Gun["Current", number])
+                            
+                if(D_TurretAng){
+                    soundVolume("TurretSound", D_TurretAng * 0.33 / Tick_Fix, 0.2)
+                    soundPitch("TurretSound", 30 + D_TurretAng * 40 / Tick_Fix, 0.2)
+                }        
+                if(D_GunAng){
+                    soundVolume("GunSound", D_GunAng * 0.5 / Tick_Fix, 0.2)
+                    soundPitch("GunSound", 20 + D_GunAng * 50 / Tick_Fix, 0.2)
+                }
+                if(!Turret["Current", number] & !Gun["Current", number] & ZeroAngle){
+                    ZeroAngle = 0
+                }
+            }
+        }
+    }
+}
