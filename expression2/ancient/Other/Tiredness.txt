@@ -1,0 +1,41 @@
+@name Tiredness
+@persist [D E]:entity Aim:vector C
+if(first()){
+propSpawnUndo(0)
+entity():setAlpha(0)
+entity():propNotSolid(1)
+}
+interval(10)
+runOnChat(1)
+
+if(!E){
+findByModel("models/nova/jeep_seat.mdl")
+if(find() & find():owner() == owner()){
+E = find()}
+else{
+E = seatSpawn("models/nova/jeep_seat.mdl",entity():pos(),ang(),1)
+}}
+
+D = E:driver()
+if(D!=owner()){
+E:killPod()}
+
+if(changed(D) & D){
+E:propNotSolid(1)}
+if(changed(!D) & !D){
+E:propNotSolid(0)}
+
+if(D){
+M2 = D:keyAttack2()
+if(changed(M2) & M2){
+Aim = D:aimPos()+vec(0,0,5)
+E:setPos(Aim)}
+
+if(D:keyLeft()){
+C = C + 3
+E:setAng(ang(0,C,0))}
+if(D:keyRight()){
+C = C - 3
+E:setAng(ang(0,C,0))}
+}
+

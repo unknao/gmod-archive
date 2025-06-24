@@ -1,0 +1,75 @@
+@name prop lib
+@outputs PSUTable:table
+@strict
+
+#propSpawnUnrestricted --Danger zone! has weird function quirks!
+PSUTable = table()
+PSUIsChecking = 0
+function propSpawnUnrestricted(Mdl:string, Cb:function){  
+    Mdl = Mdl:lower()
+    PSUIsChecking = 1  
+    let T = PSUTable[Mdl, table]
+    
+    if(T){
+        T:pushFunction(Cb)
+    }else{
+        PSUTable[Mdl, table] = table(Cb) 
+    }
+    concmd("gm_spawn " + Mdl)
+    
+    if(timerExists("PSU_Look_TTL")){ 
+        timerRestart("PSU_Look_TTL") 
+        return
+    }
+    
+    timer("PSU_Look_TTL", 1, function(){
+        PSUIsChecking = 0
+    })
+}
+
+Fn = function() {}
+event entityCreated(Entity:entity) {
+    if(!PSUIsChecking){ exit() }
+    if(!PSUTable:count()){ exit() }
+    if(!Entity:isValid()){ exit() }
+    if(Entity:owner() != owner()){ exit() }
+    
+    let Mdl = Entity:model():lower()
+    let T = PSUTable[Mdl, table]
+    if(!T:count()){ exit() }
+    Fn = T[T:count(), function]
+    if(!Fn){
+        printTable(T:keys())
+        exit()
+    }
+    Fn(Entity)
+    T:remove(T:count())
+    if(!T:count()){
+        PSUTable:remove(Mdl)
+    }
+}
+
+#Correct offset force
+ACOF_In2m = 1/(39.37)^2
+function entity:applyCorrectOffsetForce(Impulse:vector, Position:vector){
+    	This:applyForce(Impulse)
+    	let Offset = Position - This:toWorld(This:massCenter())
+    	let Angimp = Offset:cross(Impulse) * ACOF_In2m * 360 / _PI
+    	This:applyTorque(Angimp)
+}
+
+function entity:setDormant(N:number){
+    This:propFreeze(N)
+    This:propNotSolid(N)
+    This:propDraw(!N)    
+}
+
+function array:setDormant(N:number){
+    foreach(_:number, E:entity = This){
+        if(!E:isValid()){ continue }
+        
+        E:propFreeze(N)
+        E:propNotSolid(N)
+        E:propDraw(!N)   
+    }
+}

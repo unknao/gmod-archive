@@ -1,0 +1,179 @@
+@name tally
+@inputs Button
+@persist I S Htm Tm Tm2 Tm3 Tm4 Int Val E:entity
+
+if(first()){
+entity():setAlpha(0)
+}
+interval(50)
+if(!E){
+Int = 1
+#1 for counting seconds, needs interval 1k
+#0 for increase by 1 wired to output
+Val = 0.30
+
+holoCreate(11, entity():toWorld(vec(0,6,10)),vec(1,1,0.3),entity():toWorld(ang(0,0,90)))
+holoColor(11, vec(30))
+holoModel(11, "hq_cylinder")
+holoParent(11, entity())
+
+holoCreate(12, entity():toWorld(vec(0,2,10)),vec(1,1,0.3),entity():toWorld(ang(0,0,90)))
+holoColor(12, vec(30))
+holoModel(12, "hq_cylinder")
+holoParent(12, entity())
+
+holoCreate(13, entity():toWorld(vec(0,-2,10)),vec(1,1,0.3),entity():toWorld(ang(0,0,90)))
+holoColor(13, vec(30))
+holoModel(13, "hq_cylinder")
+holoParent(13, entity())
+
+holoCreate(14, entity():toWorld(vec(0,-6,10)),vec(1,1,0.3),entity():toWorld(ang(0,0,90)))
+holoColor(14, vec(30))
+holoModel(14, "hq_cylinder")
+holoParent(14, entity())
+
+holoCreate(51, entity():toWorld(vec(0,0,16.5)),vec(1.1,3.161,1.1),entity():toWorld(ang()))
+holoModel(51, "models/sprops/misc/tubes_thin/size_1/t_h_tube_12x6.mdl")
+holoMaterial(51, "models/debug/debugwhite")
+holoColor(51, vec(43,61,67))
+holoParent(51, entity())
+
+holoCreate(52, entity():toWorld(vec(0,8.67,13.2)),vec(1.1),entity():toWorld(ang()))
+holoModel(52, "models/sprops/geometry/t_fdisc_12.mdl")
+holoMaterial(52, "models/debug/debugwhite")
+holoColor(52, vec(43,61,67))
+holoParent(52, entity())
+
+holoCreate(53, entity():toWorld(vec(0,-8.67,13.2)),vec(1.1),entity():toWorld(ang()))
+holoModel(53, "models/sprops/geometry/t_fdisc_12.mdl")
+holoMaterial(53, "models/debug/debugwhite")
+holoColor(53, vec(43,61,67))
+holoParent(53, entity())
+
+holoCreate(54, entity():toWorld(vec(0,0,5)),vec(1.1,3.161,1.1),entity():toWorld(ang(180,0,0)))
+holoModel(54, "models/sprops/misc/tubes_thin/size_1/t_h_tube_12x6.mdl")
+holoMaterial(54, "models/debug/debugwhite")
+holoColor(54, vec(43,61,67))
+holoParent(54, entity())
+
+holoCreate(55, entity():toWorld(vec(0,8.67,8.35)),vec(1.1),entity():toWorld(ang()))
+holoModel(55, "models/sprops/geometry/t_fdisc_12.mdl")
+holoMaterial(55, "models/debug/debugwhite")
+holoColor(55, vec(43,61,67))
+holoParent(55, entity())
+
+holoCreate(56, entity():toWorld(vec(0,-8.67,8.35)),vec(1.1),entity():toWorld(ang()))
+holoModel(56, "models/sprops/geometry/t_fdisc_12.mdl")
+holoMaterial(56, "models/debug/debugwhite")
+holoColor(56, vec(43,61,67))
+holoParent(56, entity())
+
+holoCreate(57, entity():toWorld(vec(0,8.67,10.75)),vec(1.1,0.83,1.1),entity():toWorld(ang(0,0,90)))
+holoModel(57, "models/sprops/rectangles_thin/size_1_5/rect_6x12x1_5.mdl")
+holoMaterial(57, "models/debug/debugwhite")
+holoColor(57, vec(43,61,67))
+holoParent(57, entity())
+
+holoCreate(58, entity():toWorld(vec(0,-8.67,10.75)),vec(1.1,0.83,1.1),entity():toWorld(ang(0,0,90)))
+holoModel(58, "models/sprops/rectangles_thin/size_1_5/rect_6x12x1_5.mdl")
+holoMaterial(58, "models/debug/debugwhite")
+holoColor(58, vec(43,61,67))
+holoParent(58, entity())
+
+holoCreate(59, entity():toWorld(vec(-5.79,0,10.75)),vec(1.4,0.83,1.1),entity():toWorld(ang(0,90,90)))
+holoModel(59, "models/sprops/rectangles_thin/size_1_5/rect_6x12x1_5.mdl")
+holoMaterial(59, "models/debug/debugwhite")
+holoColor(59, vec(43,61,67))
+holoParent(59, entity())
+
+holoCreate(60, entity():toWorld(vec(6,0,12.5)),vec(0.4,11,0.5),entity():toWorld(ang(0,180,180)))
+holoModel(60, "models/sprops/triangles_thin/right/size_0/t_rtri_3x3.mdl")
+holoMaterial(60, "models/debug/debugwhite")
+holoColor(60, vec(43,61,67))
+holoParent(60, entity())
+
+holoCreate(61, entity():toWorld(vec(5,8,3.3)),vec(1.2,1,1),entity():toWorld(ang(90,0,0)))
+holoModel(61, "models/sprops/rectangles_thin/size_0/rect_1_5x6x1_5.mdl")
+holoMaterial(61, "models/debug/debugwhite")
+holoColor(61, vec(43,61,67))
+holoParent(61, entity())
+
+holoCreate(62, entity():toWorld(vec(5,-8,3.3)),vec(1.2,1,1),entity():toWorld(ang(90,0,0)))
+holoModel(62, "models/sprops/rectangles_thin/size_0/rect_1_5x6x1_5.mdl")
+holoMaterial(62, "models/debug/debugwhite")
+holoColor(62, vec(43,61,67))
+holoParent(62, entity())
+
+holoCreate(63, entity():toWorld(vec(-5,8,3.3)),vec(1.2,1,1),entity():toWorld(ang(90,0,0)))
+holoModel(63, "models/sprops/rectangles_thin/size_0/rect_1_5x6x1_5.mdl")
+holoMaterial(63, "models/debug/debugwhite")
+holoColor(63, vec(43,61,67))
+holoParent(63, entity())
+
+holoCreate(64, entity():toWorld(vec(-5,-8,3.3)),vec(1.2,1,1),entity():toWorld(ang(90,0,0)))
+holoModel(64, "models/sprops/rectangles_thin/size_0/rect_1_5x6x1_5.mdl")
+holoMaterial(64, "models/debug/debugwhite")
+holoColor(64, vec(43,61,67))
+holoParent(64, entity())
+
+E = holoEntity(64)
+for(I=1,10){
+I2 = I+20
+I3 = I+30
+I4 = I+40
+holoCreate(I)
+holoCreate(I2)
+holoCreate(I3)
+holoCreate(I4)
+
+holoPos(I,holoEntity(11):pos()+vec(sinr(((2*pi())/10)*I)*5.8,0,cosr(((2*pi())/10)*I)*5.8))
+holoPos(I2,holoEntity(12):pos()+vec(sinr(((2*pi())/10)*I)*5.8,0,cosr(((2*pi())/10)*I)*5.8))
+holoPos(I3,holoEntity(13):pos()+vec(sinr(((2*pi())/10)*I)*5.8,0,cosr(((2*pi())/10)*I)*5.8))
+holoPos(I4,holoEntity(14):pos()+vec(sinr(((2*pi())/10)*I)*5.8,0,cosr(((2*pi())/10)*I)*5.8))
+
+holoScale(I, vec(0.2))
+holoScale(I2, vec(0.2))
+holoScale(I3, vec(0.2))
+holoScale(I4, vec(0.2))
+
+holoModel(I, "models/sprops/misc/alphanum/alphanum_"+(10-I):toString()+".mdl")
+holoModel(I2, "models/sprops/misc/alphanum/alphanum_"+(10-I):toString()+".mdl")
+holoModel(I3, "models/sprops/misc/alphanum/alphanum_"+(10-I):toString()+".mdl")
+holoModel(I4, "models/sprops/misc/alphanum/alphanum_"+(10-I):toString()+".mdl")
+
+holoMaterial(I, "models/debug/debugwhite")
+holoMaterial(I2, "models/debug/debugwhite")
+holoMaterial(I3, "models/debug/debugwhite")
+holoMaterial(I4, "models/debug/debugwhite")
+
+holoAng(I, ang(0,-90,-36*I)+ang(0,0,90))
+holoAng(I2, ang(0,-90,-36*I)+ang(0,0,90))
+holoAng(I3, ang(0,-90,-36*I)+ang(0,0,90))
+holoAng(I4, ang(0,-90,-36*I)+ang(0,0,90))
+
+holoParent(I, 11)
+holoParent(I2, 12)
+holoParent(I3, 13)
+holoParent(I4, 14)
+
+holoDisableShading(I,1)
+holoDisableShading(I2,1)
+holoDisableShading(I3,1)
+holoDisableShading(I4,1)}}
+
+if(!Int){
+if(changed(Button)&Button){
+Htm++}}
+Tm=Int ? Tm+0.05 : clamp(Tm+Val,0,Htm)
+Tm2=clamp(Tm2+Val,0,floor(Tm/10))
+Tm3=clamp(Tm3+Val,0,floor(Tm2/10))
+Tm4=clamp(Tm4+Val,0,floor(Tm3/10))
+
+if(changed(Tm)){
+holoAng(11,entity():toWorld(ang(90+Tm*36,0,90)))}
+if(changed(Tm2)){
+holoAng(12,entity():toWorld(ang(90+Tm2*36,0,90)))}
+if(changed(Tm3)){
+holoAng(13,entity():toWorld(ang(90+Tm3*36,0,90)))}
+if(changed(Tm4)){
+holoAng(14,entity():toWorld(ang(90+Tm4*36,0,90)))}

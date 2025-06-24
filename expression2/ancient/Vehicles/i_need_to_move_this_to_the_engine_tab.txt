@@ -1,0 +1,20 @@
+@name aeiou
+@inputs [Seat Crankshaft]:wirelink
+@outputs RPM Bearing P1 P2
+@persist [Crank Base]:entity RPM
+
+runOnTick(1)
+if(first()|dupefinished()){
+Crank = Crankshaft:entity()
+Base = entity():isWeldedTo()
+Crank:soundPlay(1,0,"acf_engines/v12_russian.wav")
+}
+T=2
+
+RPM = abs(Crank:angVel():yaw()/6)
+Bearing=Crank:bearing(Base:pos()+vec(24, 0, 15):rotate(Base:angles()))
+
+P1 = sin(Bearing)*T
+P2 = sin(Bearing + 180)*T
+
+soundPitch(1,abs(RPM)/6)

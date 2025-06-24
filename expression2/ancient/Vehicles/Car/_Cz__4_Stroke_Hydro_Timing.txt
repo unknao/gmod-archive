@@ -1,0 +1,23 @@
+@name _Cz_ 4 Stroke Hydro Timing
+@inputs GPS:vector Crank:entity W S
+@outputs Hyd1 Hyd2 Hyd3 Hyd4 Constant Damping RPM
+@persist MinLength MaxLength ConstantValue Rotation A B
+@trigger 
+interval(10)
+
+if(first()){
+    MinLength=0
+    MaxLength=10
+    ConstantValue=20000
+    Damping=10
+}
+
+if(W==1){A=MaxLength B=MinLength Constant=ConstantValue}
+if(S==1){A=MinLength B=MaxLength Constant=ConstantValue}
+if(W==0&S==0){A=MinLength B=MinLength Constant=0}
+
+RPM = round(abs(Crank:angVel():yaw()/6))
+Rotation=entity():bearing(GPS)
+
+if(Rotation>-180&Rotation<0){Hyd1=A Hyd2=B}else{Hyd1=B Hyd2=A}
+if(Rotation>-90&Rotation<90){Hyd3=B Hyd4=A}else{Hyd3=A Hyd4=B}

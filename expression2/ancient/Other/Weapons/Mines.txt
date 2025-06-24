@@ -1,0 +1,136 @@
+@name Mines
+@persist [T E]:entity Exp Fr Canexp FC Ready Vol
+interval(100)
+if(first()){
+entity():setAlpha(0)
+entity():propNotSolid(1)
+propSpawnUndo(0)
+findExcludeEntity(owner())
+Canexp = 0
+}
+if(!T){
+if(!first()){
+print(_HUD_PRINTCENTER,"Mine entity destroyed, rebuilding..")}
+findByModel("models/sprops/geometry/fdisc_24.mdl")
+findSortByDistance(owner():pos())
+if(find() & find():owner() == owner()){
+T = find()}
+else{
+T = propSpawn("models/sprops/geometry/fdisc_24.mdl", vec(),1)
+T:propNotSolid(1)
+T:setAlpha(0)
+T:setAng(ang(0,0,90))
+T:setMass(1000)
+timer("holla",1000)
+}}
+
+if(clk("holla")){
+holoCreate(1, T:toWorld(vec()), vec(2,2,0.3), T:toWorld(ang(0,0,90)))
+holoAlpha(1, 0)
+holoColor(1, vec(60))
+holoModel(1,"hq_cylinder")
+holoParent(1, T)
+
+holoCreate(2, T:toWorld(vec(0,0.5,0)), vec(1.7,1.7,0.3), T:toWorld(ang(0,0,90)))
+holoAlpha(2, 0)
+holoColor(2, vec(55))
+holoModel(2,"hq_cylinder")
+holoParent(2, T)
+
+holoCreate(3, T:toWorld(vec(0,1,0)), vec(1.4,1.4,0.3), T:toWorld(ang(0,0,90)))
+holoAlpha(3, 0)
+holoColor(3, vec(50))
+holoModel(3,"hq_cylinder")
+holoParent(3, T)
+
+holoCreate(4, T:toWorld(vec(0,1.5,0)), vec(1,1,0.3), T:toWorld(ang(0,0,90)))
+holoAlpha(4, 0)
+holoColor(4, vec(191,255,0))
+holoModel(4,"hq_icosphere")
+holoParent(4, T)
+
+timer("loop",1000)
+Ready = 1
+Deployed = 0
+}
+
+H = owner():keyPressed("MOUSE_MIDDLE")
+if(changed(H) & H & Ready){
+owner():soundPlay(1,0,"weapons/slam/throw.wav")
+soundVolume(1, 0.5)
+holoAlpha(1, 255)
+holoAlpha(2, 255)
+holoAlpha(3, 255)
+holoAlpha(4, 255)
+T:propFreeze(0)
+T:propNotSolid(0)
+T:setPos(owner():boxCenterW()+owner():eye()*50)
+T:applyForce(owner():eye()*400*T:mass()+owner():vel()*T:mass()/2)
+Exp = 0
+Ready = 0
+Deployed = 1
+timer("arm",1000)
+timer("reready",3000)
+}
+if(clk("arm")){
+Canexp = 1}
+
+if(clk("reready")){
+soundStop(1)
+Ready = 1}
+
+findInSphere(T:pos(),80)
+findIncludeClass("player")
+P = findClosest(T:pos())
+
+if(P & Canexp){
+if(!E){
+findByModel("models/props_phx/ww2bomb.mdl")
+findSortByDistance(owner():pos())
+if(find() & find():owner() == owner()){
+E = find()}
+else{
+E = propSpawn("models/props_phx/ww2bomb.mdl", T:pos()-vec(5,0,0),1)
+E:propNotSolid(1)
+E:setAlpha(0)
+E:setAng(ang(90,0,0))
+}}
+E:propBreak()
+Canexp = 0
+Exp = 1}
+if(changed(Exp) & Exp){
+holoAlpha(1, 0)
+holoAlpha(2, 0)
+holoAlpha(3, 0)
+holoAlpha(4, 0)
+T:propFreeze(1)
+T:setPos(vec())
+T:setAng(ang(0,0,90))
+T:propNotSolid(1)
+print(_HUD_PRINTCENTER,"Tripped...")
+Vol = 0}
+
+if(changed(Deployed) & Deployed){
+Vol = 0.1}
+
+if(T:vel():length()==0){
+F = 1}else{F = 0}
+if(changed(F) & F){
+T:propFreeze(1)
+T:setAng(ang(0,0,90))
+}
+
+
+if(clk("loop")){
+holoDisableShading(4, 1)
+T:soundPlay(2,0,"hl1/fvox/boop.wav")
+soundVolume(2, Vol)
+holoColor(4, vec(191,255,0))
+soundPitch(2, 70)
+timer("loopback",1000)}
+if(clk("loopback")){
+soundStop(2)
+holoDisableShading(4, 0)
+holoColor(4, vec(119,146,0))
+timer("loop",1000)}
+

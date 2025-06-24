@@ -1,0 +1,86 @@
+@name Hypersonic cannon + Ballistics v2
+@strict
+@trigger none
+
+#include "includes/lib/ballistics"
+rangerPersist(1)
+rangerFilter(owner())
+
+const Projectile_Model = "models/props_phx/misc/potato_launcher_explosive.mdl"   
+const ShootVel = 4000
+const Interval = 1
+let Firekey = 0
+let Is_Capturing = 0
+let NextFire = 0
+
+event keyPressed(Ply:entity, _:string, Down:number, Keybind:string){
+    if(Ply != owner()){ exit() }
+    
+    if(Keybind == "walk"){ 
+        Firekey = Down
+        
+        if(Down){
+            if(timerExists("fireloop")){ exit() }
+        
+            if(NextFire < curtime()){
+                NextFire = curtime() + Interval
+                
+                Is_Capturing = 1
+                concmd("gm_spawn " + Projectile_Model)
+            }
+            timer("fireloop", Interval, 0, function(){
+                if(!Firekey){ stoptimer("fireloop") return }
+                
+                Is_Capturing = 1
+                concmd("gm_spawn " + Projectile_Model)
+            })
+        }else{
+            stoptimer("fireloop")
+        }
+    }  
+}
+
+event entityCreated(E:entity){
+    if(!Is_Capturing){ exit() }
+    if(!E:isValid()){ exit() }
+    if(E:owner() != owner()){ exit() }
+    if(E:model() != Projectile_Model){ exit() }
+    
+    
+    let Pos = owner():shootPos() + owner():eye() * 100 + randvec(-2, 2) + owner():eyeAngles():up() * 15
+    rangerFilter(E)
+    let Ranger = rangerOffset(32767, Pos, owner():eye())
+    
+    let Vel = calculateTrajectory(Pos, ShootVel, Ranger:position(), gravity())
+    if(!Vel){
+        E:propDelete()
+        exit()
+    }
+    
+    E:setPos(Pos)
+    E:setAng(Vel:toAngle() + ang(90, 0, 0))
+    E:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+    E:propDrag(0)
+    E:propSetVelocity(Vel)
+    if(trailsLeft()){
+        E:setTrails(40, 0, 2, "trails/physbeam", vec(255), 255)
+    }
+    E:emitSound("Weapon_ELITE.Single")
+    trackCollision(E, function(E:entity, _:entity, _:collision){
+        if(!E:isValid()){ return }
+        if(E["curtime", number] == curtime()){ return }
+        
+        E["curtime", number] = curtime()
+        E:propBreak()
+    })
+
+    if(!timerExists("capturewindow")){
+        timer("capturewindow", 0.5, function(){
+            Is_Capturing = 0
+        })
+    }
+    else{
+        timerRestart("capturewindow")
+    }
+}
+

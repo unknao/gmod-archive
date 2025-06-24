@@ -1,0 +1,39 @@
+@name Swiper
+@persist S:entity Tog 
+interval(20)
+if(first()){
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia())
+}
+propSpawnUndo(0)
+}
+
+
+if(!S){
+findByModel("models/sprops/misc/tubes/size_84/q_tube_84x96.mdl")
+findSortByDistance(owner():pos())
+if(find() & find():owner() == owner()){
+S = find()
+}else{
+
+S = propSpawn("models/sprops/misc/tubes/size_84/q_tube_84x96.mdl",owner():pos()+vec(0,200,40),0)
+S:setMass(50000)
+S:setMaterial("models/debug/debugwhite")
+S:setColor(vec(119,146,0))
+}}
+Mouse2 = owner():keyAttack2()
+if(changed(Mouse2) & Mouse2){
+Tog = !Tog}
+if(Tog){
+S:propNotSolid(0)}
+else{
+S:propNotSolid(1)}
+if(changed(!Tog) & Tog){
+print(_HUD_PRINTCENTER,"Enabled")}
+if(changed(Tog) & !Tog){
+print(_HUD_PRINTCENTER,"Disabled")}
+Vec = ((owner():boxCenterW()+vec(sinr(curtime()*10)*150,cosr(curtime()*10)*150,30)-S:pos())-S:vel()/10)*S:mass()
+S:applyForce($Vec*15+Vec)
+S:faceAng(((owner():boxCenterW()-S:pos()):toAngle())+ang(-15,-90,90),12)
+

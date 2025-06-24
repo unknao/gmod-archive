@@ -1,0 +1,57 @@
+@name Constraint Buddy V2
+@strict
+@trigger none
+
+printColor(vec(100, 255, 100), "Constraint Buddy V2 by unknao, press use on the E2 to get started.")
+
+#6 Ballsocket lock
+let Modes = table(
+    1 = "6 Ballsocket Lock",
+    2 = "Rope Slider"
+)
+let Ballsocket_Settings = table(
+    "Mins" = array(
+        vec(-180, -0.01, -0.01),
+        vec(-180, -180, -0.01),
+        vec(-180, -0.01, -180),
+        vec(-180, 0.01, 0.01),
+        vec(-180, -180, 0.01),
+        vec(-180, 0.01, -180)
+    ),
+    "Maxs" = array(
+        vec(180, 0.01, 0.01),
+        vec(180, 180, 0.01),
+        vec(180, 0.01, 180),
+        vec(180, -0.01, -0.01),
+        vec(180, 180, -0.01),
+        vec(180, -0.01, 180)
+    )
+)
+#Rope slider
+let Enabled = 0, let E1 = noentity(), let E2 = noentity()
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player != owner()){ exit() }
+    if(!Down){ exit() }
+    
+    if(Player:aimEntity() == entity()){
+        switch(KeyBind){
+            case "use",
+                Enabled = !Enabled 
+                printColor(Enabled ? vec(100, 255, 100) : vec(255, 100, 100), "Constraint Buddy V2 " + (Enabled ? "Enabled." : "Disabled."))
+            break
+            case "walk",
+                
+            break
+        }
+    }elseif(Enabled){
+        switch(KeyBind){
+            case "use",
+            break
+            case "reload",
+            break
+        }
+    }
+    
+    #print(KeyBind)
+}

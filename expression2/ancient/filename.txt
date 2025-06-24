@@ -1,0 +1,12 @@
+@persist A:array V Val
+runOnTick(1)
+V++
+if(first()){
+findIncludePlayerProps(owner())}
+findByModel("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl")
+A=findToArray()
+foreach(I,E:entity=A){
+Val=(360/A:count()*I)+V
+E:propSetVelocity(((entity():pos()+vec(sin(Val)*10*A:count()*2,cos(Val)*10*A:count()*2,80))-E:pos())*E:mass())
+
+}

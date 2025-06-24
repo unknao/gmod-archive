@@ -1,0 +1,17 @@
+@name DRM
+@strict
+
+#Experimental anti stealing e2
+if(!getExtensionStatus("remoteupload")){
+    if(owner():steamID() != "STEAM_0:1:33890317"){
+        print("False owner detected! Microwaving E2.")
+        selfDestruct()
+    }
+}
+#ifdef e:remoteSetCode(s)
+    if(owner():steamID() != "STEAM_0:1:33890317"){
+        print("False owner detected! Microwaving E2.")
+        entity():remoteSetCode("")
+        exit()
+    }
+#endif

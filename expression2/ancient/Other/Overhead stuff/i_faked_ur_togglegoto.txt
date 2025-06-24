@@ -1,0 +1,14 @@
+@name i faked ur togglegoto
+@persist P:entity
+interval(100)
+if(first()){
+entity():setAlpha(0)
+P=findPlayerByName("galaxy")
+holoCreate(1, P:toWorld(vec(0,0,100)), vec(1), P:toWorld(ang(0,0,0)))
+holoAlpha(1, 0)
+}
+holoPos(1, P:boxCenterW())
+Up = owner():keyPressed("up")
+if(changed(Up) & Up){
+concmd("aowl goto _"+holoEntity(1):id())
+}

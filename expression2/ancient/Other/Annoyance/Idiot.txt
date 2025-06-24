@@ -1,0 +1,14 @@
+@name Idiot
+@persist [P E2]:entity
+@model models/beer/wiremod/gate_e2_nano.mdl
+
+if(first()){
+P = findPlayerByName("*****456")
+E2 = entity()
+E2:propNotSolid(1)
+holoCreate(1)
+holoEntity(1):propDraw(0)
+}
+interval(100)
+holoPos(1,P:pos()+vec(0,0,75))
+holoEntity(1):streamStart(1,"http://puu.sh/on0lZ.mp3",100)

@@ -1,0 +1,134 @@
+@name Weapon Library
+@persist [E M T R P Aim]:entity [Vec Vec2]:vector Switch I ID Lock Mouse2 Bricks:array
+runOnChat(1)
+if(first()){
+holoCreate(1)
+holoAlpha(1, 0)
+entity():setAlpha(0)
+entity():propNotSolid(1)
+propSpawnUndo(0)
+Switch = 0
+
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia())
+}
+}
+
+Said = owner():lastSaid():explode(" ")
+if(Said[1,string] == "!brick" & chatClk(owner())){
+hideChat(1)
+Switch = 1
+timer("deletion",500)
+}
+
+if(Said[1,string] == "!comp" & chatClk(owner())){
+hideChat(1)
+Switch = 2}
+
+if(Said[1,string] == "!missile" & chatClk(owner())){
+hideChat(1)
+Switch = 3
+timer("deletion",500)}
+
+if(Said[1,string] == "!none" & chatClk(owner())){
+hideChat(1)
+Switch = 0
+timer("deletion",500)}
+
+if(Switch == 1){
+#Bricker
+interval(250)
+if(owner():keyAttack2())
+{
+E = propSpawn("models/props_junk/CinderBlock01a.mdl",owner():pos()+owner():eye()*30+vec(0,0,72),0) 
+E:setMass(50000)
+E:propGravity(0)
+E:setAng(owner():eyeAngles())
+E:applyForce(owner():eye()*5000000000000000)
+
+ID = E:id()
+
+
+timer("1"+ID,1.5*1000)
+
+findIncludePlayerProps(owner())
+findByModel("models/props_junk/CinderBlock01a.mdl")
+Bricks = findToArray()
+}
+
+for(I = 1,Bricks:count())
+{
+D = (Bricks)[I,entity]
+
+if(clk("1"+ID) | !D:pos():isInWorld()) 
+{
+D:propDelete()
+findIncludePlayerProps(owner())
+findByModel("models/props_junk/CinderBlock01a.mdl")
+Bricks = findToArray()}}}
+
+
+if(Switch == 2){
+#Computer Error 
+interval(20)
+if(!M){
+M = propSpawn("models/props_lab/monitor01a.mdl",owner():pos()+vec(0,0,100)+owner():right()*50,0) 
+M:setMass(50000)
+M:propGravity(0)
+}
+
+if(owner():keyAttack2()){
+Vec = ((owner():aimPos()+(M:forward()*100)-M:pos())-M:vel()/10)*M:mass()
+if(M:pos():distance(owner():pos())<100){
+M:propNotSolid(1)
+}else{
+M:propNotSolid(0)
+}
+}else{
+Vec = ((owner():pos()+vec(0,0,100)+owner():right()*50-M:pos())-M:vel()/10)*M:mass()
+M:propNotSolid(1)
+}
+M:applyForce(Vec + $Vec*5)
+M:faceAng(owner():eyeAngles(),12)
+} 
+if(clk("deletion")){
+M:propDelete()
+R:propDelete()}
+
+if(Switch == 3){
+#Lock on missiles
+interval(100)
+Mouse2 = owner():keyAttack2()
+Aim = owner():aimEntity()
+
+if(changed(Mouse2) & Mouse2 & Aim:type()=="player"){
+Lock = !Lock}
+
+if(changed(!Lock) & Lock){
+print(_HUD_PRINTCENTER,"Locked on: "+Aim:name())
+holoPos(1, Aim:boxCenterW())
+holoParent(1, Aim)
+}
+if(changed(Lock) & !Lock){
+print(_HUD_PRINTCENTER,"Lock broken")
+holoUnparent(1)
+holoPos(1, entity():pos())
+R:propDelete()
+}
+if(Lock & changed(Mouse2) & Mouse2){
+Lock = 0}
+if(Lock){
+if(!R){
+R = propSpawn("models/props_phx/ww2bomb.mdl",owner():pos()+vec(0,0,125),0)
+R:setAng(ang(0,0,0))
+R:propGravity(0)
+}
+
+if(R:pos():distance(holoEntity(1):pos())<128){
+R:propBreak()}
+
+R:applyForce(R:forward()*120000-(R:vel()*0.8-R:up()*5)*R:mass())
+R:faceAng((holoEntity(1):pos()-R:pos()):toAngle(),12)
+}
+}

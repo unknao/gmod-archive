@@ -1,0 +1,148 @@
+@name mini ture
+@persist P:entity Cld [Spawned A]:array Rc S:array Ctrl Ranger:ranger M1 [Vec1 Vec2]:angle V TargetStr:string Pos:vector
+
+interval(10)
+runOnChat(1)
+
+if(first()){
+propSpawnUndo(0)
+holoCreate(1, entity():toWorld(vec(0,0,-2)),vec(1),entity():toWorld(ang()))
+holoModel(1, "models/props_trainstation/trainstation_ornament002.mdl")
+holoParent(1, entity())
+
+holoCreate(2, entity():toWorld(vec(0,0,14)),vec(0.5),entity():toWorld(ang()))
+holoAlpha(2,0)
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(10,0,0)),vec(0.5,0.5,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(3, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(3, "models/props_pipes/guttermetal01a.mdl")
+holoColor(3, vec(100))
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(2):toWorld(vec(10,3,2)),vec(0.7,0.7,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(4, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(4, "models/props_pipes/guttermetal01a.mdl")
+holoColor(4, vec(150))
+holoParent(4, 3)
+
+holoCreate(5, holoEntity(2):toWorld(vec(10,3,-2)),vec(0.7,0.7,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(5, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(5, "models/props_pipes/guttermetal01a.mdl")
+holoColor(5, vec(150))
+holoParent(5, 3)
+
+holoCreate(6, holoEntity(2):toWorld(vec(10,-3,2)),vec(0.7,0.7,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(6, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(6, "models/props_pipes/guttermetal01a.mdl")
+holoColor(6, vec(150))
+holoParent(6, 3)
+
+holoCreate(7, holoEntity(2):toWorld(vec(10,-3,-2)),vec(0.7,0.7,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(7, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(7, "models/props_pipes/guttermetal01a.mdl")
+holoColor(7, vec(150))
+holoParent(7, 3)
+
+holoCreate(8, holoEntity(2):toWorld(vec(10,0,3.5)),vec(0.7,0.7,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(8, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(8, "models/props_pipes/guttermetal01a.mdl")
+holoColor(8, vec(150))
+holoParent(8, 3)
+
+holoCreate(9, holoEntity(2):toWorld(vec(10,0,-3.5)),vec(0.7,0.7,1),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(9, "models/sprops/cylinders/size_3/cylinder_6x18.mdl")
+holoMaterial(9, "models/props_pipes/guttermetal01a.mdl")
+holoColor(9, vec(150))
+holoParent(9, 3)
+
+holoCreate(10, holoEntity(2):toWorld(vec(18,0,0)),vec(1,1,0.25),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(10, "hq_tube_thin")
+holoMaterial(10, "models/props_pipes/guttermetal01a.mdl")
+holoColor(10, vec(100))
+holoParent(10, 3)
+
+holoCreate(11, holoEntity(2):toWorld(vec(11,0,0)),vec(1,1,0.3),holoEntity(2):toWorld(ang(90,0,0)))
+holoModel(11, "hq_tube_thin")
+holoMaterial(11, "models/props_pipes/guttermetal01a.mdl")
+holoColor(11, vec(100))
+holoParent(11, 3)
+Cld=1
+Ctrl=1
+}
+
+if(chatClk(owner())){
+S = lastSaid():explode(" ")
+if(S[1,string]=="!mnl"){Ctrl=2
+hideChat(1)
+P=noentity()}
+
+if(S[1,string]=="!tg"){Ctrl=1
+TargetStr = S[2,string]
+hideChat(1)
+}}
+
+if(Ctrl==1){
+
+Vec1=((P:boxCenterW()-holoEntity(1):pos()):toAngle()):setPitch(0)
+Vec2=(P:boxCenterW()-holoEntity(2):pos()):toAngle()
+Ranger = rangerOffset(99999999999,holoEntity(2):pos(),holoEntity(2):forward())
+
+if(findCanQuery() & !P & TargetStr:length()){
+P=findPlayerByName(TargetStr)
+TargetStr = ""}}
+
+if(Ctrl==2){
+
+Vec1=((owner():aimPos()-holoEntity(1):pos()):toAngle()):setPitch(0)
+Vec2=(owner():aimPos()-holoEntity(2):pos()):toAngle()
+M1 = owner():keyAttack1()}
+
+holoAng(1, Vec1)
+holoAng(2, Vec2)
+
+
+if(changed(Rc)){
+holoPos(3, holoEntity(2):toWorld(vec(10,0,0)))}
+
+if(Ranger:entity()==P | M1){
+F=1
+if(Cld){
+entity():soundPlay(1,0,"buttons/latchunlocked2.wav")
+concmd("gm_spawn models/sprops/misc/domes/size_0/dome_3x6.mdl")
+Pos = holoEntity(3):pos()+holoEntity(3):up()*10
+Cld=0
+timer("rdy",100)}}else{F=0}
+if(clk("rdy")){Cld=1}
+
+findByModel("models/sprops/misc/domes/size_0/dome_3x6.mdl")
+findIncludePlayerProps(owner())
+A = findToArray()
+
+if(F){
+holoAng(3, holoEntity(3):toWorld(ang(0,20,0)))}
+
+foreach(I,T:entity=A)
+{
+if(Spawned[T:id(),entity] != T & Pos:isInWorld())
+{
+T:setPos(Pos)
+T:setAng(holoEntity(3):angles())
+T:propDrag(0)
+T:propGravity(0)
+T:applyForce(holoEntity(3):up()*3000*T:mass()+randvec(-50,50)*T:mass())
+T:setMass(1000)
+T:setMaterial("models/shiny")
+T:setColor(vec(114,103,0))
+
+Spawned[T:id(),entity] = T
+}
+if(T:vel():length() < 2000)
+{
+T:propDelete()
+}
+}
+
+
+
+

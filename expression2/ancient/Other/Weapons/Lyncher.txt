@@ -1,0 +1,109 @@
+@name Lyncher
+@persist Hold Ready E:entity C
+interval(100)
+if(first()){
+entity():setAlpha(0)
+entity():propNotSolid(1)
+
+holoCreate(1)
+holoScale(1, vec(0.5))
+holoColor(1, vec(100,0,0))
+holoAlpha(1, 0)
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(0.5,-1,0.5)), vec(0.1,0.1,0.5), holoEntity(1):toWorld(ang(30,0,0)))
+holoMaterial(2, "models/props_pipes/GutterMetal01a")
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(5,0,9)), vec(1.5,0.5,0.5), holoEntity(1):toWorld(ang(-20,0,0)))
+holoMaterial(3, "models/props_pipes/pipeset_metal")
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(3):toWorld(vec(-4.9,0,1.5)), vec(0.15), holoEntity(3):toWorld(ang(0,90,0)))
+holoModel(4, "models/props_borealis/mooring_cleat01.mdl")
+holoParent(4, 2)
+
+holoCreate(5, holoEntity(3):toWorld(vec(11.3,0,0)), vec(0.35,0.35,0.15), holoEntity(3):toWorld(ang(90,0,0)))
+holoModel(5, "models/props_junk/TrafficCone001a.mdl")
+holoParent(5, 2)
+
+holoCreate(6, holoEntity(3):toWorld(vec(3,0,1)), vec(0.5), holoEntity(3):toWorld(ang(0,90,0)))
+holoModel(6, "models/Items/car_battery01.mdl")
+holoParent(6, 2)
+
+holoCreate(7, holoEntity(3):toWorld(vec(7,2.5,0)), vec(0.125), holoEntity(3):toWorld(ang(-90,0,0)))
+holoModel(7, "models/props_c17/canister_propane01a.mdl")
+holoParent(7, 2)
+
+holoCreate(8, holoEntity(3):toWorld(vec(-5,3,0)), vec(0.5), holoEntity(3):toWorld(ang(0,90,0)))
+holoModel(8, "models/props_borealis/door_wheel001a.mdl")
+holoParent(8, 2)
+
+holoCreate(9, holoEntity(3):toWorld(vec(-4.5,-1,-1)), vec(0.2), holoEntity(3):toWorld(ang(-50,90,0)))
+holoModel(9, "models/props_c17/metalladder002b.mdl")
+holoParent(9, 2)
+
+holoCreate(10, holoEntity(3):toWorld(vec(4.5,-3.1,0)), vec(0.225), holoEntity(3):toWorld(ang(0,180,0)))
+holoModel(10, "models/props_c17/streetsign001c.mdl")
+holoParent(10, 2)
+
+holoCreate(11, holoEntity(3):toWorld(vec(3.5,-2.5,-2.5)), vec(0.2), holoEntity(3):toWorld(ang(90,0,0)))
+holoModel(11, "models/props_lab/tpplugholder_single.mdl")
+holoParent(11, 2)
+
+Ready = 1
+}
+
+if(owner():weapon():type() == "weapon_ar2"){
+Hold = 1
+}else{
+Hold = 0}
+
+if(changed(!Hold) & Hold){
+timer("equip",1)
+holoUnparent(1)
+owner():weapon():setAlpha(0)
+}
+if(changed(Hold) & !Hold){
+timer("unequip",1)
+holoUnparent(1)
+owner():weapon():setAlpha(255)
+}
+if(clk("equip")){
+holoPos(1, owner():attachmentPos("anim_attachment_rh"))
+holoAng(1, owner():attachmentAng("anim_attachment_rh"))
+holoParentAttachment(1, owner(), "anim_attachment_rh")
+holoPos(2, holoEntity(1):toWorld(vec(0.5,-1,0.5)))
+holoAng(2, holoEntity(1):toWorld(ang(30,0,0)))}
+if(clk("unequip")){
+holoPos(1, owner():attachmentPos("chest"))
+holoAng(1, owner():attachmentAng("chest"))
+holoParentAttachment(1, owner(), "chest")
+holoPos(2, holoEntity(1):toWorld(vec(-9,-5,5)))
+holoAng(2, holoEntity(1):toWorld(ang(110,90,0)))}
+
+if(owner():keyAttack1() & Hold & Ready){
+E = propSpawn("models/sprops/misc/cones/size_0/cone_3x6.mdl", holoEntity(5):pos()-holoEntity(5):up()*40,0)
+E:setMass(50000)
+E:setMaterial("models/shiny")
+E:setColor(vec(30))
+E:setTrails(10,1,1,"trails/laser",vec(200),150)
+E:setAng(owner():eyeAngles()+ang(90,0,0))
+E:applyForce((((owner():aimPos()-E:pos())-E:vel()*0.1)*E:mass())*5000)
+Ready =0
+timer("lets wait",5000)
+}
+if(!Ready){
+C = C+2
+
+holoAng(8, holoEntity(3):toWorld(ang(0,90,C)))}
+
+if(clk("lets wait")){
+Ready = 1}
+if(changed(Ready) & !Ready){
+holoEntity(3):soundPlay(1,1,"weapons/widow_maker_shot_01.wav")}
+if(changed(!Ready) & Ready){
+holoEntity(3):soundPlay(2,2,"weapons/widow_maker_pump_action_back.wav")
+E:propDelete()
+soundStop(1)}
+

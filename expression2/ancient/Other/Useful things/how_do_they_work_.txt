@@ -1,0 +1,46 @@
+@name how do they work? 
+@persist E:entity Magnet M:entity A:array
+interval(20)
+if(first()){
+findIncludePlayerProps(owner())   
+propSpawnUndo(0)
+findExcludeEntity(entity())
+findExcludeEntity(owner())}
+
+if(!E){
+findByModel("models/Mechanics/gears/gear16x6.mdl")
+findSortByDistance(entity():pos())
+if(find() & find():owner() == owner()){
+E = find()
+}else{
+E = propSpawn("models/Mechanics/gears/gear16x6.mdl", entity():pos()+vec(0,0,20),0)
+}
+}
+
+K = owner():keyPressed("k")
+if(changed(K) & K){
+Magnet = !Magnet}
+
+
+findByClass("prop_physics")
+findExcludeModel("models/Mechanics/gears/gear16x6.mdl")
+A = findToArray()
+
+if(Magnet){
+for(I=1,A:count()){
+
+M = A:entity(I)
+S = M:isWeldedTo()
+
+if(M:pos():distance(E:pos())<25 & !S){
+weld(E,M)}
+
+if(M:pos():distance(E:pos())<50 &!S){
+M:applyForce((E:pos()-M:pos())*E:mass())
+}}}
+
+if(!Magnet){
+for(I=1,M:getConstraints():count()){
+Con = M:getConstraints()[I,entity]
+Con:constraintBreak()}}  
+

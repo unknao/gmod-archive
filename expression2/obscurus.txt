@@ -1,0 +1,74 @@
+@name obscurus
+@trigger none
+@strict
+
+Rings = array()
+ActiveRings = array()
+for(I = 1, 10){
+    let E = holoCreate(I)
+    holoModel(I, "hq_torus_thin")
+    holoDisableShading(I, 1)
+    Rings:pushEntity(E)
+}  
+
+propSpawnUndo(0)
+Projectile = noentity()
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Projectile:isValid()){ exit() }
+    if(Player != owner()){ exit() }
+    if(KeyBind != "reload"){ exit() }
+    if(!Down){ exit() }
+    if(!propCanCreate()){ exit() }
+    
+    Projectile = propSpawn("models/hunter/blocks/cube025x025x025.mdl", owner():shootPos(), ang(), 0)
+    Projectile:setCollisionGroup(_COLLISION_GROUP_PASSABLE_DOOR)
+    Projectile:setMass(50)
+    Projectile:propSetVelocity(owner():eye() * 1000)
+    let I = 1
+    
+    timer("projectile_rings", 0.2, 0, function(){
+        if(!Projectile:isValid()){ 
+            stoptimer("projectile_rings")
+            return
+        }
+        let Ent = Rings[I, entity]
+        Ent["TTL", number] = curtime() + 1
+        holoAng(I, Projectile:vel():toAngle() + ang(90, 0, 0))
+        holoPos(I, Projectile:pos())
+        
+        ActiveRings:pushEntity(Ent)
+        
+        I = (I % 10) + 1
+    })
+    
+    trackCollision(Projectile, function(E:entity, _:entity, XCD:collision){
+        if(!E:isValid()){ return }
+        if(E["Collide", number]){ return }
+        E["Collide", number] = 1
+        
+        E:setMass(50000)
+        E:propSetVelocity(XCD:ourOldVelocity():normalized() * 4000)
+        
+        timer(tickInterval() * 2, function(){
+            if(!E:isValid()){ return }
+            E:propBreak()
+        })
+    })
+}
+
+event tick(){
+    if(!ActiveRings:count()){ exit() }
+    
+    foreach(I:number, E:entity = ActiveRings){
+        let N = holoIndex(E)
+        let Scaler = max(E["TTL", number] - curtime(), 0)
+        
+        holoScale(N, vec(1 - Scaler, 1 - Scaler, 0) * 20)
+        holoAlpha(N, Scaler * 255)
+        
+        if(E["TTL", number] < curtime()){
+            ActiveRings:remove(I)
+        }
+    }
+}
+

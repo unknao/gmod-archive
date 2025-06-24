@@ -1,0 +1,68 @@
+@name Holo Self building box
+@persist A C
+interval(10)
+if(first()){
+holoCreate(1, entity():toWorld(vec(0,0,25)), vec(1,1,0.0125), entity():toWorld(ang()))
+holoColor(1, randvec(0,255))
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(6,0,0)), vec(0.1), entity():toWorld(ang()))
+holoAlpha(2, 0)
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(6,0,0)), vec(1,1,0.0125), entity():toWorld(ang()))
+holoColor(3, randvec(0,255))
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(3):toWorld(vec(6,0,0)), vec(0.1), entity():toWorld(ang()))
+holoAlpha(4, 0)
+holoParent(4, 3)
+
+holoCreate(5, holoEntity(4):toWorld(vec(6,0,0)), vec(1,1,0.0125), entity():toWorld(ang()))
+holoColor(5, randvec(0,255))
+holoParent(5, 4)
+
+holoCreate(6, holoEntity(1):toWorld(vec(-6,0,0)), vec(0.1), entity():toWorld(ang()))
+holoAlpha(6, 0)
+holoParent(6, 1)
+
+holoCreate(7, holoEntity(6):toWorld(vec(-6,0,0)), vec(1,1,0.0125), entity():toWorld(ang()))
+holoColor(7, randvec(0,255))
+holoParent(7, 6)
+
+holoCreate(8, holoEntity(1):toWorld(vec(0,6,0)), vec(0.1), entity():toWorld(ang()))
+holoAlpha(8, 0)
+holoParent(8, 1)
+
+holoCreate(9, holoEntity(8):toWorld(vec(0,6,0)), vec(1,1,0.0125), entity():toWorld(ang()))
+holoColor(9, randvec(0,255))
+holoParent(9, 8)
+
+holoCreate(10, holoEntity(1):toWorld(vec(0,-6,0)), vec(0.1), entity():toWorld(ang()))
+holoAlpha(10, 0)
+holoParent(10, 1)
+
+holoCreate(11, holoEntity(10):toWorld(vec(0,-6,0)), vec(1,1,0.0125), entity():toWorld(ang()))
+holoColor(11, randvec(0,255))
+holoParent(11, 10)
+
+A = 0
+
+timer("assemble",1500)
+}
+if(clk("assemble")){
+A = 1}
+
+if(A){
+C = clamp(C,0,89)+1
+
+holoAng(2, holoEntity(1):toWorld(ang(-C,0,0)))
+holoAng(4, holoEntity(3):toWorld(ang(-C,0,0)))
+holoAng(6, holoEntity(1):toWorld(ang(C,0,0)))
+holoAng(8, holoEntity(1):toWorld(ang(0,0,C)))
+holoAng(10, holoEntity(1):toWorld(ang(0,0,-C)))
+
+timer("stop",4000)
+}
+if(clk("stop")){
+A = 0}

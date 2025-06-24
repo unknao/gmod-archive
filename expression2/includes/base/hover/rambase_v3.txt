@@ -1,0 +1,158 @@
+@name Ram Base V3
+@inputs W A S D Space Shift Duck Alt Noclip R Base:entity Active Cam:wirelink
+@outputs On AngVel:vector
+@strict
+#[
+    Ram Base V2 by unknao
+    A pure flight base very good for ramming things
+    Controls:
+        WASD - Movement,
+        Space/Duck - Ascend/Descend relative to the camera
+        Shift - Boost/Slow depending on Shift_Mul,
+        Camera - Turning,
+        Walk - Toggle camera turning,
+        Noclip - Toggle nonsolid state,
+        R - Toggle between on and off,
+]#
+
+#include "includes/lib/vector"
+#include "includes/util/misc"
+
+##Adjustables
+#Directions
+Dir_Forward = vec(0, 1, 0)
+Dir_Right = vec(0, 0, 1)
+Dir_Up = vec(1, 0, 0)
+    
+#Speed modifiers
+Movement_Speed = 100
+Shift_Mul = -0.6
+Base_Drag = 0.05
+    
+#Angles
+PD_Angle = vec2(400, 20)
+Base_Ang_Drag = 0.5
+    
+#Lean
+Lean_Coef = 0.2
+Lean_Max = 45
+Lean_Vel_Coef = 0.00075
+    
+RamBase_Sound_Funcs = table(
+    "OnOff" = function(Num:number){
+        Base:emitSound(Num ? ")buttons/button19.wav" : ")buttons/button18.wav")
+        Base:emitSound(Num ? ")npc/roller/remote_yes.wav" : ")npc/roller/code2.wav")
+        if(Num){
+            Base:soundPlay("Active1", 0, "^ambient/levels/citadel/portal_beam_loop1.wav")
+            soundPitch("Active1", 70)
+            soundPitch("Active1", 80, 0.3)
+            soundVolume("Active1", 0)
+            soundVolume("Active1", 0.3, 0.3)  
+                      
+            Base:soundPlay("Active2", 0, "^ambient/levels/citadel/citadel_drone_loop1.wav")
+            soundPitch("Active2", 50)
+            soundVolume("Active2", 0)
+        }else{
+            Base:emitSound("^ambient/energy/spark4.wav")
+            soundVolume("Active1", 0, 1)
+            soundPitch("Active1", 70, 1) 
+                       
+            soundVolume("Active2", 0, 1)
+            soundPitch("Active2", 50, 1)
+        }
+    },
+    "OnLoop" = function(Num:number){
+        soundPitch("Active1", 80 + Num * 0.04, 0.3)
+        soundVolume("Active1", 0.3 + Num * 0.0008, 0.3)        
+        
+        soundPitch("Active2", 50 + Num * 0.06, 0.3)
+        soundVolume("Active2", Num * 0.013 - 0.2, 0.3)
+    },  
+    "ToggleSolidity" = function(Num:number){
+        Base:emitSound(Num ? ")buttons/blip1.wav" : ")buttons/combine_button1.wav")
+        Base:emitSound(Num ? ")weapons/stunstick/alyx_stunner1.wav" : ")npc/combine_gunship/attack_start2.wav")
+    },     
+    "ToggleSteering" = function(Num:number){
+        Base:emitSound(")weapons/ar2/ar2_empty.wav", 100, 70 + Num * 20)
+    }
+)
+##Danger zone starts here
+On = 0, Mouse_Tracking = 1, Point_To = vec(), Sprint = 1, Not_Solid = 0, Lean_Current = 0
+
+event input(In:string) {
+    if(In == "R" & R){
+        On = !On
+        Base:propGravity(!On)
+        RamBase_Sound_Funcs["OnOff", function](On)
+    }elseif(In == "Alt" & Alt){
+        Mouse_Tracking = !Mouse_Tracking
+        RamBase_Sound_Funcs["ToggleSteering", function](Mouse_Tracking)
+    }elseif(In == "Shift"){
+        Sprint = 1 + Shift * Shift_Mul
+    }elseif(In == "Noclip" & Noclip){
+        Not_Solid = !Not_Solid
+        foreach(_:number, E:entity = Base:getConnectedEntities()){  
+            if(E:isPlayer()){ continue }
+            if(E:owner() != owner()){ continue }
+            if(!E:isValidPhysics()){ continue }
+            
+            E:propNotSolid(Not_Solid)
+        }
+        RamBase_Sound_Funcs["ToggleSolidity", function](Not_Solid)
+    }
+}
+if(->Base){
+    Mass = Base:mass()
+    Inertia = Base:inertia()
+    if(->Cam){
+        Cam["FilterEntities", array] = Base:getConnectedEntities()
+    }
+}
+
+if(->Cam){
+    Cam["Distance", number] = 200
+    Cam["Position", vector] = vec(25, 0, 0)
+}
+
+event tick(){
+    AngVel = Base:angVelVector()
+    if(On){
+        Speed = Base:vel():length()
+        if(Mouse_Tracking & Active){
+            let CamAng = Cam["CamAng", angle]
+            let CamDir = Cam["CamDir", vector]
+            
+            Dir_Movement = (CamDir * (W - S) #Translate movement inputs into a normal vector
+             + CamAng:right() * (D - A)
+             + CamAng:up()* (Space - Duck)):normalized()
+            
+            local Base_Forward = Base:toWorldAxis(Dir_Forward)
+            local Base_Up = Base:toWorldAxis(Dir_Up)
+            local D_Point_To = Point_To
+            
+            local Vel = min(Speed * Lean_Vel_Coef, 1)
+            local Vel_Right = (Base:velL() * Dir_Right):collapse() * 0.1
+            local Lean_Target = clamp(((-AngVel * Dir_Up):collapse() - Vel_Right) * Lean_Coef * Vel * TickAdjust, -Lean_Max, Lean_Max)
+            Lean_Current += (Lean_Target - Lean_Current) * 0.15 * TickAdjust
+            local Cam_Up_Composite = Cam["CamAng", angle]:up():rotateAroundAxis(Base_Forward, Lean_Current)
+            
+            Point_To = Base:toLocalAxis(Base_Forward:cross(Cam["CamDir", vector]) + Base_Up:cross(Cam_Up_Composite)) * PD_Angle:x()
+            D_Point_To = Point_To - D_Point_To
+            Base:applyTorque(((Point_To + D_Point_To * PD_Angle:y()) * (Mouse_Tracking & Active) - Base:angVelVector() * Base_Ang_Drag) * Inertia * TickAdjust)
+        }else{
+            Dir_Movement = Base:toWorldAxis(Dir_Forward * (W - S) + Dir_Right * (A - D) + Dir_Up * (Space - Duck)):normalized()
+            Base:applyTorque((-Base:angVelVector() * Base_Ang_Drag) * Inertia * TickAdjust)
+        }
+        
+        Base:applyForce((Dir_Movement * Movement_Speed * Sprint - Base:vel() * Base_Drag) * Mass * TickAdjust)
+        RamBase_Sound_Funcs["OnLoop", function](Speed)
+    }   
+}
+event removed(Reset:number) {
+    if(!Reset){ exit() }
+    Base:propGravity(1)
+    foreach(_:number, E:entity = Base:getConnectedEntities()){  
+        if(E:isPlayer()){ continue }
+        E:propNotSolid(0)
+    }
+}

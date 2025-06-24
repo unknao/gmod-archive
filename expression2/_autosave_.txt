@@ -1,53 +1,20 @@
-@name Garland Saber
+@name holos
 @inputs 
 @outputs 
-@persist A:array Num Ready
-@trigger 
+@persist 
 @strict
-if(first()){
-    propSpawnUndo(0)
-    enableConstraintUndo(0)
-    Num = 20
-    A = array() 
+for(I = 0, 9){
+    holoCreate(I + 1, entity():toWorld(vec(13 * I, 0, 0)))
     
-}
-
-if(A:count() < Num){
-    if(propCanCreate()){
-        E = propSpawn("models/hunter/blocks/cube025x025x025.mdl", entity():pos(), ang(), 1)
-        E:setMass(5000)
-        E:setCollisionGroup(_COLLISION_GROUP_PASSABLE_DOOR)
-        E:propDrag(0)
-        E:setMaterial("engine/singlecolor")
-        A:pushEntity(E)
-        E:setPos(entity():pos() + vec(0, 0, 20 * A:count()))
-        E:setColor(hsv2rgb(145 * A:count(), 1, 1))
-        if(A[A:count() - 1, entity]){
-            rope(E:id(), E, vec(), A[A:count() - 1, entity], vec(), -(2^16), 10, "cable/rope", 1, vec()) 
-        }
-    }
-    interval(100)
-}else{
-    rangerFilter(owner())
-    rangerFilter(A)
-    rangerPersist(1)
-    Ready = 1
-}
-event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
-    if(Player == owner() & KeyBind == "reload" & Ready){
-        foreach(I:number, E:entity = A){
-            if(I == 1 | I == A:count()){ continue }
-            E:propFreeze(!Down)   
-            if(Down){
-                E:setPos(owner():shootPos() + owner():eye() * 20 * I)
-            }
-        }
-    }
-}
-
-event tick(){
-    if(owner():keyReload() & Ready){
-        A[1, entity]:setPos(owner():shootPos() + owner():eye() * 100)
-        A[A:count(), entity]:setPos(rangerOffset(32767, owner():shootPos(), owner():eye()):position())
+    if(1){
+        let II = I + 1
+        timer(0, 0, function(){
+            holoAlpha(II, (curtime() * 50 + II * 25.5) % 255) 
+            
+            let TargetPos = entity(6):attachmentPos("anim_attachment_head") + vec(0, 0, 20 + 13 * (II * 1))
+            holoPos(II, holoEntity(II):pos() - (holoEntity(II):pos() - TargetPos) * remap(II, 0, 10, 0.25, 0.025))
+            
+            #Number=remap(number value,number in_min,number in_max,number out_min,number out_max)
+        })
     }
 }

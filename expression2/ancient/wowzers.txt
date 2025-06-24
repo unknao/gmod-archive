@@ -1,0 +1,24 @@
+@name wowzers
+@persist C A:array Vec:vector
+@model models/sprops/geometry/sphere_72.mdl
+runOnTick(1)
+if(first()){
+entity():propDraw(0)
+C=1}
+if(C<=60){
+holoCreate(C,entity():toWorld(vec()),vec(-C*0.1))
+holoModel(C,"hq_sphere")
+holoDisableShading(C,1)
+Vec=hsv2rgb(300,1,0.0015*C)
+holoColor(C,Vec)
+A:pushVector(Vec)
+holoParent(C,entity())
+C++
+}else{
+S = A[1,vector]
+S = A:shiftVector()
+A:pushVector(S)
+for(I=1,60){
+holoColor(I,A[I,vector])
+}
+}

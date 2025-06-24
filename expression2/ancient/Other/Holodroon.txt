@@ -1,0 +1,58 @@
+@name Holodroon
+@persist P:entity FW BW Left Right SPR
+interval(20)
+P = entity():isWeldedTo()
+Driver = P:driver()
+if(first()){
+holoCreate(1)
+holoModel(1, "hq_rcube_thick")
+holoAng(1, ang(0))
+holoPos(1, P:pos()+vec(-25,-25,5))
+cameraCreate(1, holoEntity(1):toWorld(vec(-50,0,25)), holoEntity(1):toWorld(ang(0,0,0)), 0)
+cameraParent(1, holoEntity(1))
+}
+if(P:driver()!=owner()){
+P:ejectPod()}
+
+if(Driver){
+W = Driver:keyForward()
+A = Driver:keyLeft()
+S = Driver:keyBack()
+D = Driver:keyRight()
+Sprint = Driver:keySprint()
+if(W){
+FW = clamp(FW,0,4.8)+0.2
+}else{
+FW = clamp(FW,0.2,5)-0.2}
+
+if(S){
+BW = clamp(BW,0,4.8)+0.2
+}else{
+BW = clamp(BW,0.2,5)-0.2}
+
+if(A){
+Left = clamp(Left,0,4.8)+0.2
+}else{
+Left = clamp(Left,0.2,5)-0.2
+}
+
+if(D){
+Right = clamp(Right,0,4.8)+0.2
+}else{
+Right = clamp(Right,0.2,5)-0.2
+}
+
+if(Sprint){
+SPR = 5
+}else{
+SPR = 1}
+
+H = holoEntity(1)
+holoPos(1,H:pos()+(H:right()*((Right-Left)*SPR))+H:forward()*((FW-BW)*SPR))
+
+holoAng(1, Driver:eyeAngles():setRoll(0))
+
+
+cameraToggle(1,1)}
+else{
+cameraToggle(1, 0)}

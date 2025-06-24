@@ -1,0 +1,284 @@
+@name Hoverbase V5.5 public release
+@inputs W A S D Space Shift R Base:entity
+@outputs HoverActive HoverSlowOn PIDOutput VelForward VelTurn Hover_HitNormal_Avg:vector
+@strict
+#[
+    Hovercraft base version 5.5 by unknao
+    Made to be #include'able and pain free to tune
+    Note: whether you include this file into another e2 or use it as is, don't forget to add @trigger none to have it work properly.
+
+    Setup: 
+        Spawn your preferred hovercraft base prop and wire "Base" to it,
+        Wire everything else to a Pod Controller,
+        Tune the "DIR_" variables until it drives and hovers in the directions desired,
+        Finetune your RANGER_OFFSETS according to your base prop (i don't recommend going with less than 4 offsets generally or else terrain adjusting will be more erratic),
+        Edit everything else in the editable constants range to your liking,
+        
+    Controls:
+        WASD - Movement,
+        R - Toggle between on and off,
+        Shift - Boost/Slow depending on SPRINT_MUL,
+        Space - Jump
+]#
+
+BASE_MASS = Base:mass()
+BASE_INERTIA = Base:inertia()
+   
+##If #include'ing, copy all these things from here if you intend to change it
+#Keep in mind that if you don't want to change something you dont have to copy it 
+
+## EDITABLE CONSTANTS START ##
+HOVER_DEBUG = 0 #If non-zero, the chip will spawn holograms and place them at ranger endpoints
+
+#PID for hovering
+PID = vec(0.5, 0, 2)
+PID_MIN = -BASE_MASS
+PID_MAX = BASE_MASS
+    
+#Hovering distance off the floor
+HOVER_TARGET = 45
+HOVER_TRACE_LENGTH = HOVER_TARGET + 10 
+    
+#Directions
+DIR_FORWARD = vec(1, 0, 0)
+DIR_RIGHT = vec(0, 1, 0)
+DIR_UP = vec(0, 0, 1)
+    
+RANGER_OFFSETS = array( #Where the rangers originate from local to the Base entity
+    vec(0, 0, 1.5),
+    vec(-42, 24, 1.5),
+    vec(42, -24, 1.5),
+    vec(-42, -24, 1.5),
+    vec(42, 24, 1.5)
+)
+RANGER_HULLSIZE = 4 
+LOOK_AHEAD_MUL = 0.2 #How far ahead do the rangers look ahead for terrain
+    
+#Angle control
+ANGLE_PD = vec2(1200, 15) #Upright strength & damping
+TURN_SPEED_MUL = 150 #turn strength
+BASE_ANGULAR_DRAG = 0.5
+    
+#Throttle
+WS_MUL = 60 #Main speed multiplier
+REVERSE_SPEED_MUL = 0.8 #How fast can it go in reverse compared to when going forwards?
+BASE_DRAG = 0.05 
+SPRINT_MUL = -0.5 #Speed multiplier when the player is sprinting, 0 - nothing, positive - increases speed, negative - decreases speed
+    
+#Jump
+JUMP_IMPULSE_MUL = 500 #Set this to 0 to disable jumping
+JUMP_COOLDOWN = 5
+    
+#Lean
+LEAN_MAX = 15 #How many degrees can it lean
+LEAN_ANGVEL_COEF = 0.05 #Coefficient for leaning based on angular velocity
+LEAN_VEL_COEF = 0.015 #Coefficient for leaning based on velocity
+    
+#Slow enable speed coefficient
+HOVER_ACTIVATE_SPEED = 0.02 #Determines the speed of changing states (range 0-1)
+
+#Sound functions
+HOVER_CALLBACKS = table(
+    "OnOff" = function(On:number) {
+        Base:soundPlay("Toggle1", 0, On ? "buttons/button18.wav" : "buttons/button16.wav")   
+        Base:soundPlay("Toggle2", 0, On ? "ambient/machines/thumper_startup1.wav" : "ambient/machines/thumper_shutdown1.wav")  
+        soundPitch("Toggle2", 170)
+        
+        if(On){
+            Base:soundPlay("Engine1", 0, "vehicles/apc/apc_idle1.wav")
+            soundVolume("Engine1", 0.4)
+            soundPitch("Engine1", 30)        
+            
+            Base:soundPlay("Engine2", 0, "Phx.Afterburner1")
+            soundVolume("Engine2", 0.4)
+            soundPitch("Engine2", 70)        
+            
+            Base:soundPlay("Engine3", 0, "ambient/atmosphere/indoor1.wav")
+            soundVolume("Engine3", 0.4)
+            soundPitch("Engine3", 70)
+        }else{
+            soundPitch("Engine1", 30, 0.5)
+            soundStop("Engine1", 0.5)        
+            
+            soundPitch("Engine2", 70, 0.5)
+            soundStop("Engine2", 0.5)        
+            
+            soundPitch("Engine3", 70, 0.5)
+            soundStop("Engine3", 0.5)
+        }
+    },
+    "Jump" = function() {
+        Base:emitSound("weapons/airboat/airboat_gun_energy2.wav", 100)
+        Base:soundPlay("JumpCooldown", 0, "ambient/machines/thumper_amb.wav")
+        soundVolume("JumpCooldown", 0.1)
+        soundPitch("JumpCooldown", 30)
+        soundVolume("JumpCooldown", 1, JUMP_COOLDOWN)
+        soundPitch("JumpCooldown", 120, JUMP_COOLDOWN)
+        effect():setOrigin(Base:pos()):setScale(100):setEntity(Base):play("ThumperDust")
+    },
+    "JumpReady" = function() {
+        soundVolume("JumpCooldown", 0, 0.1)
+        Base:emitSound("buttons/blip1.wav")
+    },
+    "OnLoop" = function(Speed:number, Throttle:number){
+        soundVolume("Engine1", 0.4 + Throttle * 0.4)
+        soundVolume("Engine2", 0.4 + Throttle * 0.4)
+        soundVolume("Engine3", 0.4 + Throttle * 0.4)
+        
+        soundPitch("Engine1", 30 + abs(Speed) * 0.06, 0.3)
+        soundPitch("Engine2", 70 + abs(Speed) * 0.08, 0.3)    
+        soundPitch("Engine3", 70 + abs(Speed) * 0.05, 0.3)
+    }
+)
+
+## EDITABLE CONSTANTS END ##
+
+TICK_ADJUST = 66 * _TICKINTERVAL
+UP_XYZ = 0
+FORWARD_XYZ = 0
+RANGER_OFFSETS_COUNT = 0
+
+Hover_PID_Error = 0
+Hover_PID_Integral = 0
+HoverActive = 0
+HoverSlowOn = 0
+Hover_Can_Jump = 1
+Hover_HitNormal_Avg = _VECTOR_ORIGIN
+Angle_Cross = _VECTOR_ORIGIN
+AD = 0
+WS = 0
+VelForward = 0
+
+rangerPersist(1)
+rangerHitWater(1)
+rangerFilter(Base:getConnectedEntities())
+rangerFilter(players())
+
+event entityCreated(Ent:entity) { #Don't hit players or npcs with the traces
+    if(!Ent:isValid()){ exit() }
+    if(Ent:isNPC() | Ent:isPlayer()){ rangerFilter(Ent) }
+}
+
+timer("HoverbasePostFirst", 0, 1, function(){
+    RANGER_OFFSETS_COUNT = RANGER_OFFSETS:count()
+    if(HOVER_DEBUG){
+        for(I = 1, RANGER_OFFSETS_COUNT){
+            holoCreate(500 + I)
+            holoParent(500 + I, Base)
+            holoScaleUnits(500 + I, vec(1) * RANGER_HULLSIZE)
+            print("Entity[" + entity():id() + "] Hoverbase v5.5 Debug mode: Active.")
+        }
+    }
+    
+    for(I = 1, 3) { #Obtain which of the 3 vector directions have non-zero numbers automagically
+        if(!UP_XYZ & DIR_UP[I]) { UP_XYZ = I}
+        if(!FORWARD_XYZ & DIR_FORWARD[I]) { FORWARD_XYZ = I}
+    }
+    
+    BASE_ANGULAR_DRAG = BASE_ANGULAR_DRAG * TICK_ADJUST
+    TURN_SPEED_MUL = TURN_SPEED_MUL * TICK_ADJUST  
+    BASE_MASS = Base:mass()
+    BASE_INERTIA = Base:inertia()
+})
+
+#Controls
+event input(Input:string) {    
+    if(Input == "W" | Input == "S" | Input == "Shift") {
+        WS = max(W - S, -REVERSE_SPEED_MUL) * WS_MUL * (1 + Shift * SPRINT_MUL)
+    }
+    elseif(Input == "A" | Input == "D") {
+        AD = (A - D)
+    }
+    elseif(Input == "R" & R) {
+        HoverActive = !HoverActive
+        HOVER_CALLBACKS["OnOff", function](HoverActive)
+    }
+    elseif(Input == "Space" & Space & Hover_HitNormal_Avg & HoverActive & Hover_Can_Jump & JUMP_IMPULSE_MUL){
+        
+        Base:propSetVelocity(Base:vel() + Base:toLocalAxis(DIR_UP) * JUMP_IMPULSE_MUL)
+        Hover_Can_Jump = 0
+        HOVER_CALLBACKS["Jump", function]()
+        timer("Hover_Jump_Cooldown", JUMP_COOLDOWN, function() { 
+            Hover_Can_Jump = 1 
+            HOVER_CALLBACKS["JumpReady", function]()
+        })
+    }
+}
+
+D_Hitnorm = _VECTOR_ORIGIN
+event tick() {
+    if(!Base:isValid()) { exit() }
+    
+    HoverSlowOn = clamp(HoverSlowOn - (1 - 2 * HoverActive) * HOVER_ACTIVATE_SPEED * TICK_ADJUST, 0, 1)
+    if(HoverSlowOn) {
+        let Angvel = Base:angVelVector()
+        let Dist_Avg = 0
+        let VelL = Base:velL() * LOOK_AHEAD_MUL
+        let VelL_Composite = VelL - DIR_UP * clamp(VelL[UP_XYZ], -20, 20) #Without this the reading on the up axis is erroneus
+        let Base_Forward = Base:toWorldAxis(DIR_FORWARD)
+        let Base_Up = Base:toWorldAxis(DIR_UP)
+        VelForward = VelL_Composite[FORWARD_XYZ]
+        VelTurn = Angvel[UP_XYZ]
+        
+        if(HoverActive){
+            HOVER_CALLBACKS["OnLoop", function](abs(VelForward), abs(WS))
+        }
+        
+        Hover_HitNormal_Avg = _VECTOR_ORIGIN
+        Lean_Angle = clamp(VelTurn * LEAN_ANGVEL_COEF * VelForward * LEAN_VEL_COEF, -LEAN_MAX, LEAN_MAX)
+        let Target_Hypo = sqrt(HOVER_TARGET ^ 2 + VelL_Composite:length() ^ 2)
+        
+        foreach(I:number, V:vector = RANGER_OFFSETS) {
+            let Ranger = rangerOffsetHull(Base:toWorld(V), Base:toWorld(V + VelL_Composite) - Base_Up:rotateAroundAxis(Base_Forward, -Lean_Angle) * HOVER_TRACE_LENGTH, vec(RANGER_HULLSIZE))
+            if(HOVER_DEBUG){
+                holoPos(500 + I, Ranger:position())
+            }
+            Dist_Avg += Ranger:hitSky() ? Target_Hypo : Ranger:distance()
+            #If the ranger hit the sky, default to a last "good" ranger trace
+            #Doing this prevents uncontrollable climbing when the lookahead hits the skybox
+            if(!Ranger:hit() | Ranger:hitSky()){ continue }
+                
+            let Ranger_Result = Ranger:hitNormal()
+            let Dot = Base_Up:dot(Ranger_Result)
+            if(Ranger_Result & Dot < 0.2) { #If the angle between hitnormal & the base up vector is too great, default to vec(0, 0, 1) or last valid vector
+                Hover_HitNormal_Avg += D_Hitnorm ?: _VECTOR_UP
+                Dist_Avg -= Ranger:distance() - Target_Hypo * 1.1 #Use the full ranger distance + a little extra (this prevents ascent when grinding on walls sideways, or should)
+                continue
+            }
+            #D_Distance = Ranger:distance()
+            let Result = Ranger_Result ?: _VECTOR_UP
+            Hover_HitNormal_Avg += Result
+            D_Hitnorm = Result
+        }   
+        Dist_Avg /= RANGER_OFFSETS_COUNT
+        Hover_HitNormal_Avg /= RANGER_OFFSETS_COUNT 
+        
+        if(Hover_HitNormal_Avg) {
+            Hover_HitNormal_Avg = Hover_HitNormal_Avg:rotateAroundAxis(Base_Forward, Lean_Angle)
+            let HitNormal_Norm = Hover_HitNormal_Avg:normalized()
+            
+            #Hover
+            let D_Error = Hover_PID_Error
+            
+            Hover_PID_Error = Target_Hypo - Dist_Avg
+            D_Error = Hover_PID_Error - D_Error
+            
+            Hover_PID_Integral = clamp(Hover_PID_Integral + Hover_PID_Error * PID:y(), PID_MIN, PID_MAX)
+            PIDOutput = clamp(Hover_PID_Error * PID:x() + Hover_PID_Integral + D_Error * PID:z(), PID_MIN, PID_MAX)
+            let Forward_Composite = Base:toWorldAxis(DIR_RIGHT):cross(HitNormal_Norm)
+            
+            Base:applyForce((((Hover_HitNormal_Avg * PIDOutput + Forward_Composite * WS * TICK_ADJUST) - Base:vel() * BASE_DRAG * TICK_ADJUST) - propGravity() * _TICKINTERVAL + Hover_HitNormal_Avg) * BASE_MASS * HoverSlowOn)
+            
+            #Angle
+            let D_Cross = Angle_Cross
+            Angle_Cross = Base_Up:cross(Hover_HitNormal_Avg) * ANGLE_PD:x()
+            D_Cross = (Angle_Cross - D_Cross) * ANGLE_PD:y()
+            
+            Base:applyTorque((Base:toLocalAxis(Angle_Cross + D_Cross + HitNormal_Norm * AD * TURN_SPEED_MUL) - Angvel * BASE_ANGULAR_DRAG) * BASE_INERTIA * HoverSlowOn)
+        }
+        else{
+            D_Hitnorm = _VECTOR_ORIGIN
+            Base:applyTorque((DIR_UP * AD * TURN_SPEED_MUL - Angvel * BASE_ANGULAR_DRAG * 0.5) * BASE_INERTIA * HoverSlowOn * TICK_ADJUST)
+        }
+    }
+}

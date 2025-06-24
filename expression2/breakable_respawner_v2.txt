@@ -1,0 +1,42 @@
+@name Breakable Respawner V2
+@strict
+
+const QueuedForRespawn = table()
+
+event entityRemoved(E:entity) {
+    if(!E:isValid()){ exit() }
+    if(E:getClass() != "prop_physics"){ exit() }
+    if(E:owner() != owner()){ exit() }
+    if(E:maxHealth() <= 1){ exit() }
+    
+    let Data = array(E:model(), E:pos(), E:angles(), E:isFrozen(), E:getColor4(), E:getMaterial())
+    timer(3, function(){
+        QueuedForRespawn:pushArray(Data)
+    })
+}
+
+event tick(){
+    if(!QueuedForRespawn:count()){ exit() }
+    if(!propCanCreate()){ exit() }
+    
+    foreach(I:number, A:array = QueuedForRespawn){
+        if(!propCanCreate()){ break }
+        
+        let E = propSpawn(A[1, string], A[2, vector], A[3, angle], A[4, number])
+        if(!E:isValid()){ continue }
+        E:setColor(vec4(255))     
+        E:setMaterial("models/alyx/emptool_glow")
+        E:emitSound("items/spawn_item.wav") 
+        QueuedForRespawn:remove(I)  
+        if(1){
+            let AA = A
+            let EE = E
+            timer(0.5, function(){
+                if(!EE:isValid()){ return }
+                
+                EE:setColor(AA[5, vector4])
+                EE:setMaterial(AA[6, string])
+            })
+        }
+    }
+}

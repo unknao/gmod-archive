@@ -1,0 +1,120 @@
+@name cam V1
+@inputs Cam:wirelink Base:entity Duck #[Input for switching camera modes.]# FlirInput
+@outputs CC_Inc
+@strict
+
+#Cam Controller controller V1 by unknao, now with fancy mode!
+#Usage: use the camUpdateConfig() function to set up your camera parameters in the same format as the example, this only needs to be done once.
+#If fancy mode is enabled, the camera will attempt to lag behind and shake at higher speeds (configurable via CAM_LAG_MUL, CAM_SHAKE_MUL and CAM_SHAKE_MAX)
+#If included in a seperate file, copy everything up until the "don't copy" line to the master file.
+
+#MAKE SURE TO HAVE '@trigger none' IN YOUR MASTER FILE!!!!
+CC_Inc = 1
+CamConfig = table()
+CamSlice = table()
+CAM_CALLBACKS = table()
+
+HoloCam = holoCreate(10001, vec(), vec(), ang(), vec4())
+Cam["Parent", entity] = holoEntity(10001)
+
+function camUpdate(N:number){
+    CamSlice = CamConfig[N, table]
+    
+    
+    Cam["Position", vector] = CamSlice["Position", vector]
+    Cam["Distance", number] = CamSlice["Distance", number]
+    Cam["MaxDistance", number] = CamSlice["MaxDistance", number]
+        
+    if(CamSlice["Parent", entity] != holoEntity(10001):parent()){
+        holoUnparent(10001)
+        holoParent(10001, CamSlice["Parent", entity])
+    }
+    holoLocalPos(10001, vec())
+    holoLocalAng(10001, ang())
+    
+    CAM_CALLBACKS["Switch", function](CC_Inc)
+}
+
+function camUpdateConfig(Tbl:table){
+    CamConfig = Tbl
+    CC_Inc = 1
+    camUpdate(CC_Inc)
+}
+
+###Copyable variables start here
+
+CAM_LAG_MUL = 0.02
+CAM_SHAKE_MUL = 0.03
+CAM_SHAKE_MAX = 1
+CAM_CALLBACKS = table(
+    "Switch" = function(_:number){},
+    
+    "FLIR" = function(N:number){
+        Base:emitSound(N ? "buttons/button1.wav" : "buttons/button18.wav")
+    }
+)
+
+camUpdateConfig( #Example camera parameters
+    table(
+        table(
+            "Position" = vec(),
+            "Distance" = 100,
+            "MaxDistance" = 0,
+            "Parent" = Base,
+            "Fancy" = 0
+        ),    
+        table(
+            "Position" = vec(0, 0, 50),
+            "Distance" = 100,
+            "MaxDistance" = 100,
+            "Parent" = Base,
+            "Fancy" = 0
+        ),    
+        table(
+            "Position" = vec(0, 0, 0),
+            "Distance" = 0,
+            "MaxDistance" = 1000,
+            "Parent" = Base,
+            "Fancy" = 1
+        ),    
+        table(
+            "Position" = vec(0, 0, 150),
+            "Distance" = 0,
+            "MaxDistance" = 0,
+            "Parent" = Base,
+            "Fancy" = 0
+        ) 
+    )
+)
+
+###Don't copy from this point on
+
+if(->Cam & ->Base){
+    Cam["FilterEntities", array] = Base:getConnectedEntities()
+}
+
+CamFlir = 0
+
+event input(InputName:string) {
+    
+    if(InputName == "Duck" & Duck){
+        CC_Inc = (CC_Inc % CamConfig:count()) + 1
+        
+        camUpdate(CC_Inc)
+    }
+    
+    elseif(InputName == "FlirInput" & FlirInput){
+        CamFlir = !CamFlir
+        Cam["FLIR", number] = CamFlir
+        CAM_CALLBACKS["FLIR", function](CamFlir)
+    }
+}
+
+event tick(){
+    if(!HoloCam){ exit() }
+    if(!CamSlice["Fancy", number]){ exit() }
+    
+    let Vel = Base:velL()
+    let Shake = clamp(Vel:length() * CAM_SHAKE_MUL, -CAM_SHAKE_MAX, CAM_SHAKE_MAX)
+    holoLocalPos(10001, -Vel * CAM_LAG_MUL + randvec(vec(-Shake), vec(Shake)))
+}

@@ -1,54 +1,68 @@
 @name Hypersonic plank gun
-@inputs 
-@outputs 
-@persist Shoot Projectile:string ShootVel
-@trigger 
+@strict
+@trigger none
 
-if(first()){
-    Projectile = "models/props_phx/construct/wood/wood_boardx1.mdl"   
-    ShootVel = 4000
-        
-}
+Projectile = "models/props_lab/blastdoor001c.mdl"   
+ShootVel = 4000
+      
 event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
-    if(Player == owner()){
-        if(KeyBind == "reload"){
-            Shoot = Down
-            if(Shoot){
-                interval(10)
-            }
-        }
-    }   
+    if(Player != owner()){ exit() }
+    if(KeyBind != "walk"){ exit() }
+    
+    if(Down){
+        timer("FireLoop", 0.05, 0, function(){
+            concmd("gm_spawn " + Projectile)
+        })
+    }else{
+        stoptimer("FireLoop")
+    }
 }
 
-if(Shoot & clk("interval")){
-    interval(10)
-    concmd("gm_spawn " + Projectile)
-}
-
+let TempArray = array()
 event entityCreated(E:entity) {
-    if(E:owner() == owner() & E:model() == Projectile){
-        local Pos = owner():shootPos()
-        E:setPos(Pos)
-        E:setMass(1000)
+    if(!E:isValid()){ exit() }
+    if(E:owner() != owner()){ exit() }
+    if(E:model() != Projectile){ exit() }
+    
+    let Pos = owner():shootPos()
+    E:setPos(Pos)
+    E:setMass(10000)
+    E:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+    E:propDrag(0)
+    
+    let Vel = (owner():eye() + randvec(-0.06, 0.06)):normalized()
+    E:setAng(Vel:toAngle())
+    E:propSetVelocity(Vel * ShootVel)
+    
+    E:emitSound("Weapon_ELITE.Single", 80, random(75,85))
+    
+    #Timer conservatism, because it's really easy to max out the timer limit if every prop had their own individual timers
+    TempArray:pushEntity(E)
+    if(TempArray:count() >= 10){
+        stoptimer("Stragglers")
+        let A = TempArray
+        TempArray = array()
         
-        E:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
-        
-        E:propDrag(0)
-        local Vel = (owner():eye() + randvec(-0.06, 0.06)):normalized()
-        
-        E:setAng(Vel:toAngle())
-        E:propSetVelocity(Vel * ShootVel)
-        E:emitSound("Weapon_ELITE.Single")
-        
-        soundPitch(E:id(), random(50, 60))
-        timer(toString(E:id()), 5000)
-    }   
+        timer(5, function() {
+            foreach(_:number, E:entity = A) {
+                if(!E:isValid()){ continue }
+                
+                E:propBreak()
+            }
+        })
+    }else{
+        if(timerExists("Stragglers")) { 
+            timerRestart("Stragglers") 
+            exit()
+        }
+        timer("Stragglers", 5, 1, function() {
+            foreach(_:number, E:entity = TempArray) {
+                if(!E:isValid()){ continue }
+                
+                E:propBreak()
+            }
+            TempArray = array()
+        })
+    } 
 }
 
-ID = clkName():toNumber()
-
-if(ID){
-    if(entity(ID):isValid() & entity(ID):owner() == owner()){
-        entity(ID):propBreak() 
-    }  
-}

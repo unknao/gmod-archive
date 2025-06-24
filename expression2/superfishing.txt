@@ -1,0 +1,127 @@
+@name Superfishing
+@outputs Fire
+@strict
+@trigger none
+
+propSpawnUndo(0)
+function entity:setupTurret(){
+    This:propDraw(0)
+    This:parentTo(holoCreate(1, entity():toWorld(vec(0, 0, 200)), vec(1), ang(), vec(255), "models/airboatgun.mdl"))
+    holoParent(1, entity())
+    This:setLocalAng(ang())
+    This:setLocalPos(-This:toLocal(This:attachmentPos("muzzle")))
+    This:createWire(entity(), "Fire", "Fire")
+    
+    let WL = This:wirelink()
+    WL["Force", number] = 0
+    WL["Damage", number] = 200
+    WL["Spread", number] = 0
+    WL["NumBullets", number] = 5
+    WL["Delay", number] = 0.5
+    WL["Tracer", string] = "ToolTracer"
+    WL["Sound", string] = "^ambient/energy/ion_cannon_shot1.wav"
+}
+
+
+T = sentSpawn("gmod_wire_turret", vec(), ang(), 1, table( "Model" = "models/weapons/w_smg_mp5.mdl"))
+T:setupTurret()
+
+rangerFilter(T)
+rangerPersist(1)
+
+const Seagulls = table()
+Hook = noentity()
+event entityCreated(Entity:entity) {
+    if(!Entity:isValid()){ exit() }
+    
+    if(Entity:getClass() == "fishing_mod_seagull"){
+        Seagulls[Entity:id():toString(), entity] = Entity
+        exit()
+    }
+    if(Entity:owner() != owner()){ exit() }
+    if(Entity:getClass() == "prop_ragdoll" & Entity:model() == "models/seagull.mdl"){
+        Entity:ragdollFreeze(1)
+        Entity:ragdollSetPos(entity():pos())
+        timer(0, function(){ 
+            Entity:parentTo(entity()) 
+        })
+        exit()
+    }
+    
+    if(Entity:getClass() == "fishing_rod_hook"){
+        Hook = Entity
+        hint("Fishing rod hook found, Superfishing: activated", 3)
+        exit()
+    }
+    if(!Hook:isValid()){ exit() }
+    if(!owner():canTool(Entity, "")){ exit() }
+    
+    let Connected = noentity()
+    foreach(_:number, E:entity = Entity:getConnectedEntities()){
+        if(E != Hook){ continue }
+            
+        Connected = Hook
+        break
+    }
+    if(Connected){
+        owner():emitSound("buttons/bell1.wav")
+        Entity:constraintBreak()
+        
+        if(Entity:getClass():find("fishing_mod_catch")){
+            if(Entity:isRagdoll()){
+                Entity:ragdollFreeze(1)
+                Entity:ragdollSetPos(entity():toWorld(vec(50, 0, 0)))
+                timer(0, function(){ 
+                    Entity:parentTo(entity()) 
+                })
+            }else{
+                Entity:propFreeze(1)
+                Entity:parentTo(entity()) 
+                Entity:setLocalPos(vec(50, 0, 0))
+            }
+        }else{
+            
+            if(Entity:isRagdoll()){
+                Entity:ragdollFreeze(1)
+                Entity:ragdollSetPos(entity():toWorld(vec(-50, 0, 0)))
+                timer(0, function(){ 
+                    Entity:parentTo(entity()) 
+                })
+            }else{
+                Entity:propMakeBreakable(0)
+                Entity:propFreeze(1)
+                Entity:parentTo(entity()) 
+                Entity:setLocalPos(vec(-50, 0, 0))
+            }
+        }
+    }
+
+}
+event entityRemoved(Entity:entity) {
+    if(!Entity:isValid()){ exit() }
+    if(Entity:getClass() != "fishing_mod_seagull"){ exit() }
+    
+    Seagulls:remove(Entity:id():toString())
+}
+
+Seagull = noentity()
+event tick(){
+    if(!T){ exit() }
+
+    Seagull = noentity()
+    foreach(_:string, E:entity = Seagulls){
+        let Ranger = rangerOffset(T:attachmentPos("muzzle"), E:boxCenterW() + E:vel() * _TICKINTERVAL)
+        if(Ranger:entity() == E | Ranger:fraction() == 1){
+            Seagull = E
+            Fire = 1
+            break
+        }
+    }
+    if(!Seagull){ 
+        Fire = 0 
+        exit()
+    }
+    holoAng(1, (Seagull:boxCenterW() - holoEntity(1):pos()):toAngle())
+}
+
+

@@ -1,0 +1,31 @@
+@name tests/holo_handdowns
+@inputs 
+@outputs Cycles
+@persist 
+@strict
+
+propSpawnUndo(0)
+E = propSpawn("models/props_c17/oildrum001.mdl", entity():pos(), ang(), 1)
+holoCreate(1)
+holoParent(1, entity())
+holoCreate(2)
+holoParent(2, entity())
+
+Cycles = floor(curtime() * 80 / 360), D_Cycles = Cycles
+
+event tick(){
+    D_Cycles = Cycles
+    let Time = curtime() * 80
+    Cycles = floor(Time / 360)
+    
+    if(D_Cycles != Cycles){
+        E:deparent()
+        E:parentTo(holoEntity(1 + Cycles % 2))
+        E:setLocalPos(vec())
+        E:setLocalAng(ang())
+    }
+    holoPos(1, entity():toWorld(vec(0, -50 + cos(Time) * 50, 50)))
+    holoAng(1, entity():toWorld(ang(-50 + cos(Time) * 50, 0, 0)))
+    holoPos(2, entity():toWorld(vec(0, 50 - cos(Time) * 50, 50)))
+    holoAng(2, entity():toWorld(ang(50 - cos(Time) * 50, 0, 0)))
+}

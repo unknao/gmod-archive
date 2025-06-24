@@ -1,0 +1,69 @@
+@name Present man
+@outputs Targets:array
+@persist Targets:array Alpha Fade St S Prep T:entity
+
+interval(100)
+if(first()){
+entity():propDraw(0)
+entity():propNotSolid(1)
+Fade = 0 #blowjobjordon mode
+
+holoCreate(1, entity():toWorld(vec(0,0,30)), vec(1.5), entity():toWorld(ang()))
+holoColor(1, vec(200,200,0))
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(0,0,8)), vec(1.6,1.6,0.5), holoEntity(1):toWorld(ang()))
+holoColor(2, vec(200,200,0))
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(1):toWorld(vec()), vec(1.55,0.5,1.55), holoEntity(1):toWorld(ang()))
+holoColor(3, vec(150,0,0))
+holoParent(3, 1)
+
+holoCreate(4, holoEntity(1):toWorld(vec()), vec(0.5,1.55,1.55), holoEntity(1):toWorld(ang()))
+holoColor(4, vec(150,0,0))
+holoParent(4, 1)
+
+holoCreate(5, holoEntity(2):toWorld(vec()), vec(0.5,1.65,0.55), holoEntity(2):toWorld(ang()))
+holoColor(5, vec(150,0,0))
+holoParent(5, 2)
+
+holoCreate(6, holoEntity(2):toWorld(vec()), vec(1.65,0.5,0.55), holoEntity(2):toWorld(ang()))
+holoColor(6, vec(150,0,0))
+holoParent(6, 2)
+S = 6
+Alpha = 255}
+
+St = St+S
+
+if(S){
+holoAng(1, ang(0,St,0))
+holoPos(1, entity():toWorld(vec(0,0,30))+vec(0,0,sin(St*3)*3))}
+
+findInSphere(entity():pos(),400)
+findIncludeClass("player")
+Targets = findToArray()
+
+foreach(I,T:entity=Targets){
+if((T:pos()):distance(entity():pos())>=50){
+Prep=1}
+
+if(!S){
+ID = I+100
+holoCreate(ID,T:shootPos())
+holoDisableShading(ID,1)
+holoModel(ID,"hq_sphere")
+holoScale(ID,vec(-5.5))
+holoParentAttachment(I+100,T,"chest")
+holoAlpha(ID, Alpha)}
+}
+if(Prep){S = clamp(S,0.2,6)-0.2}
+if(!S){
+if(changed(S)){
+E = propSpawn("models/props_phx/torpedo.mdl", holoEntity(1):pos(),1)
+for(I = 1,6){holoDelete(I)}
+E:propBreak()}
+if(Fade){
+Alpha = clamp(Alpha,1,255)-1}}
+if(!Alpha){selfDestruct()}
+

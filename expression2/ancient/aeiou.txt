@@ -1,0 +1,38 @@
+@name aeiou
+@inputs [Crankshaft #[Seat Steer]#]:wirelink
+@outputs RPM Bearing P1 P2 P3 P4 #Hydro Hydro2
+@persist [Crank Base]:entity RPM #STR Fwdvel IsRight Drift Ang
+
+runOnTick(1)
+if(first()|dupefinished()){
+Crank = Crankshaft:entity()
+Crank:soundPlay(1,0,"acf_engines/i12l.wav")
+Base = entity():isWeldedTo()
+#Steer:entity():propInertia(vec(10,10,100))
+}
+
+#[D=Seat:entity():driver()
+STR=D:keyLeft()-D:keyRight()
+
+Fwdvel=(Base:vel()*Base:forward()):length()
+IsRight=Fwdvel>50
+Ang=clamp(14-Fwdvel*0.005,8,14)
+
+Hydro=STR ? 38.18-STR*Ang : Drift+38.18
+Hydro2=STR ? 38.18+STR*Ang : -Drift+38.18
+
+Drift=(((acos(clamp(Base:right():dot(Base:vel():normalized()),-1,1))-90)*0.15)*IsRight)]#
+
+T=1
+#(-1500*(D:keyForward()-D:keyBack()))/(1+D:keySprint())
+
+RPM = abs(Crank:angVel():yaw()/6)
+Bearing=Crank:bearing(Base:toWorld(vec(0,0,25.5)))
+
+P1 = sin(Bearing)*T
+P2 = sin(Bearing + 90)*T
+P3 = sin(Bearing + 180)*T
+P4 = sin(Bearing + 270)*T
+
+
+soundPitch(1,abs(RPM)/6)

@@ -1,0 +1,98 @@
+@name UnKnao's Hoverbase
+@persist Distance [E P]:entity G I Turn Sprint Lean Tog Driver:entity A SH C1 C2 C3 Vec:vector
+@model models/hunter/blocks/cube1x2x05.mdl
+if(first()){
+propSpawnUndo(0)
+E = entity()
+
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia())
+}
+
+P = seatSpawn("models/nova/jeep_seat.mdl", E:toWorld(vec(0,0,8)), E:toWorld(ang(0,180,0)),0)
+P:parentTo(E)
+rangerFilter(array(E,P))
+
+E:setMass(1000)
+E:propFreeze(0)
+rangerHitWater(1)
+rangerPersist(1)
+#E:removeNoCollideAll()
+noCollideAll(entity(),0)
+}
+
+Driver = P:driver()
+
+interval(20)
+if(changed(Driver:keyReload()) & Driver:keyReload()){
+Tog = !Tog
+soundPlay("ignv",Tog ? 0.874 : 1.13, Tog ? "hl1/fvox/activated.wav" : "hl1/fvox/deactivated.wav")
+}
+
+if(changed(Tog) & Tog){
+Turn = E:angles():yaw()
+E:soundPlay("idle",0,"hl1/ambience/labdrone2.wav")}
+
+if(Tog){
+
+soundPitch("idle", 50+E:vel():length()*0.05)
+Ranger = rangerOffset(100,entity():pos()+E:vel():setZ(0)/8,-entity():up())
+
+E:applyForce(Vec)
+if(Ranger:hit()){
+Diff = 75-Ranger:distance()
+Vec = ((vec(0,0,Diff*0.75)-E:vel()*0.1)*E:mass())+(E:right()*50)*(G-I)*Sprint}
+else{
+Vec = ((-E:vel()*0.1+Ranger:entity():vel()/6)*E:mass())+(E:right()*50)*(G-I)*Sprint}
+
+SH = Driver:keySprint()
+if(SH){
+Sprint = 3
+}else{Sprint = 1}
+
+if(changed(SH) & SH){
+soundPlay("loop",0,"ambient/machines/wall_ambient_loop1.wav")
+soundVolume("loop",0.65)
+if(E:vel():length()>=400){
+soundPlay("charge",0,"ambient/energy/ion_cannon_shot2.wav")
+soundVolume("charge",0.25)
+soundPitch("charge",50)}}
+soundPitch("loop",50+E:vel():length()*0.025)
+
+if(changed(SH) & !SH){
+soundStop("loop")
+soundStop("charge")}
+
+if(Driver:keyForward()){
+if(G!=1500){
+G = clamp(G,0,1300)+200}
+}
+else{
+if(G!=0){
+G = clamp(G,200,1500)-200}}
+
+if(Driver:keyBack()){
+if(I!=500){
+I = clamp(I,0,300)+200}
+}else{
+if(I!=0){
+I = clamp(I,200,500)-200}}
+
+if(Driver:keyLeft()){
+Turn = Turn + 3.5
+Lean = 20}
+
+if(Driver:keyRight()){
+Turn = Turn - 3.5
+Lean = -20}
+
+if(!Driver:keyRight() & !Driver:keyLeft()){
+Lean = 0}
+
+E:faceAng(ang(Lean,Turn,-Driver:keyJump()*30),7)
+}
+if(changed(Tog) & !Tog){
+soundStop("idle")
+soundStop("loop")}
+

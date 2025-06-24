@@ -1,0 +1,47 @@
+@name Collision dartboard
+@inputs #Pod:collision
+@strict
+propSpawnUndo(0)
+trackCollision(propSpawn("models/props_phx/construct/metal_plate4x4.mdl", entity():toWorld(vec(0, 0, 50)), ang(), 1))
+Time = curtime()
+Fade_List = array()
+
+event entityCollision(HitEntity:entity, Entity:entity, CollisionData:collision) {
+    if(Time == curtime()){ exit() }
+    if(!Entity:isValid()){ exit() }
+    if(Entity:isPlayer()){ exit() }
+    if(Entity:owner() != owner()){ exit() }
+    if(HitEntity:parent() == Entity){ exit() }
+    
+    Time = curtime()
+    Entity:parentTo(HitEntity)
+    Entity:emitSound("npc/fast_zombie/claw_strike3.wav")
+    
+    timer("hit" + Entity:id(), 3, 1, function(){
+        if(!Entity:isValid()){ return }
+        Entity:propShadow(0)
+        Fade_List:pushEntity(Entity)
+    })
+}
+
+event tick(){
+    if(!Fade_List:count()){ exit() }
+    
+    foreach(I:number, E:entity = Fade_List){
+        if(!E:isValid()){
+            Fade_List:remove(I)
+            continue
+        }
+        
+        if(E:getAlpha() == 0){
+            timer(0, function(){
+                if(!E:isValid()){ return }
+                E:propDelete()
+            })
+            Fade_List:remove(I)
+            continue
+        }
+        
+        E:setAlpha(max(E:getAlpha() - 5 * 66 * tickInterval(), 0))
+    }
+}

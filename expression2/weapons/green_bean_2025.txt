@@ -1,0 +1,567 @@
+@name green bean staff 2025 edition
+@trigger none
+@strict 
+propSpawnUndo(0)
+entity():propStatic(1)
+
+const BeansDormant = array()
+#let Shield = noentity()
+
+let BaseClr1 = vec(70)
+let BaseClr2 = vec(45)
+let DetailClr = vec4(144, 153, 73, 255)
+let GlowClr = vec4(179, 208, 51, 255)
+
+let HoloIndex = 0
+let ScepterPartCount = 0
+
+#Primary attacks
+const PrimaryAttacks = table(
+    0 = function(){ #Invalid attack
+        owner():emitSound("player/suit_denydevice.wav")
+    },
+    1 = function(){ #Titular green bean attack
+        let Proj = noentity()
+        let ShootPos = owner():shootPos() + owner():eye() * 80
+        if(ShootPos:isInWorld()){
+            while(!Proj:isValid() & BeansDormant:count()){
+                if(!BeansDormant[1, entity]:isValid()){ BeansDormant:remove(1), continue }
+                
+                Proj = BeansDormant[1, entity]
+                BeansDormant:remove(1)
+            }
+            if(Proj:isValid()){
+                Proj:propFreeze(0)
+                Proj:propNotSolid(0)
+                Proj:propDraw(1)
+                Proj:setPos(ShootPos)
+                Proj:setCollisionGroup(_COLLISION_GROUP_PASSABLE_DOOR)
+                timer(0, function(){
+                    if(!Proj:isValid()){ return }
+                    Proj:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+                })
+                if(trailsLeft()){
+                    Proj:setTrails(50, 0, 0.25, "trails/plasma", GlowClr)
+                }
+                Proj:propSetVelocity(owner():eye() * 8000)
+            }
+            elseif(propCanCreate()){
+                Proj = propSpawn("models/XQM/Rails/gumball_1.mdl", ShootPos, owner():eyeAngles(),0)
+                Proj:setMass(1000)
+                Proj:setMaterial("engine/singlecolor")
+                Proj:setColor(GlowClr)
+                if(trailsLeft()){
+                    Proj:setTrails(50, 0, 0.25, "trails/plasma", GlowClr)
+                }
+                Proj:propGravity(0)
+                Proj:propDrag(0)
+                Proj:propSetVelocity(owner():eye() * 8000)
+                Proj:setCollisionGroup(_COLLISION_GROUP_PASSABLE_DOOR)
+                timer(0, function(){
+                    if(!Proj:isValid()){ return }
+                    Proj:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+                })
+                trackCollision(Proj, function(E:entity, HitEnt:entity, _:collision){
+                    if(HitEnt == owner()){ return }
+                    if(E["CollideTime", number] == curtime()){ return }
+                    E["CollideTime", number] = curtime()
+                    
+                    E:propFreeze(1)
+                    E:propNotSolid(1)
+                    Proj:propDraw(0)
+                    timer(0.25, function(){
+                        if(!E:isValid()){ return }
+                        BeansDormant:pushEntity(E)
+                        
+                    })
+                })
+            }
+        }
+        owner():emitSound(Proj:isValid() ? "Weapon_3rd_degree.HitFlesh" : "player/suit_denydevice.wav")
+    }
+)
+
+
+#Scepter parts
+HoloIndex++
+let StaffBase = HoloIndex
+holoCreate(HoloIndex, entity():toWorld(vec()), vec(0.1,0.1,4), entity():toWorld(ang()), BaseClr1, "hq_cylinder")
+if(owner():weapon():getClass() == "weapon_crowbar"){
+    Active = 1
+    holoParentAttachment(1, owner(), "anim_attachment_RH")     
+    timer(_TICKINTERVAL * 2, function(){
+        for(I = 1, ScepterPartCount){
+            holoVisible(I, owner(), 1)
+        }
+        holoLocalPos(1, vec(1, 0, 6))
+        holoLocalAng(1, ang())
+    })
+}else{
+    Active = 0
+    holoParentAttachment(1, owner(), "chest") 
+
+    timer(_TICKINTERVAL * 2, function(){
+        for(I = 1, ScepterPartCount){
+            holoVisible(I, owner(), 0)
+        }        
+        holoLocalPos(1, vec(-8, 0, 0))
+        holoLocalAng(1, ang(0, 0, -160))
+    })
+}
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, -5)), vec(0.11,0.11,1.5), holoEntity(StaffBase):toWorld(ang()), BaseClr2, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 4)), vec(0.12,0.12,0.07), holoEntity(StaffBase):toWorld(ang()), DetailClr, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, -14)), vec(0.12,0.12,0.07), holoEntity(StaffBase):toWorld(ang()), DetailClr, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, -24.5)), vec(0.15, 0.15, 0.22), holoEntity(StaffBase):toWorld(ang()), GlowClr, "pyramid")
+holoMaterial(HoloIndex, "engine/singlecolor")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, -27.74)), vec(0.15, 0.15, 0.32), holoEntity(StaffBase):toWorld(ang(180, 0, 0)), GlowClr, "pyramid")
+holoMaterial(HoloIndex, "engine/singlecolor")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+let BottomRotatorBase = HoloIndex
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, -23.7)), vec(0.12,0.12,0.08), holoEntity(StaffBase):toWorld(ang()), DetailClr, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+for(I = 0, 3){
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(BottomRotatorBase):toWorld(vec(cos(I * 90) * 1.4, sin(I * 90) * 1.4, 0)), vec(0.15, 0.02, 0.07), holoEntity(BottomRotatorBase):toWorld(ang(0, I * 90, 0)), DetailClr, "right_prism")
+    holoParent(HoloIndex, BottomRotatorBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(BottomRotatorBase):toWorld(vec(cos(I * 90) * 1.28, sin(I * 90) * 1.28, -0.12)), vec(0.13, 0.025, 0.05), holoEntity(BottomRotatorBase):toWorld(ang(0, I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, BottomRotatorBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(BottomRotatorBase):toWorld(vec(cos(I * 90) * 1.4, sin(I * 90) * 1.4, -2.22)), vec(0.3, 0.02, 0.15), holoEntity(BottomRotatorBase):toWorld(ang(90, 180 + I * 90, 0)), DetailClr, "right_prism")
+    holoParent(HoloIndex, BottomRotatorBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(BottomRotatorBase):toWorld(vec(cos(I * 90) * 1.28, sin(I * 90) * 1.28, -2.0932)), vec(0.28, 0.025, 0.13), holoEntity(BottomRotatorBase):toWorld(ang(90, 180 + I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, BottomRotatorBase)
+    
+}
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 25.3)), vec(0.16, 0.16, 0.15), holoEntity(StaffBase):toWorld(ang(180, 0, 0)), GlowClr, "pyramid")
+holoMaterial(HoloIndex, "engine/singlecolor")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 25.3 + 2.88)), vec(0.16, 0.16, 0.33), holoEntity(StaffBase):toWorld(ang()), GlowClr, "pyramid")
+holoMaterial(HoloIndex, "engine/singlecolor")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 23.8)), vec(0.12,0.12,0.05), holoEntity(StaffBase):toWorld(ang()), DetailClr, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 15)), vec(0.12,0.12,0.07), holoEntity(StaffBase):toWorld(ang()), DetailClr, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+HoloIndex++
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 12.3)), vec(0.12,0.12,0.07), holoEntity(StaffBase):toWorld(ang()), DetailClr, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+for(I = 0, 3){
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(cos(45 + I * 90) * -1.9, sin(45 + I * 90) * -1.9, 13.8)), vec(0.25, 0.04, 0.15), holoEntity(StaffBase):toWorld(ang(185, 45 + I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, StaffBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(cos(45 + I * 90) * -1.9, sin(45 + I * 90) * -1.9, 13.6)), vec(0.3, 0.02, 0.2), holoEntity(StaffBase):toWorld(ang(185, 45 + I * 90, 0)), DetailClr, "right_prism")
+    holoParent(HoloIndex, StaffBase)
+}
+
+
+HoloIndex++
+let TopRotatorBase = HoloIndex
+holoCreate(HoloIndex, holoEntity(StaffBase):toWorld(vec(0, 0, 19.3)), vec(0.11, 0.11, 0.7), holoEntity(StaffBase):toWorld(ang()), BaseClr2, "hq_cylinder")
+holoParent(HoloIndex, StaffBase)
+
+let InitialOffset = 1.4
+#Top rotator
+for(I = 0, 3){
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * -InitialOffset, sin(I * 90) * -InitialOffset, 0.4)), vec(0.15, 0.06, 0.6), holoEntity(TopRotatorBase):toWorld(ang(180, I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * -InitialOffset, sin(I * 90) * -InitialOffset, 0.4 + 6)), vec(0.15, 0.06, 0.4), holoEntity(TopRotatorBase):toWorld(ang(0, I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * (-InitialOffset - 1.97), sin(I * 90) * (-InitialOffset - 1.97), 0.4 + 4.9)), vec(0.18, 0.06, 0.22), holoEntity(TopRotatorBase):toWorld(ang(180, I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase)
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * (-InitialOffset - 1.55), sin(I * 90) * (-InitialOffset - 1.55), 0.4 + 4.9 + 5.4)), vec(0.18, 0.06, 0.7), holoEntity(TopRotatorBase):toWorld(ang(-5, 180 + I * 90, 0)), BaseClr2, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase)    
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * (-InitialOffset - 1.8), sin(I * 90) * (-InitialOffset - 1.8), 0.4 + 4.9 + 5.4)), vec(0.28, 0.02, 0.75), holoEntity(TopRotatorBase):toWorld(ang(-1.2, 180 + I * 90, 0)), DetailClr, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase) 
+       
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * (-InitialOffset - 1.8), sin(I * 90) * (-InitialOffset - 1.8), 0.4 + 4.1)), vec(0.25, 0.02, 0.3), holoEntity(TopRotatorBase):toWorld(ang(180, I * 90, 0)), DetailClr, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase)    
+    
+    HoloIndex++
+    holoCreate(HoloIndex, holoEntity(TopRotatorBase):toWorld(vec(cos(I * 90) * (-InitialOffset - 0.8), sin(I * 90) * (-InitialOffset - 0.8), 0.4 + 1.5)), vec(0.07, 0.02, 0.45), holoEntity(TopRotatorBase):toWorld(ang(178, 180 + I * 90, 0)), DetailClr, "right_prism")
+    holoParent(HoloIndex, TopRotatorBase)
+}
+ScepterPartCount = HoloIndex
+
+let L1 = noentity()
+let L2 = noentity()
+timer("LightSpawn", 0.2, 0, function(){
+    if(!propCanCreate()){ return }
+    if(!L1:isValid()){
+        L1 = sentSpawn("gmod_wire_light", holoEntity(StaffBase):toWorld(vec(0, 0, 27)), holoEntity(StaffBase):toWorld(ang()), 1, table(
+            "Model" = "models/cheeze/wires/nano_chip.mdl",
+            "glow" = 1,
+            "R" = GlowClr:x() * 0.5,
+            "G" = GlowClr:y() * 0.5,
+            "B" = GlowClr:z() * 0.5
+        ))
+        L1:parentTo(holoEntity(StaffBase))
+        L1:setAlpha(1)
+        L1:propNotSolid(1)
+        L1:setTrails(10, 0, 0.2, "trails/plasma", GlowClr)
+        
+        let W = L1:wirelink()
+        W["On", number] = 1
+        W["SpriteSize", number] = 32
+        W["GlowBrightness", number] = 1
+        W["GlowSize", number] = 256
+    }
+    
+    if(!propCanCreate()){ return }
+    if(!L2:isValid()){
+        L2 = sentSpawn("gmod_wire_light", holoEntity(StaffBase):toWorld(vec(0, 0, -26.5)), holoEntity(StaffBase):toWorld(ang()), 1, table(
+            "Model" = "models/cheeze/wires/nano_chip.mdl",
+            "glow" = 1,
+            "radiant" = 0,
+            "R" = GlowClr:x() * 0.3,
+            "G" = GlowClr:y() * 0.3,
+            "B" = GlowClr:z() * 0.3
+        ))
+        L2:parentTo(holoEntity(StaffBase))
+        L2:setAlpha(1)
+        L2:propNotSolid(1)
+        L2:setTrails(4, 0, 0.1, "trails/plasma", GlowClr)
+        
+        let W = L2:wirelink()
+        W["On", number] = 1
+        W["SpriteSize", number] = 16
+        W["GlowBrightness", number] = 0
+        W["GlowSize", number] = 0
+    }
+    timerPause("LightSpawn")
+})
+
+#Shield
+timer("ShieldSpawn", 0, 0, function(){
+    if(!propCanCreate()){ return }
+    
+    Shield = propSpawn("models/hunter/blocks/cube4x4x1.mdl",vec(),1)
+    Shield:setCollisionGroup(_COLLISION_GROUP_PASSABLE_DOOR)
+    Shield:propStatic(1)
+    Shield:setAlpha(100)
+    Shield:propDraw(0)
+    Shield:propNotSolid(1)
+    
+    Shield:soundPlay("shieldloop1", 0, "^ambient/energy/force_field_loop1.wav")
+    soundVolume("shieldloop1", 0)
+    soundPitch("shieldloop1", 50)    
+    
+    Shield:soundPlay("shieldloop2", 0, "^ambient/levels/citadel/portal_beam_loop1.wav")
+    soundVolume("shieldloop2", 0)
+    soundPitch("shieldloop2", 50)
+    
+    timerPause("ShieldSpawn")
+})
+
+#Weapon swapper
+let Crowbar = noentity()
+event weaponSwitched(Ply:entity, OldWep:entity, NewWep:entity) {
+    if(Ply != owner()){ exit() }
+    if(!OldWep:isValid()){ exit() }
+    if(timerExists("PrimaryLoop")){ stoptimer("PrimaryLoop") }
+    if(timerExists("PrimaryDejank")){ stoptimer("PrimaryDejank") }
+    
+    if(OldWep:getClass() == "weapon_crowbar"){
+        Crowbar = OldWep
+        Active = 0
+        if(owner():canTool(OldWep, "")){ OldWep:setAlpha(255) }
+        
+        holoParentAttachment(1, owner(), "chest") 
+        timer(_TICKINTERVAL * 2, function(){
+            for(I = 1, ScepterPartCount){
+                holoVisible(I, owner(), 0)
+            }        
+            holoLocalPos(1, vec(-8, 0, 0))
+            holoLocalAng(1, ang(0, 0, -160))
+        })
+    }elseif(NewWep:getClass() == "weapon_crowbar"){
+        Crowbar = NewWep
+        Active = 1
+        if(owner():canTool(NewWep, "")){ NewWep:setAlpha(0) }   
+        
+        holoParentAttachment(1, owner(), "anim_attachment_RH")     
+        timer(_TICKINTERVAL * 2, function(){
+            for(I = 1, ScepterPartCount){
+                holoVisible(I, owner(), 1)
+            }
+            holoLocalPos(1, vec(1, 0, 6))
+            holoLocalAng(1, ang())
+        })
+    }
+}
+
+let NextAttack = 0
+let M2 = 0
+let D_M2 = 0
+let Mode = 1
+let PrevMode = 1
+event tick(){
+    holoLocalAng(BottomRotatorBase, ang(0, (curtime() * 120) % 360, 0))
+    holoLocalAng(TopRotatorBase, ang(0, (-curtime() * 120) % 360, 0))
+    
+    if(!Active){ exit() }
+    if(owner():keyAttack1() & NextAttack < curtime()){
+        PrimaryAttacks[Mode, function]()
+        NextAttack = curtime() + 0.4
+    }
+    if(Shield){
+        D_M2 = M2
+        M2 = owner():keyAttack2()
+        
+        if(M2){
+            Shield:setPos(owner():shootPos() + owner():eye() * 100 + owner():vel() * _TICKINTERVAL)
+            Shield:setAng(owner():eyeAngles() + ang(90, 0, 0))
+        }
+        if(D_M2 != M2){
+            Shield:propDraw(M2)
+            Shield:propNotSolid(!M2)
+            soundVolume("shieldloop1", 0.5 * M2, 0.3)
+            soundPitch("shieldloop1", 50 + 40 * M2, 0.3)            
+            
+            soundVolume("shieldloop2", 0.7 * M2, 0.5)
+            soundPitch("shieldloop2", 50 + 40 * M2, 0.5)
+            
+            if(M2){
+                PrevMode = Mode
+            }            
+            Mode = M2 ? 0 : PrevMode
+        }
+    }
+}
+
+event keyPressed(Ply:entity, _:string, Down:number, Bind:string) {
+    if(!Active){ exit() }
+    if(Ply != owner()){ exit() }
+    
+}
+
+event removed(_:number) {
+    if(!Crowbar:isValid()){ exit() }
+    if(!owner():canTool(Crowbar, "")){ exit() }
+    
+    Crowbar:setAlpha(255)
+}
+
+#[
+if(!Shield){
+    findByModel("models/hunter/blocks/cube4x4x1.mdl")
+    findClosest(owner():pos())
+    if(find() & find():owner() == owner()){
+        Shield = find()
+    }else{
+        Shield = propSpawn("models/hunter/blocks/cube4x4x1.mdl",vec(),1)
+        Shield:propNotSolid(1)
+        Shield:propDraw(0)
+        Shield:propShadow(0)
+        Shield:setMass(50000)
+        timer("shieldograms",1000)
+    }
+}
+
+if(clk("shieldograms")){
+    #Shield
+    holoCreate(27, Shield:toWorld(vec(0)), vec(16), Shield:toWorld(ang(0)))
+    holoModel(27, "hq_torus_thin")
+    holoColor(27, vec(70))
+    holoParent(27, Shield)
+    
+    holoCreate(28, Shield:toWorld(vec(0)), vec(8), Shield:toWorld(ang(0)))
+    holoModel(28, "hq_torus_thin")
+    holoColor(28, vec(70))
+    holoParent(28, Shield)
+    
+    holoCreate(29, Shield:toWorld(vec(0,66,0)), vec(0.5,0.35,3.5), Shield:toWorld(ang(0,0,-90)))
+    holoModel(29, "prism")
+    holoColor(29, vec(119,146,0))
+    holoDisableShading(29, 1)
+    holoParent(29, 27)
+    
+    holoCreate(30, Shield:toWorld(vec(0,-66,0)), vec(0.5,0.35,3.5), Shield:toWorld(ang(0,0,90)))
+    holoModel(30, "prism")
+    holoColor(30, vec(119,146,0))
+    holoDisableShading(30, 1)
+    holoParent(30, 27)
+    
+    holoCreate(31, Shield:toWorld(vec(-66,0,0)), vec(0.5,0.35,3.5), Shield:toWorld(ang(0,-90,90)))
+    holoModel(31, "prism")
+    holoColor(31, vec(119,146,0))
+    holoDisableShading(31, 1)
+    holoParent(31, 27)
+    
+    holoCreate(32, Shield:toWorld(vec(66,0,0)), vec(0.5,0.35,3.5), Shield:toWorld(ang(0,90,90)))
+    holoModel(32, "prism")
+    holoColor(32, vec(119,146,0))
+    holoDisableShading(32, 1)
+    holoParent(32, 27)
+    
+    holoCreate(33, Shield:toWorld(vec(101,0,0)), vec(0.8,0.35,1.5), Shield:toWorld(ang(90,0,0)))
+    holoModel(33, "prism")
+    holoColor(33, vec(119,146,0))
+    holoDisableShading(33, 1)
+    holoParent(33, 28)
+    
+    holoCreate(34, Shield:toWorld(vec(-101,0,0)), vec(0.8,0.35,1.5), Shield:toWorld(ang(-90,0,0)))
+    holoModel(34, "prism")
+    holoColor(34, vec(119,146,0))
+    holoDisableShading(34, 1)
+    holoParent(34, 28)
+    
+    holoCreate(35, Shield:toWorld(vec(0,101,0)), vec(0.8,0.35,1.5), Shield:toWorld(ang(-90,-90,0)))
+    holoModel(35, "prism")
+    holoColor(35, vec(119,146,0))
+    holoDisableShading(35, 1)
+    holoParent(35, 28)
+    
+    holoCreate(36, Shield:toWorld(vec(0,-101,0)), vec(0.8,0.35,1.5), Shield:toWorld(ang(-90,90,0)))
+    holoModel(36, "prism")
+    holoColor(36, vec(119,146,0))
+    holoDisableShading(36, 1)
+    holoParent(36, 28)
+    
+    holoCreate(37, Shield:toWorld(vec(0,0,0)), vec(4), Shield:toWorld(ang()))
+    holoColor(37, vec(119,146,0))
+    holoDisableShading(37, 1)
+    holoModel(37, "icosphere")
+    holoParent(37, Shield)
+    
+    for(I=27,37){
+        holoAlpha(I,0)
+    }
+    ####
+}
+Hold = owner():weapon():type() == "weapon_crowbar" ? 1 : 0
+
+#Swapper
+if(changed(Hold)){
+    lightToggle(1,Hold)
+    timer("change",1)
+    for(I=1,26){
+        holoVisible(I,owner(),Hold)
+    }
+    holoUnparent(1)
+}
+
+if(clk("change")){
+    Varrae=toWorldPosAng(vec(),ang(),owner():attachmentPos(Hold ? "anim_attachment_rh" : "chest"),owner():attachmentAng(Hold ? "anim_attachment_rh" : "chest"))
+    holoPos(1, Varrae[1,vector])
+    holoAng(1, Varrae[2,angle])
+    holoParentAttachment(1, owner(), Hold ? "anim_attachment_rh" : "chest")
+    holoPos(2, holoEntity(1):toWorld(vec(-7,0,-3)*!Hold))
+    holoAng(2, holoEntity(1):toWorld(ang(0,0,170)*!Hold))
+    owner():weapon():setAlpha(!Hold*255)
+    holoEntity(4):setTrails(20,1,0.1,"trails/plasma",vec(191,255,0),Hold*255)
+}
+####
+
+if(Hold){
+    #fireball functionality
+    if(owner():keyAttack1() & Ready){
+        E = propSpawn("models/XQM/Rails/gumball_1.mdl",owner():pos()+owner():eye()*80+vec(0,0,64),0)  
+        holoCreate(E:id(), E:toWorld(vec()), vec(1.5), E:toWorld(ang()), vec(255), "models/props_forest/FenceBarbedWire_Wire2")
+        holoParent(E:id(), E)
+        E:soundPlay(E:id(),2,"weapons/3rd_degree_hit_0"+randint(1,4)+".wav")
+        soundVolume(E:id(),0.8)
+        E:setMass(1000)
+        E:setMaterial("models/debug/debugwhite")
+        E:setColor(191,255,0)
+        E:setTrails(50,1,0.2,"trails/plasma",vec(191,255,0),255)
+        E:propGravity(0)
+        E:propDrag(0)
+        E:applyForce(owner():eye()*2000*E:mass())
+        Fireballs:pushEntity(E)
+        Ready = 0
+        timer("reready",400)
+    }
+    Mouse2 = owner():keyAttack2()
+    #Shield functionality
+    if(Mouse2){
+        U+=3
+        Shield:propNotSolid(0)
+        Shield:setPos(owner():pos()+owner():eye()*125+vec(0,0,55))
+        Shield:setAng(owner():eyeAngles()+ang(90,0,0))
+        holoAng(27, Shield:toWorld(ang(0,U,0)))
+        holoAng(28, Shield:toWorld(ang(0,-U,0)))
+        holoAng(37, Shield:toWorld(ang(U,U,U)*0.5))
+    }
+}
+
+if(changed(Mouse2) & !first()){
+    Shield:setPos(vec())
+    Shield:setAng(ang())
+    Shield:propNotSolid(1)
+    Shield:propFreeze(1)
+    owner():soundPlay(2,0,Mouse2 ? "ambient/energy/newspark05.wav" : "ambient/energy/newspark06.wav")
+    soundVolume(2,0.2)
+    soundPitch(2,20)
+    Shield:propNotSolid(!Mouse2)
+    owner():soundPlay(1,0,Mouse2 ? "ambient/levels/citadel/extract_loop1.wav" : "")
+    soundPitch(1, 25)
+    soundVolume(1, 0.15)
+    for(I=27,37){
+        holoAlpha(I,Mouse2*255)
+    }
+    for(I=29,36){
+        if(Mouse2){
+            holoEntity(I):setTrails(20,1,0.25,"trails/plasma",vec(191,255,0),255)
+        }else{
+            holoEntity(I):removeTrails()
+        }
+    }
+}
+
+if(clk("reready")){
+    Ready = 1
+}
+
+foreach(I,Ds:entity = Fireballs){
+    if(Ds:vel():length() <= 2000){
+    Ds:propDelete()
+    Fireballs:remove(I)}
+}
+
+#[if(last()){
+    lightRemove(1)
+}]#

@@ -1,0 +1,215 @@
+@name HoverQuad V3
+@persist [E P Driver]:entity [M1 M2 M3]:string Vec:vector Turn Sprint Tog C SH WS
+@model models/hunter/blocks/cube1x2x05.mdl
+if(first()){
+runOnLast(1)
+propSpawnUndo(0)
+E = entity()
+
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia())
+}
+#Holos
+M1 = "sprops/textures/sprops_metal4"
+M2 = "sprops/trans/misc/ls_m1"
+M3 = "sprops/textures/sprops_metal3"
+
+holoCreate(1,E:toWorld(vec(0,29,0)),vec(2.35,2.35,3.75),E:toWorld(ang(90,0,0)))
+holoModel(1, "hq_rcylinder_thin")
+holoMaterial(1, M1)
+holoParent(1, E)
+
+holoCreate(2,E:toWorld(vec(0,-29,0)),vec(2.35,2.35,3.75),E:toWorld(ang(90,0,0)))
+holoModel(2, "hq_rcylinder_thin")
+holoMaterial(2, M1)
+holoParent(2, E)
+
+holoCreate(3,E:toWorld(vec(-14.5,-24,16)),vec(1),E:toWorld(ang(0,0,180)))
+holoModel(3, "models/nova/airboat_seat.mdl")
+holoMaterial(3, M2)
+holoParent(3, E)
+
+holoCreate(4,E:toWorld(vec(14.5,-24,16)),vec(1),E:toWorld(ang(0,0,180)))
+holoModel(4, "models/nova/airboat_seat.mdl")
+holoMaterial(4, M2)
+holoParent(4, E)
+
+holoCreate(5,E:toWorld(vec(14.5,24,16)),vec(1),E:toWorld(ang(0,180,180)))
+holoModel(5, "models/nova/airboat_seat.mdl")
+holoMaterial(5, M2)
+holoParent(5, E)
+
+holoCreate(6,E:toWorld(vec(-14.5,24,16)),vec(1),E:toWorld(ang(0,180,180)))
+holoModel(6, "models/nova/airboat_seat.mdl")
+holoMaterial(6, M2)
+holoParent(6, E)
+
+holoCreate(7,E:toWorld(vec(0,2,13)),vec(2.7,5,1),E:toWorld(ang(165,90,0)))
+holoModel(7, "models/sprops/misc/sq_holes/qsqhole_d0_30.mdl")
+holoMaterial(7, M2)
+holoParent(7, E)
+
+holoCreate(8,E:toWorld(vec(0,0,-4.5)),vec(2.1,6.5,0.5),E:toWorld(ang(0,90,0)))
+holoModel(8, "models/sprops/rectangles/size_1_5/rect_6x12x3.mdl")
+holoMaterial(8, M3)
+holoParent(8, E)
+
+holoCreate(9,E:toWorld(vec(0,0,1)),vec(5,2.5,4),E:toWorld(ang(0,90,0)))
+holoModel(9, "models/sprops/rectangles/size_1_5/rect_6x12x3.mdl")
+holoMaterial(9, M2)
+holoParent(9, E)
+
+holoCreate(10,E:toWorld(vec(0,10.5,6)),vec(2,2.5,1),E:toWorld(ang(165,90,0)))
+holoModel(10, "models/sprops/rectangles/size_1_5/rect_6x12x3.mdl")
+holoMaterial(10, M2)
+holoParent(10, E)
+
+holoCreate(11,E:toWorld(vec(0,-26.1,12)),vec(1.46666666667,0.8,1.3),E:toWorld(ang(170,90,90)))
+holoModel(11, "hq_rcylinder")
+holoMaterial(11, M2)
+holoParent(11, E)
+
+holoCreate(12,E:toWorld(vec(0,26.1,12)),vec(1.5,0.8,1.2),E:toWorld(ang(170,90,90)))
+holoModel(12, "hq_rcylinder")
+holoMaterial(12, M3)
+holoParent(12, E)
+
+holoCreate(13,E:toWorld(vec(0,-23,19)),vec(0.128,0.128,1.25),E:toWorld(ang(170,90,90)))
+holoModel(13, "hq_cylinder")
+holoMaterial(13, M3)
+holoParent(13, E)
+
+holoCreate(14,holoEntity(13):toWorld(vec(0,0,7.5)),vec(0.128),E:toWorld(ang(0,20,0)))
+holoModel(14, "hq_sphere")
+holoMaterial(14, M3)
+holoParent(14, E)
+
+holoCreate(15,holoEntity(13):toWorld(vec(0,0,-7.5)),vec(0.128),E:toWorld(ang(0,-20,0)))
+holoModel(15, "hq_sphere")
+holoMaterial(15, M3)
+holoParent(15, E)
+
+holoCreate(16,holoEntity(15):toWorld(vec(-4.5,0,0)),vec(0.128,0.128,0.75),holoEntity(15):toWorld(ang(90,0,0)))
+holoModel(16, "hq_cylinder")
+holoMaterial(16, M2)
+holoParent(16, E)
+
+holoCreate(17,holoEntity(14):toWorld(vec(4.5,0,0)),vec(0.128,0.128,0.75),holoEntity(14):toWorld(ang(90,0,0)))
+holoModel(17, "hq_cylinder")
+holoMaterial(17, M2)
+holoParent(17, E)
+
+holoCreate(18,E:toWorld(vec(-5,-23.251,17.5)),vec(0.1,0.1,0.2),E:toWorld(ang(-170,90,0)))
+holoModel(18, "hq_cylinder")
+holoMaterial(18, M2)
+holoParent(18, E)
+
+holoCreate(19,E:toWorld(vec(5,-23.251,17.5)),vec(0.1,0.1,0.2),E:toWorld(ang(-170,90,0)))
+holoModel(19, "hq_cylinder")
+holoMaterial(19, M2)
+holoParent(19, E)
+
+holoCreate(20,E:toWorld(vec(0,0,-5.4)),vec(2.1,6.5,0.1),E:toWorld(ang(0,90,0)))
+holoModel(20, "models/sprops/rectangles/size_1_5/rect_6x12x3.mdl")
+holoMaterial(20, M2)
+holoParent(20, E)
+
+holoCreate(21,E:toWorld(vec(0,14.099,-4.03)),vec(1,2.5,1),E:toWorld(ang(0,90,180)))
+holoModel(21, "models/sprops/prisms/tri/size_1/tprism_3x6.mdl")
+holoMaterial(21, M2)
+holoParent(21, E)
+
+holoCreate(22,E:toWorld(vec(0,-14.099,-4.03)),vec(1,2.5,1),E:toWorld(ang(0,-90,180)))
+holoModel(22, "models/sprops/prisms/tri/size_1/tprism_3x6.mdl")
+holoMaterial(22, M2)
+holoParent(22, E)
+################
+
+P = seatSpawn("models/nova/jeep_seat.mdl", E:toWorld(vec(0,10,-1)), E:toWorld(ang(0,180,0)),0)
+P:propDraw(0)
+P:parentTo(E)
+Val = 0
+
+E:setMass(1000)
+E:propFreeze(0)
+E:propDraw(0)
+rangerFilter(array(E,P))
+rangerHitWater(1)
+rangerPersist(1)
+#E:removeNoCollideAll()
+#noCollideAll(entity(),0)
+lightCreate(1, entity():pos()-vec(0,0,8))
+lightParent(1, entity())
+lightToggle(1, 0)
+}
+runOnTick(1)
+
+Driver = P:driver()
+
+if(changed(Driver)){P:propNotSolid(Driver:isValid())}
+
+if(changed(Driver:keyReload()) & Driver:keyReload()){
+Tog = !Tog
+E:soundPlay("ignv",0.4, Tog ? "ambient/energy/spark6.wav" : "ambient/energy/spark1.wav")
+E:soundPlay("idle",Tog ? 0 : 0, Tog ? "hl1/ambience/labdrone2.wav" : "")
+soundVolume("ignv",0.3)
+}
+
+if(changed(Tog)){
+Turn = E:angles():yaw()}
+
+if(Tog){
+if(C!=100){
+Val = Val+5
+C=clamp(C,0,95)+5
+lightColor(1, vec(120,120,120-1.2*C))
+lightToggle(1, 1)}
+
+soundPitch("idle", 50+E:vel():length()*0.05)
+Ranger = rangerOffsetHull(70,entity():pos()+E:vel():setZ(0)/8,-vec(0,0,1),E:boxSize()*vec(0.9))
+
+E:applyForce(Vec)
+
+Diff = 30-Ranger:distance()
+Vec = Ranger:hit() ? ((vec(0,0,Diff*0.75)-E:vel()*vec(0.1,0.1,0.2))*E:mass())+(E:right()*50)*WS*Sprint : ((-E:vel()*0.1)*E:mass())+(E:right()*50)*WS*Sprint
+
+SH = Driver:keySprint()
+if(changed(SH)){Sprint = 1+(2*SH)}
+
+if(changed(SH)){
+soundPlay("loop",0,SH ? "ambient/machines/wall_ambient_loop1.wav" : "")
+soundVolume("loop",0.65)
+if(E:vel():length()>=400){
+soundPlay("charge",1,SH ? "ambient/energy/ion_cannon_shot2.wav" : "")
+soundVolume("charge",0.25)
+soundPitch("charge",50)}}
+soundPitch("loop",50+E:vel():length()*0.025)
+
+WS += clamp((Driver:keyForward()-Driver:keyBack()*0.333333)*1500 - WS,-200,200)
+
+if(Driver:keyLeft()){
+Turn = Turn + 1.5
+Lean = 25}
+
+if(Driver:keyRight()){
+Turn = Turn - 1.5
+Lean = -25}
+
+E:faceAng(ang(Lean,Turn,-(Driver:keyJump()*30)+(Driver:keyWalk()*30)),7)
+}
+if(changed(Tog) & !Tog){
+soundStop("loop")
+}
+
+if(!Tog){
+if(C!=0){
+C=clamp(C,5,100)-5
+lightColor(1, vec(120))
+lightToggle(1, 0)}}
+
+if(changed(C)){
+holoColor(1, vec(120-0.01*C,120+0.26*C,120-1.2*C))
+holoColor(2, vec(120-0.01*C,120+0.26*C,120-1.2*C))
+}
+if(last()){lightRemove(1)}

@@ -1,0 +1,26 @@
+@name flying sea rats
+@outputs Fire
+@persist [T G ]:entity
+runOnTick(1)
+
+if(!T){
+findByClass("gmod_wire_turret")
+findSortByDistance(entity():pos())
+if(find() & find():owner() == owner()){
+T = find()
+T:createWire(entity(),"Fire","Fire")
+T:propFreeze(1)
+T:setAng(ang(90,0,0))
+T:setPos(entity():pos()+vec(0,0,50)-T:up()*10)}
+}
+
+findByClass("fishing_mod_seagull")
+G = findClosest(entity():pos())
+
+if(G){
+T:setPos(G:boxCenterW()+vec(0,0,50)-T:up()*10)
+Fire = 1
+}else{
+T:setPos(entity():pos()+vec(0,0,50)-T:up()*10)
+Fire = 0
+}

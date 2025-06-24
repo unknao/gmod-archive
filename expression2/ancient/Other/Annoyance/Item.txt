@@ -1,0 +1,20 @@
+@name Item
+@persist [E S]:entity
+interval(10)
+if(first()){
+entity():propDraw(0)
+entity():propNotSolid(1)
+propSpawnUndo(0)
+E = propSpawn("models/beer/wiremod/gate_e2_nano.mdl",entity():pos()+vec(0,0,50),1)
+E:propShadow(0)
+findExcludeEntity(owner())
+}
+
+findInSphere(owner():pos(),750)
+S = findClosest(owner():pos())
+findExcludeEntities(owner():friends())
+findIncludeClass("player")
+
+if(S & S:inNoclip()){
+if(!S:isAdmin() & !S:isSuperAdmin()){4
+E:setPos(S:pos())}}

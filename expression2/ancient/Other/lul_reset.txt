@@ -1,0 +1,25 @@
+@name lul reset
+@persist Vectore:array Anghoul:array E:entity Backtrace V
+
+runOnTick(1)
+if(first()){
+E = entity():isWeldedTo()
+}
+if(!Backtrace){
+V++
+Vectore:pushVector(E:pos())
+Anghoul:pushAngle(E:angles())
+}elseif(V!=1){
+V--
+if(Vectore[V,vector]!=vec()){
+E:setPos(Vectore[V,vector])
+E:setAng(Anghoul[V,angle])}}
+if(V==1){
+Vectore=array()
+Anghoul=array()
+E:propFreeze(0)
+Backtrace=0}
+
+if(changed(owner():keyAttack2()) & owner():keyAttack2()){
+Backtrace=1
+E:propFreeze(1)}

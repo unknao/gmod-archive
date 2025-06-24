@@ -1,5 +1,191 @@
-@name vectorlib
+@name vector lib
+@strict
 
-function number vector:collapse(){
+#All vector user functions go here
+
+function number vector:sum(){ #returns the sum of all parts
     return This:x() + This:y() + This:z()
+}
+#[
+function vector minComponents(Vec1:vector, Vec2:vector){ #returns a vector with the smallest parts from each input
+    return vec(min(Vec1:x(), Vec2:x()), min(Vec1:y(), Vec2:y()), min(Vec1:z(), Vec2:z()))
+}
+
+function vector maxComponents(Vec1:vector, Vec2:vector){ #returns a vector with the largest parts from each input
+    return vec(max(Vec1:x(), Vec2:x()), max(Vec1:y(), Vec2:y()), max(Vec1:z(), Vec2:z()))
+}]#
+function vector minComponents(...Vecs:table){ #returns a vector with the smallest parts from each input
+    let Vec = vec(_INF)
+    for(I = 1, 3){
+        foreach(_:number, V:vector = Vecs){
+            if(V[I] > Vec[I]){ continue }
+            Vec[I] = V[I]
+        }
+    }
+    return Vec
+}
+
+function vector maxComponents(...Vecs:table){ #returns a vector with the largest parts from each input
+    let Vec = vec(-_INF)
+    for(I = 1, 3){
+        foreach(_:number, V:vector = Vecs){
+            if(V[I] < Vec[I]){ continue }
+            Vec[I] = V[I]
+        }
+    }
+    return Vec
+}
+
+#Ballistics
+function vector calculateTrajectory(ProjPos:vector, Speed:number, TargetPos:vector, High:number){
+
+    let Diff = TargetPos - ProjPos
+    let DiffXY = vec(Diff:x(), Diff:y(), 0)
+    let GroundDist = DiffXY:length()
+    
+    let Z = Diff:z()
+    let X = GroundDist
+    let GX = gravity()*X
+    
+    let Root = (Speed ^ 4) - gravity() * ((gravity() * (X ^ 2)) + 2 * Z * (Speed ^ 2))
+    
+    if(Root < 0){
+        return vec()
+    }
+    
+    Root = sqrt(Root)
+    
+    let GroundDir = DiffXY:normalized()
+    let Result = vec()
+    if(High){
+        let HighAng = toDeg(atan2(Speed ^ 2 + Root, GX))
+        Result = GroundDir * cos(HighAng) * Speed + _VECTOR_UP * sin(HighAng) * Speed
+    }else{
+        let LowAng = toDeg(atan2(Speed ^ 2 - Root, GX))
+        Result = GroundDir * cos(LowAng) * Speed + _VECTOR_UP * sin(LowAng) * Speed
+    }
+    
+    return Result
+}
+
+function vector calculateTrajectory(ProjPos:vector, Speed:number, TargetPos:vector){
+
+    let Diff = TargetPos - ProjPos
+    let DiffXY = vec(Diff:x(), Diff:y(), 0)
+    let GroundDist = DiffXY:length()
+    
+    let Z = Diff:z()
+    let X = GroundDist
+    let GX = gravity()*X
+    
+    let Root = (Speed ^ 4) - gravity() * ((gravity() * (X ^ 2)) + 2 * Z * (Speed ^ 2))
+    
+    if(Root < 0){
+        return vec()
+    }
+    
+    Root = sqrt(Root)
+    
+    let GroundDir = DiffXY:normalized()
+    let LowAng = toDeg(atan2(Speed ^ 2 - Root, GX))
+    let Result = GroundDir * cos(LowAng) * Speed + _VECTOR_UP * sin(LowAng) * Speed
+    
+    return Result
+}
+
+function vector findPointOnParabola(Start:vector, Dir:vector, Speed:number, Time:number){
+    Time = max(Time, 0)
+    let Point = Start + Dir * Speed * Time
+    let GravityVel = propGravity() * Time ^ 2
+    Point += GravityVel
+    return Point
+}
+
+function vector findRaySphereIntersect(RayPos:vector, RayDir:vector, SpherePos:vector, Radius:number){
+    let Offset = RayPos - SpherePos
+    let Dot1 = Offset:dot(RayDir)
+    let Dot2 = Offset:dot(Offset) - Radius ^ 2
+    
+    #ray's position outside sphere (Dot1 > 0)
+    #ray's direction pointing away from sphere (Dot2 > 0)
+    if(Dot2 > 0 & Dot1 > 0){ return _VECTOR_ORIGIN }
+    
+    let Discriminant = Dot1 ^ 2 - Dot2
+    if(Discriminant < 0){ return _VECTOR_ORIGIN }
+    
+    let Dist = max(-Dot1 - sqrt(Discriminant), 0)
+    
+    return (RayPos + RayDir * Dist)
+}
+
+function array findRayAABBIntersect(RayPos:vector, RayDir:vector, AABBMins:vector, AABBMaxs:vector){
+    let DirFraction = 1 / RayDir
+    
+    let T1 = (AABBMins:x() - RayPos:x()) * DirFraction:x()
+    let T2 = (AABBMaxs:x() - RayPos:x()) * DirFraction:x()
+    let T3 = (AABBMins:y() - RayPos:y()) * DirFraction:y()
+    let T4 = (AABBMaxs:y() - RayPos:y()) * DirFraction:y()
+    let T5 = (AABBMins:z() - RayPos:z()) * DirFraction:z()
+    let T6 = (AABBMaxs:z() - RayPos:z()) * DirFraction:z()
+    
+    #no vararg min/max function in e2 :(
+    let TMin = max(max(min(T1, T2), min(T3, T4)), min(T5, T6))
+    let TMax = min(min(max(T1, T2), max(T3, T4)), max(T5, T6))
+    
+    if(TMax < 0){ #ray is intersecting AABB, but whole AABB is behind us
+        return array()
+    }    
+    if(TMin > TMax){ #ray doesn't intersect AABB
+        return array()
+    }
+
+    return array(RayPos + RayDir * TMin, RayPos + RayDir * TMax)
+}
+
+function vector findRayAABBIntersectMin(RayPos:vector, RayDir:vector, AABBMins:vector, AABBMaxs:vector){
+    let DirFraction = 1 / RayDir
+    
+    let T1 = (AABBMins:x() - RayPos:x()) * DirFraction:x()
+    let T2 = (AABBMaxs:x() - RayPos:x()) * DirFraction:x()
+    let T3 = (AABBMins:y() - RayPos:y()) * DirFraction:y()
+    let T4 = (AABBMaxs:y() - RayPos:y()) * DirFraction:y()
+    let T5 = (AABBMins:z() - RayPos:z()) * DirFraction:z()
+    let T6 = (AABBMaxs:z() - RayPos:z()) * DirFraction:z()
+    
+    #no vararg min/max function in e2 :(
+    let TMin = max(max(min(T1, T2), min(T3, T4)), min(T5, T6))
+    let TMax = min(min(max(T1, T2), max(T3, T4)), max(T5, T6))
+    
+    if(TMax < 0){ #ray is intersecting AABB, but whole AABB is behind us
+        return _VECTOR_ORIGIN
+    }    
+    if(TMin > TMax){ #ray doesn't intersect AABB
+        return _VECTOR_ORIGIN
+    }
+
+    return RayPos + RayDir * TMin
+}
+
+function vector findRayAABBIntersectMax(RayPos:vector, RayDir:vector, AABBMins:vector, AABBMaxs:vector){
+    let DirFraction = 1 / RayDir   
+    
+    let T1 = (AABBMins:x() - RayPos:x()) * DirFraction:x()
+    let T2 = (AABBMaxs:x() - RayPos:x()) * DirFraction:x()
+    let T3 = (AABBMins:y() - RayPos:y()) * DirFraction:y()
+    let T4 = (AABBMaxs:y() - RayPos:y()) * DirFraction:y()
+    let T5 = (AABBMins:z() - RayPos:z()) * DirFraction:z()
+    let T6 = (AABBMaxs:z() - RayPos:z()) * DirFraction:z()
+    
+    #no vararg min/max function in e2 :(
+    let TMin = max(max(min(T1, T2), min(T3, T4)), min(T5, T6))
+    let TMax = min(min(max(T1, T2), max(T3, T4)), max(T5, T6))
+    
+    if(TMax < 0){ #ray is intersecting AABB, but whole AABB is behind us
+        return _VECTOR_ORIGIN
+    }    
+    if(TMin > TMax){ #ray doesn't intersect AABB
+        return _VECTOR_ORIGIN
+    }
+
+    return RayPos + RayDir * TMax
 }

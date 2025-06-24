@@ -1,0 +1,41 @@
+@name Dirty LCD
+@inputs LCD:wirelink Memory
+@outputs CharAddress
+@persist 
+@trigger none
+@strict
+
+CharAddress = 0
+LCD["Char", number] = 0
+LCD["Reset", number] = 1
+LCD["Clk", number] = 1
+
+let Width = 24
+
+event input(In:string) {
+    if(!Memory){ exit() }
+    if(Memory == 154 | Memory == 155){ exit() } #Shift
+    if(Memory == 158){ #Control
+        CharAddress = 0
+        LCD["Char", number] = 0
+        LCD["Reset", number] = 1
+        LCD["Clk", number] = 1
+        exit()
+    }
+    if(Memory == 127){ #Backspace
+        if(CharAddress){
+            LCD["Char", number] = Memory
+            LCD["Clk", number] = 1
+            CharAddress = max(CharAddress - 1, 0)
+        }
+        exit()
+    }
+    if(Memory == 10){ #Newlines
+        CharAddress = (floor(CharAddress / Width) + 1) * Width
+        exit()
+    }
+    
+    LCD["Char", number] = Memory
+    LCD["Clk", number] = 1
+    CharAddress++
+}

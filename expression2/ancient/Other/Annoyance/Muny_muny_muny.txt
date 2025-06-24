@@ -1,0 +1,49 @@
+@name Anti-Bjoern machine
+@inputs StoredAmount
+@persist [RP C]:entity Tog K S
+if(first()){
+entity():setAlpha(0)
+entity():propNotSolid(1)
+}
+interval(10)
+if(!RP){
+findByClass("darkrp_moneypot")
+findSortByDistance(owner():pos())
+if(find() & find():owner() == owner()){
+RP = find()
+RP:propFreeze(1)
+RP:setAlpha(0)
+noCollideAll(RP,1) 
+RP:setAng(ang(0,0,0))
+timer("holonaire",10)
+entity():createWire(RP,"StoredAmount","StoredAmount")
+}}
+
+if(clk("holonaire")){
+holoCreate(1)
+holoPos(1, RP:boxCenterW())
+holoModel(1, "models/passtime/duffel_bags/duffel_grey_closed.mdl")
+holoScale(1, vec(0.5))
+holoParent(1, RP)}
+
+S = S+2
+holoAng(1, RP:toWorld(ang(0,S,0)))
+
+findByClass("coin")
+C = findClosest(RP:pos())
+
+if(C){
+RP:propNotSolid(0)
+RP:setPos(C:pos())
+}
+else{
+RP:setPos(owner():boxCenterW()+vec(0,0,50))
+RP:propNotSolid(1)
+}
+
+if(changed(StoredAmount)){
+print(_HUD_PRINTCENTER,"Current money: "+StoredAmount)}
+
+if(!RP & !StoredAmount){
+print(_HUD_PRINTCENTER,"Money pot destroyed.")}
+

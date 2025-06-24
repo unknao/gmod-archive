@@ -1,0 +1,28 @@
+@name tornado 2025
+@strict
+@trigger none
+propSpawnUndo(0)
+enableConstraintUndo(0)
+entity():setMass(50000)
+entity():propStatic(1)
+
+const Ents = array()
+const Ang = entity():angles()
+
+timer("SpawnLoop", 0.5, 0, function(){
+    while(propCanCreate() & Ents:count() < 200){
+        let I = Ents:count() + 1
+        let E = propSpawn("models/props_c17/oildrum001.mdl", entity():toWorld(vec(sinr((I*10))*(150+I*3),cosr(I*10)*(150+I*3),I*10)), entity():toWorld(ang()), 0)
+        if(!E:isValid()){ break }
+        
+        E:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+        E:weld(entity())
+        Ents:pushEntity(E)
+    }
+    if(Ents:count() == 200){
+        stoptimer("SpawnLoop")
+        timer("Spin", 0, 0, function(){
+            entity():setAng(Ang:rotateAroundAxis(entity():up(), curtime() * 300))
+        })
+    }
+})

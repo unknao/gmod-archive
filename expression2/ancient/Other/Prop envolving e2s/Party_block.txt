@@ -1,0 +1,23 @@
+@name Party block
+@persist E:entity
+interval(20)
+if(dupefinished()){reset()}
+if(first()){
+propSpawnUndo(0)}
+
+if(!E){
+findByModel("models/sprops/misc/pyramids/rsize_2/rpyr_24x30.mdl")
+findSortByDistance(entity():pos())
+if(find() & find():owner() == owner()){
+E = find()
+}else{
+E = propSpawn("models/sprops/misc/pyramids/rsize_2/rpyr_24x30.mdl", entity():pos()+vec(0,0,50),0)
+E:applyTorque(randvec(0,10000))
+E:setColor(vec(0,255,178))
+E:setMaterial("models/shiny")
+}
+}
+
+Vec = ((entity():pos()+vec(0,0,40)-E:pos())-E:vel()/10)*E:mass()
+E:applyForce($Vec)
+E:applyAngForce(-E:angles()*10)

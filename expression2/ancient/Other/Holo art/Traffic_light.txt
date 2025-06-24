@@ -1,0 +1,106 @@
+@name Traffic light
+@outputs Timer
+@persist Timer:number E2:entity [Red Yellow Green DRed DYellow DGreen]:vector
+#Traffic lifght made only by UnKnao, the british bloke didnt help this time.
+#Uses clamp as a timer.
+E2 = entity()
+E2:setAlpha(0)
+Red = vec(255,0,0)
+Yellow = vec(255,255,0)
+Green = vec(0,255,0)
+DRed = vec(30,0,0)
+DYellow = vec(30,30,0)
+DGreen = vec(0,30,0)
+interval(500)
+if(first() | duped()){
+holoCreate(1, E2:toWorld(vec(0,0,0)), vec(1), E2:toWorld(ang(0,0,0)))
+holoModel(1, "models/props_phx/misc/t_light_single_b.mdl")
+holoParent(1, E2)
+
+holoCreate(2, E2:toWorld(vec(0,-6,116.5)), vec(0.9,0.5,0.9), E2:toWorld(ang(0,0,0)))
+holoModel(2, "hq_sphere")
+holoColor(2, DGreen)
+holoDisableShading(2, 1)
+holoParent(2, E2)
+
+holoCreate(3, E2:toWorld(vec(0,-6,129.5)), vec(0.9,0.5,0.9), E2:toWorld(ang(0,0,0)))
+holoModel(3, "hq_sphere")
+holoColor(3, DYellow)
+holoDisableShading(3, 1)
+holoParent(3, E2)
+
+holoCreate(4, E2:toWorld(vec(0,-6,142)), vec(0.9,0.5,0.9), E2:toWorld(ang(0,0,0)))
+holoModel(4, "hq_sphere")
+holoColor(4, DRed)
+holoDisableShading(4, 1)
+holoParent(4, E2)
+}
+Timer = clamp(Timer,0,46)+ 0.5
+#Green light
+if(Timer>=0){
+holoColor(2, Green)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=26){
+holoColor(2, DGreen)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=26.5){
+holoColor(2, Green)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=27){
+holoColor(2, DGreen)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=27.5){
+holoColor(2, Green)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=28){
+holoColor(2, DGreen)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=28.5){
+holoColor(2, Green)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=29){
+holoColor(2, DGreen)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+if(Timer>=29.5){
+holoColor(2, Green)
+holoColor(3, DYellow)
+holoColor(4, DRed)
+}
+#Yellow light
+if(Timer>=30){
+holoColor(2, DGreen)
+holoColor(3, Yellow)
+holoColor(4, DRed)
+}
+#Red light
+if(Timer>=33){
+holoColor(2, DGreen)
+holoColor(3, DYellow)
+holoColor(4, Red)
+#Red Yellow light
+}
+if(Timer>=43){
+holoColor(2, DGreen)
+holoColor(3, Yellow)
+holoColor(4, Red)
+}
+#Back to square 1
+if(Timer==46){
+Timer = 0
+}

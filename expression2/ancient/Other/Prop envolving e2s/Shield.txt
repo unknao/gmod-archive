@@ -1,0 +1,47 @@
+@name Shield
+@persist E:entity T:entity
+
+interval(50)
+if(first()){
+entity():setAlpha(0)
+propSpawnUndo(0)
+}
+
+if(!E){
+findByModel("models/sprops/misc/tubes/size_5/tube_96x84.mdl")
+findSortByDistance(owner():pos())
+if(find() & find():owner() == owner()){
+E = find()
+}else{
+E = propSpawn("models/sprops/misc/tubes/size_5/tube_96x84.mdl",owner():pos()+vec(0,0,200),1)
+E:setMass(50000)
+E:setAlpha(25)
+E:setAng(ang(0,0,90))
+E:setColor(vec(119,146,0))
+E:setMaterial("models/shiny")
+E:propFreeze(1)
+}}
+
+
+findInSphere(owner():pos(),256)
+findExcludePlayerProps(owner())
+findIncludeClass("prop_physics")
+findExcludeClass("player")
+findSortByDistance(owner():pos())
+
+if(find():pos():distance(owner():pos()) < find():vel():length()*8)
+{
+T = find()
+}
+
+if(T)
+{
+if(T:vel():length() > 1000 | T:angVelVector():length() > 100 & (T:pos()+T:vel()*2):distance(owner():pos()) > 256)
+{
+E:setPos(owner():pos()+vec(0,0,50))
+}
+else
+{
+E:setPos(owner():pos()+vec(0,0,200))
+}
+}

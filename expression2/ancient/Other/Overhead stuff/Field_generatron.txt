@@ -1,0 +1,25 @@
+@name Field generatron
+@outputs Active Distance Multiplier
+@persist F:entity
+interval(100)
+
+if(first()){
+findIncludePlayerProps(owner())
+entity():setAlpha(0)
+entity():propNotSolid(1)}
+
+findByClass("gmod_wire_field_device")
+A = findToArray()
+for(I=1,A:count()){
+F = A:entity(I)
+F:setPos(owner():pos()+vec(0,0,300))
+if(changed(F)){
+F:createWire(entity(),"Active","Active")
+F:createWire(entity(),"Multiplier","Multiplier")
+F:createWire(entity(),"Distance","Distance")
+F:setAlpha(0)
+}
+}
+Active = 1
+Multiplier = 1000
+Distance = 1000

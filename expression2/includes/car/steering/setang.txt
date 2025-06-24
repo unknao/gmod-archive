@@ -1,0 +1,37 @@
+@name setang steering w/ackermann angles
+@inputs A D
+@inputs [FLWheel #[Front left wheel slave]# FRWheel #[Front right wheel slave]# BaseSlave #[Obvious]# Base]:entity
+@outputs Curve
+@strict
+
+#include "includes/util/misc"
+
+STEERING_MAX = 45 #Maximum steering angle
+STEERING_RATE_MUL = 0.1 #How fast the steering angle changes
+STEERING_RATE_MAX = 2.2 #Upper bound of how fast the steering angle can change
+STEERING_DONE_EDITING = 0
+
+WHEEL_TRACK = 83.007 #Distance between the wheels lengthwise
+WHEEL_WIDTH = 68.125 / 2 #Distance between the wheels widthwise divided by 2
+
+#Danger zone
+Gyro = 0, Curve = 90, Steering_Tan = 0, Steering_Left = 0, Steering_Right = 0
+
+if(->FLWheel){ FLWheel:propStatic(STEERING_DONE_EDITING) }
+if(->FRWheel){ FRWheel:propStatic(STEERING_DONE_EDITING) }
+if(->BaseSlave){ BaseSlave:propStatic(STEERING_DONE_EDITING) }
+
+event tick() {
+    let Curve_Target = 90 - clamp((A - D) * STEERING_MAX + Gyro, -STEERING_MAX, STEERING_MAX)
+    if(Curve_Target != Curve){
+        Curve += clamp((Curve_Target - Curve) * STEERING_RATE_MUL, -STEERING_RATE_MAX, STEERING_RATE_MAX) * TickAdjust
+        
+        Steering_Tan = WHEEL_TRACK * tan(Curve)
+        Steering_Left = atan(WHEEL_TRACK / (Steering_Tan - WHEEL_WIDTH))
+        Steering_Right = atan(WHEEL_TRACK / (Steering_Tan + WHEEL_WIDTH))
+    }
+    
+    if(->FLWheel){ FLWheel:setAng(Base:toWorld(ang(0, Steering_Left, 0))) }    
+    if(->FRWheel){ FRWheel:setAng(Base:toWorld(ang(0, Steering_Right, 0))) }    
+    if(->BaseSlave){ BaseSlave:setAng(Base:toWorld(ang())) }
+}

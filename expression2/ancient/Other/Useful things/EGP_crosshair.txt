@@ -1,0 +1,28 @@
+@name EGP crosshair
+@inputs EGP:wirelink
+@persist [M T Mat]:string
+interval(100)
+
+EGP:egpBox(1, vec2(800,435), vec2(2,20))
+EGP:egpBox(2, vec2(800,465), vec2(2,20))
+EGP:egpBox(3, vec2(785,450), vec2(20,2.5))
+EGP:egpBox(4, vec2(815,450), vec2(20,2.5))
+
+EGP:egpColor(1, vec(0,255,0))
+EGP:egpColor(2, vec(0,255,0))
+EGP:egpColor(3, vec(0,255,0))
+EGP:egpColor(4, vec(0,255,0))
+
+EGP:egpAlpha(1, 150)
+EGP:egpAlpha(2, 150)
+EGP:egpAlpha(3, 150)
+EGP:egpAlpha(4, 150)
+
+
+EGP:egpText(5, "Model: "+M, vec2(1))
+EGP:egpText(6, "Material: "+Mat, vec2(1,20))
+EGP:egpText(7, "Class: "+T, vec2(1,40))
+
+M = owner():aimEntity():model()
+T = owner():aimEntity():type()
+Mat = owner():aimEntity():getMaterial()

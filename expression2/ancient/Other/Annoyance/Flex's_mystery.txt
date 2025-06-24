@@ -1,0 +1,12 @@
+@name Flex's mystery
+@persist P:entity
+
+if(first()){
+P = findPlayerByName("")
+}
+interval(10)
+while(perf()){
+moneyGive(P,1)}
+if(!P){
+selfDestruct()}
+

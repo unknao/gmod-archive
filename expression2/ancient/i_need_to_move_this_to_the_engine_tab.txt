@@ -1,0 +1,29 @@
+@name i need to move this to the engine tab
+@inputs [Seat Crankshaft BasePlate]:wirelink
+@outputs RPM Bearing SoundPitch P1 P2 P3 P4 P5 P6 Hydro Friction
+@persist [Crank Base]:entity RPM Friction
+
+
+
+interval(10)
+Friction=Seat:entity():driver():keyJump()*200
+T=(Seat:entity():driver():keyForward()-Seat:entity():driver():keyBack())*2000
+
+Hydro=26.93-(Seat:entity():driver():keyLeft()-Seat:entity():driver():keyRight())*10
+
+Crank = Crankshaft:entity()
+Base = BasePlate:entity()
+RPM = Crank:angVel():yaw()/6
+Bearing=Crank:bearing(Base:pos()+vec(-15,0,7.5):rotate(Base:angles()))+180
+
+P1 = sin(Bearing)*T
+P2 = sin(Bearing + 120)*T
+P3 = sin(Bearing + 240)*T
+P4 = -P1
+P5 = -P2
+P6 = -P3
+
+
+if(first()|dupefinished()){ entity():soundPlay(1,0,"acf_engines/v8_smalldiesel.wav")
+}
+soundPitch(1,abs(RPM)/6,0.5)

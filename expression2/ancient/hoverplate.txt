@@ -1,0 +1,51 @@
+@name hoverplate
+@outputs Rang
+@persist [E P Driver]:entity [Vee Err Vi Derr]:array Diff [V VEC UP FORWARD PID]:vector Mass ANG:angle WS AD Rang
+@model models/sprops/rectangles/size_4/rect_36x72x3.mdl
+runOnTick(1)
+
+if(first()){
+propSpawnUndo(0)
+E = entity()
+#E:propDraw(0)
+noCollideAll(E,0)
+E:propFreeze(0)
+E:setMass(100)
+Mass = E:mass()
+findIncludePlayerProps(owner())
+P = seatSpawn("models/nova/jeep_seat.mdl",E:toWorld(vec()),E:toWorld(ang(0,90,0)),0)
+P:parentTo(E)
+PID=vec(200,1,-150)
+rangerFilter(array(E,P))
+rangerHitWater(1)
+rangerPersist(1)
+
+Vee = array(vec(35.5,17.5,0),vec(-35.5,17.5,0),vec(35.5,-17.5,0),vec(-35.5,-17.5,0))
+}
+
+UP = E:up()
+FORWARD = E:forward()
+
+foreach(I,V:vector=Vee){
+TW=E:toWorld(V)
+Rangers = rangerOffset(60,TW,-UP)
+Rang=Rangers:distance()
+if(Rangers:hit()){
+Var=1
+Derr[I,number]=Err[I,number]
+Err[I,number]=30-Rang
+Vi[I,number]=Vi[I,number]+PID:y()*Err[I,number]
+T=PID:x()*Err[I,number]+Vi[I,number]+PID:z()*Derr[I,number]
+E:applyOffsetForce(vec(0,0,T),TW)}}
+
+
+Driver=P:driver()
+WS=(50+(25*Driver:keySprint()+1))*(Driver:keyForward()-Driver:keyBack())
+AD=-70*(Driver:keyRight()-Driver:keyLeft())
+
+if(Var){
+ANG=(-E:angVel()*ang(0.3,0.3,0.3)+ang(0,AD,0))*Mass*3
+VEC=(-E:vel()*vec(0.05,0.05,0.05)-(FORWARD*WS))*Mass
+E:applyForce(VEC)
+E:applyAngForce(ANG)
+}

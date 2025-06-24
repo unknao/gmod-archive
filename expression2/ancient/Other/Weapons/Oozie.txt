@@ -1,0 +1,118 @@
+@name Oozie
+@persist Hold Ready M2 A:array [E S T]:entity
+interval(10)
+if(first()){
+entity():propNotSolid(1)
+entity():setAlpha(0)
+propSpawnUndo(0)
+holoCreate(1)
+holoScale(1, vec(0.5))
+holoColor(1, vec(100,0,0))
+holoEntity(1):propDraw(0)
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec()), vec(0.2,0.2,0.5), holoEntity(1):toWorld(ang(-10,0,0)))
+holoColor(2, vec(88,96,87))
+holoParent(2,1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(0,0,-4)), vec(0.15,0.15,0.5), holoEntity(2):toWorld(ang(0,0,0)))
+holoColor(3, vec(58,66,57))
+holoParent(3,2)
+
+holoCreate(4, holoEntity(2):toWorld(vec(1,0,4.5)), vec(1.2,0.25,0.25), holoEntity(2):toWorld(ang()))
+holoColor(4, vec(88,96,87))
+holoParent(4,2)
+
+holoCreate(5, holoEntity(4):toWorld(vec(-6,0,-3)), vec(0.5,0.2,0.2), holoEntity(4):toWorld(ang(90,0,0)))
+holoColor(5, vec(88,96,87))
+holoModel(5, "right_prism")
+holoParent(5,2)
+
+holoCreate(6, holoEntity(4):toWorld(vec(7.5,0,0)), vec(0.15,0.15,0.15), holoEntity(4):toWorld(ang(90,0,0)))
+holoColor(6, vec(58,66,57))
+holoModel(6, "hq_tube")
+holoParent(6,2)
+
+holoCreate(7, holoEntity(4):toWorld(vec(1.5,0,-2)), vec(0.2), holoEntity(4):toWorld(ang(-90,180,0)))
+holoColor(7, vec(58,66,57))
+holoMaterial(7, "models/debug/debugwhite")
+holoModel(7, "models/sprops/geometry/qring_30.mdl")
+holoParent(7,2)
+
+holoCreate(8, holoEntity(4):toWorld(vec(6,0.8,1.5)), vec(0.4), holoEntity(4):toWorld(ang(-90,0,0)))
+holoColor(8, vec(58,66,57))
+holoMaterial(8, "models/debug/debugwhite")
+holoModel(8, "models/sprops/geometry/t_qhex_12.mdl")
+holoParent(8,2)
+
+holoCreate(9, holoEntity(4):toWorld(vec(6,-0.8,1.5)), vec(0.4), holoEntity(4):toWorld(ang(-90,0,0)))
+holoColor(9, vec(58,66,57))
+holoMaterial(9, "models/debug/debugwhite")
+holoModel(9, "models/sprops/geometry/t_qhex_12.mdl")
+holoParent(9,2)
+
+holoCreate(10, holoEntity(6):toWorld(vec(0,0,1)), vec(0.3), holoEntity(6):toWorld(ang(-90,0,0)))
+holoColor(10, vec(255,235,0))
+holoAlpha(10,0)
+holoDisableShading(10,1)
+holoModel(10, "models/effects/muzzleflash/minigunmuzzle.mdl")
+holoParent(10,2)
+
+holoCreate(11, holoEntity(6):toWorld(vec(0,0,-0.5)), vec(0.13,0.13,0.05), holoEntity(6):toWorld(ang(0,0,0)))
+holoColor(11, vec(30))
+holoModel(11, "hq_cylinder")
+holoParent(11,2)
+Ready = 1}
+
+if(A:count() <= 50){
+E = propSpawn("models/sprops/misc/domes/size_0/dome_3x6.mdl",entity():pos()+vec(0,0,10),ang(),1)
+E:setMass(400)
+E:setColor(181,166,66)
+E:setMaterial("models/debug/debugwhite")
+E:propGravity(0)
+A:pushEntity(E)
+E:propSetBuoyancy(0)
+}
+
+if(owner():weapon():type() == "weapon_pistol"){
+Hold = 1
+}else{
+Hold = 0}
+
+if(changed(Hold)){
+timer("change",10)
+holoUnparent(1)
+}
+
+if(clk("change")){
+holoPos(1, owner():attachmentPos(Hold ?"anim_attachment_rh" : "chest"))
+holoAng(1, owner():attachmentAng(Hold ?"anim_attachment_rh" : "chest"))
+holoPos(2, holoEntity(1):toWorld(vec(0,-7,-17)*!Hold))
+holoAng(2, holoEntity(1):toWorld(ang(120,0,0)*!Hold))
+holoParentAttachment(1, owner(), Hold ?"anim_attachment_rh" : "chest")
+owner():weapon():setAlpha(!Hold*255)}
+
+if(Hold){
+
+M2 = owner():keyAttack2()
+if(changed(M2)){
+holoAlpha(10, M2*255)}
+if(M2 & Ready){
+Ready=0
+S = A[1,entity]
+S:propFreeze(0)
+holoAng(10, holoEntity(6):toWorld(ang(-90,0,randint(-180,180))))
+holoEntity(2):soundPlay(1,0.05,"weapons/smg_shoot.wav")
+S:setPos(owner():pos()+vec(0,0,67)+owner():eye()*80)
+S:setAng(owner():eyeAngles()+ang(90,0,0))
+S:applyForce(owner():eye()*3000000)
+S = A:shiftEntity()
+A:pushEntity(S)
+timer("reready",50)
+}}
+if(clk("reready")){Ready = 1}
+
+foreach(I,T:entity=A){
+if(T:vel():length()<=1000 & !T:isFrozen()){
+T:propFreeze(1)}
+}

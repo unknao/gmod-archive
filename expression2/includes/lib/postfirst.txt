@@ -1,0 +1,20 @@
+@name post-first executor
+@strict
+
+#By unknao
+#Small thing for executing code 1 tick after first execution in a timer-efficient manner
+#Most useful when you're changing configurations of included bases/code and you want to do math or something with it after.
+
+POST_FIRST_FUNC_TABLE = table()
+if(!timerExists("PostFirstExecuteAll")){
+    timer("PostFirstExecuteAll", 0, 1, function(){
+        foreach(_:string, F:function = POST_FIRST_FUNC_TABLE){
+            F()
+        }
+    })
+}
+
+function postFirstAddFunction(Name:string, Callback:function){
+    POST_FIRST_FUNC_TABLE[Name, function] = Callback
+    if(timerExists("PostFirstExecuteAll")){ timerRestart("PostFirstExecuteAll") }
+}

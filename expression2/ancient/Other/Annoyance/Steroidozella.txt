@@ -1,0 +1,19 @@
+@name Steroidozella
+@persist O:entity KeyAttack2
+
+if(first()){
+entity():setAlpha(0)
+runOnTick(1)
+O = owner()
+}
+
+KeyAttack2 = O:keyAttack2()
+
+if(changed(!KeyAttack2) & KeyAttack2){
+O:soundPlay(1,0,"wowozela/samples/square_880.wav")
+}
+soundPitch(1, owner():eyeAngles():pitch()*-3.1)
+if(KeyAttack2==0){
+soundStop(1)
+}
+

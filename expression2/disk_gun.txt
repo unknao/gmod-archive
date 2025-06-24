@@ -1,0 +1,102 @@
+@name disk gun
+@strict
+@trigger none
+
+const MaxProps = 6
+Props = array()
+let SpawnedProps = 0
+
+
+
+let Holo = entity(0)
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Holo:isValid()) { exit() }
+    if(Player != owner()) { exit() }
+    if(KeyBind != "walk") { exit() }
+    if(!Down) { exit() }    
+    
+    Holo = holoCreate(1, owner():shootPos() + owner():eye() * 125, vec(1), owner():eyeAngles())
+    holoAlpha(1, 0)
+    Holo:emitSound("ambient/levels/citadel/datatransmission02_loop.wav", 100, random(95, 105))
+    Holo:emitSound("ambient/levels/citadel/datatransmission04_loop.wav", 100, random(95, 105), 0.3)
+    Holo:emitSound("ambient/levels/dog_v_strider/dvs_dogvoc_00_16_00.wav", 100, random(95, 105))
+    Holo:emitSound("^ambient/energy/ion_cannon_shot1.wav", 100, random(80, 90))
+    for(_ = 1, MaxProps){
+        concmd("gm_spawn models/hunter/blocks/cube025x025x025.mdl")
+    }
+}
+function destroyProps(){
+    let Ents = Props
+    foreach(_:number, E:entity = Ents){
+        if(!E:isValid()) { continue }
+        
+        E:propFreeze(1)
+        E:propNotSolid(1)
+    }
+    #Slow delete to make trail removal not look so jaring
+    timer(2, function(){
+        foreach(_:number, E:entity = Ents){
+            if(!E:isValid()) { continue }
+            
+            E:propDelete()
+        } 
+    })
+    Props = array()
+    SpawnedProps = 0
+    
+    Holo:emitSoundStop("ambient/levels/citadel/datatransmission02_loop.wav")
+    Holo:emitSoundStop("ambient/levels/citadel/datatransmission04_loop.wav")
+    Holo:emitSound("ambient/levels/citadel/core_playerhit1.wav", 100)
+    timer(0, function(){
+        holoDelete(1)
+        Holo = entity(0)
+    })
+}
+
+event entityCreated(E:entity) {
+    if(!E:isValid()){ exit() }
+    if(E:owner() != owner()){ exit() }
+    if(E:model() != "models/hunter/blocks/cube025x025x025.mdl"){ exit() }
+    if(SpawnedProps == MaxProps){ exit() }
+    SpawnedProps++
+    
+    E:setMass(1000)
+    E:setPos(Holo:pos())
+    E:propDrag(0)
+    E:propDraw(0)
+    E:propPhysicalMaterial("gmod_silent")
+    if(trailsLeft()){
+        E:setTrails(40, 0, 2, "trails/smoke", vec(255), 255)
+    }
+    Props:pushEntity(E)
+}
+
+event tick() {
+    if(!Props:count()){ exit() }
+    if(!Holo:isValid()){ exit() }
+    
+    let HoloNextPos = Holo:pos() + Holo:forward() * tickInterval() * 1000
+    rangerFilter(Props)
+    rangerFilter(owner())
+    let Ranger = rangerOffsetHull(Holo:pos(), HoloNextPos, vec(3))
+    if(Ranger:hit()){
+        destroyProps()
+        exit()
+    }
+    
+    holoPos(1, HoloNextPos)
+    let Distribution = 360 / Props:count()
+    let Time = curtime() * 800
+    foreach(I:number, E:entity = Props){
+        if(!E:isValid()){
+            destroyProps()
+            break
+        }
+        let TargetPos = Holo:toWorld(vec(sin(Time + Distribution * I) * 250, cos(Time + Distribution * I) * 250, 0))
+        
+        E:propSetVelocity((TargetPos - E:pos()) * 10)
+        let Distance = owner():boxCenterW():distance(E:pos() + E:vel() * tickInterval()) < 92
+        E:setCollisionGroup(Distance ? _COLLISION_GROUP_PASSABLE_DOOR : _COLLISION_GROUP_PROJECTILE)
+        E:setColor(vec(255, !Distance * 255, !Distance * 255))
+    }
+}

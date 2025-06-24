@@ -1,0 +1,36 @@
+@name virtual toolgun prototype
+@inputs A
+@outputs 
+@persist 
+@strict
+@model models/weapons/w_toolgun.mdl
+
+rangerFilter(entity())
+
+function doClick(){
+    let R = rangerOffset(32767, entity():attachmentPos("muzzle"), entity():forward())
+    
+    if(effectCanPlay("ToolTracer")){
+        let Ef = effect()
+        Ef:setEntity(entity())
+        Ef:setStart(entity():attachmentPos("muzzle"))
+        Ef:setOrigin(R:position())
+        Ef:play("ToolTracer")
+    }    
+    
+    if(effectCanPlay("selection_indicator")){
+        let Ef = effect()
+        Ef:setEntity(entity())
+        Ef:setOrigin(R:position())
+        Ef:setNormal(R:hitNormal())
+        Ef:play("selection_indicator")
+    }
+    entity():emitSound("Airboat.FireGunRevDown")
+}
+
+event input(InputName:string) {
+    if(InputName == "A" & A){
+        doClick()
+    } 
+}
+

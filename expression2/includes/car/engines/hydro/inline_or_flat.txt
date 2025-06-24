@@ -1,0 +1,6 @@
+@name inline/flat
+@inputs Crank:entity Base:entity
+@outputs HengineConstant HengineDamping
+
+HengineDamping = 0.01
+HengineConstant = 10000

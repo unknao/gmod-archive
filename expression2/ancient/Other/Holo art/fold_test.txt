@@ -1,0 +1,45 @@
+@name fold test
+@persist S:array C Tog
+
+if(first()){
+holoCreate(1, entity():toWorld(vec(0,0,20)), vec(1,1,0.1), entity():toWorld(ang()))
+holoColor(1, vec(50))
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(0,6,0.6)), vec(0.15), holoEntity(1):toWorld(ang()))
+holoColor(2, vec(150,0,0))
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(0,6,-0.6)), vec(1,1,0.1), holoEntity(2):toWorld(ang()))
+holoColor(3, vec(50))
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(3):toWorld(vec(6,0,-0.6)), vec(0.15), holoEntity(3):toWorld(ang()))
+holoColor(4, vec(150,0,0))
+holoParent(4, 3)
+
+holoCreate(5, holoEntity(4):toWorld(vec(6,0,0.6)), vec(1,1,0.1), holoEntity(4):toWorld(ang()))
+holoColor(5, vec(50))
+holoParent(5, 4)
+
+holoCreate(6, holoEntity(5):toWorld(vec(0,-6,0.6)), vec(0.15), holoEntity(5):toWorld(ang()))
+holoColor(6, vec(150,0,0))
+holoParent(6, 5)
+
+holoCreate(7, holoEntity(6):toWorld(vec(0,-6,-0.6)), vec(1,1,0.1), holoEntity(6):toWorld(ang()))
+holoColor(7, vec(50))
+holoParent(7, 6)
+}
+interval(20)
+
+if(!changed(C)){
+Tog = !Tog}
+
+if(Tog){
+C = clamp(C,0,179)+1}
+if(!Tog){
+C = clamp(C,1,180)-1}
+
+holoAng(2, holoEntity(1):toWorld(ang(0,0,C)))
+holoAng(4, holoEntity(3):toWorld(ang(C,0,0)))
+holoAng(6, holoEntity(5):toWorld(ang(0,0,-C)))

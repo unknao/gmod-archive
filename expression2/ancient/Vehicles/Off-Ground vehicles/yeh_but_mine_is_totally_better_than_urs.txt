@@ -1,0 +1,151 @@
+@name yeh but mine is totally better than urs
+@persist [E P Driver]:entity Vee:array Diff [V VEC UP FORWARD]:vector Mass ANG:angle WS AD
+@model models/sprops/rectangles/size_78/rect_78x132x3.mdl
+interval(10)
+
+if(first()){
+propSpawnUndo(0)
+E = entity()
+E:propDraw(0)
+#noCollideAll(E,0)
+#E:propFreeze(0)
+E:setMass(1000)
+Mass = E:mass()
+P = seatSpawn("models/nova/jeep_seat.mdl", E:toWorld(vec(30,0,0)), E:toWorld(ang(0,90,0)),0)
+P:setMass(1)
+P:parentTo(E)
+rangerFilter(array(E,P))
+rangerHitWater(1)
+rangerPersist(1)
+
+Vee = array(vec(66.16,42.1,0),vec(-66.16,42.1,0),vec(66.16,-42.1,0),vec(-66.16,-42.1,0))
+
+holoCreate(1, E:toWorld(vec(0,39,2)),vec(2,44,1.5),E:toWorld(ang(0,90,0)))
+holoModel(1, "models/sprops/geometry/hhex_18.mdl")
+holoColor(1, vec(255))
+holoMaterial(1, "")
+holoParent(1, E)
+
+holoCreate(2, E:toWorld(vec(0,-39,2)),vec(2,44,1.5),E:toWorld(ang(0,90,0)))
+holoModel(2, "models/sprops/geometry/hhex_18.mdl")
+holoColor(2, vec(255))
+holoMaterial(2, "")
+holoParent(2, E)
+
+
+holoCreate(3, E:toWorld(vec(60,0,7)),vec(14,28,15),E:toWorld(ang(-90,0,0)))
+holoModel(3, "models/sprops/misc/domes/size_0/dome_3x6.mdl")
+holoColor(3, vec(255))
+holoMaterial(3, "")
+holoParent(3, E)
+
+holoCreate(4, holoEntity(3):toWorld(vec(0)),vec(8,28,14),holoEntity(3):toWorld(ang(-90,0,0)))
+holoModel(4, "models/sprops/geometry/sphere_3.mdl")
+holoColor(4, vec(255))
+holoMaterial(4, "")
+holoParent(4, E)
+
+holoCreate(5, E:toWorld(vec(46.53,39,-3.87)),vec(2,13,1.5),E:toWorld(ang(180,90,0)))
+holoModel(5, "models/sprops/geometry/fhex_18.mdl")
+holoColor(5, vec(255))
+holoMaterial(5, "")
+holoParent(5, E)
+
+holoCreate(6, E:toWorld(vec(-46.53,39,-3.87)),vec(2,13,1.5),E:toWorld(ang(180,90,0)))
+holoModel(6, "models/sprops/geometry/fhex_18.mdl")
+holoColor(6, vec(255))
+holoMaterial(6, "")
+holoParent(6, E)
+
+holoCreate(7, E:toWorld(vec(46.53,-39,-3.87)),vec(2,13,1.5),E:toWorld(ang(180,90,0)))
+holoModel(7, "models/sprops/geometry/fhex_18.mdl")
+holoColor(7, vec(255))
+holoMaterial(7, "")
+holoParent(7, E)
+
+holoCreate(8, E:toWorld(vec(-46.53,-39,-3.87)),vec(2,13,1.5),E:toWorld(ang(180,90,0)))
+holoModel(8, "models/sprops/geometry/fhex_18.mdl")
+holoColor(8, vec(255))
+holoMaterial(8, "")
+holoParent(8, E)
+
+holoCreate(9, holoEntity(5):toWorld(vec(0,-22.5,-5.86875)),vec(1,3,1.95625),E:toWorld(ang(0,0,0)))
+holoColor(9, vec(255))
+holoModel(9, "models/sprops/prisms/tri/size_2/tprism_6x6.mdl")
+holoMaterial(9, "")
+holoParent(9, E)
+
+holoCreate(10, holoEntity(5):toWorld(vec(0,-22.5,5.86875)),vec(1,3,1.95625),E:toWorld(ang(0,0,180)))
+holoColor(10, vec(255))
+holoModel(10, "models/sprops/prisms/tri/size_2/tprism_6x6.mdl")
+holoMaterial(10, "")
+holoParent(10, E)
+
+holoCreate(11, holoEntity(7):toWorld(vec(0,-22.5,5.86875)),vec(1,3,1.95625),E:toWorld(ang(0,0,180)))
+holoColor(11, vec(255))
+holoModel(11, "models/sprops/prisms/tri/size_2/tprism_6x6.mdl")
+holoMaterial(11, "")
+holoParent(11, E)
+
+holoCreate(12, holoEntity(7):toWorld(vec(0,-22.5,-5.86875)),vec(1,3,1.95625),E:toWorld(ang(0,0,0)))
+holoColor(12, vec(255))
+holoModel(12, "models/sprops/prisms/tri/size_2/tprism_6x6.mdl")
+holoMaterial(12, "")
+holoParent(12, E)
+#models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl
+
+holoCreate(13, holoEntity(6):toWorld(vec(0,19.531734,0)),vec(2.745555281,3,2.745555281),E:toWorld(ang(45,0,0)))
+holoColor(13, vec(255))
+holoModel(13, "models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl")
+holoMaterial(13, "")
+holoParent(13, E)
+
+holoCreate(14, holoEntity(6):toWorld(vec(0,-19.531734,0)),vec(2.745555281,3,2.745555281),E:toWorld(ang(45,0,0)))
+holoColor(14, vec(255))
+holoModel(14, "models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl")
+holoMaterial(14, "")
+holoParent(14, E)
+
+holoCreate(15, holoEntity(8):toWorld(vec(0,19.531734,0)),vec(2.745555281,3,2.745555281),E:toWorld(ang(45,0,0)))
+holoColor(15, vec(255))
+holoModel(15, "models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl")
+holoMaterial(15, "")
+holoParent(15, E)
+
+holoCreate(16, holoEntity(8):toWorld(vec(0,-19.531734,0)),vec(2.745555281,3,2.745555281),E:toWorld(ang(45,0,0)))
+holoColor(16, vec(255))
+holoModel(16, "models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl")
+holoMaterial(16, "")
+holoParent(16, E)
+
+holoCreate(17, holoEntity(7):toWorld(vec(0,19.531734,0)),vec(2.745555281,3,2.745555281),E:toWorld(ang(45,0,0)))
+holoColor(17, vec(255))
+holoModel(17, "models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl")
+holoMaterial(17, "")
+holoParent(17, E)
+
+holoCreate(18, holoEntity(5):toWorld(vec(0,19.531734,0)),vec(2.745555281,3,2.745555281),E:toWorld(ang(45,0,0)))
+holoColor(18, vec(255))
+holoModel(18, "models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl")
+holoMaterial(18, "")
+holoParent(18, E)
+}
+
+UP = E:up()
+FORWARD = E:forward()
+
+foreach(I,V:vector=Vee){
+TW=E:toWorld(V)
+Rangers = rangerOffset(70,TW,-UP)
+Diff = 40-Rangers:distance()
+E:applyOffsetForce((UP*Diff*0.75*Mass),TW)}
+
+
+Driver=P:driver()
+WS=200*(Driver:keyForward()-Driver:keyBack())
+AD=-120*(Driver:keyRight()-Driver:keyLeft())
+
+ANG=(-E:angVel()+ang(0,AD,0))*Mass*3
+VEC=(-E:vel()*0.3-(FORWARD*WS))*Mass
+E:applyForce(VEC)
+E:applyAngForce(ANG)

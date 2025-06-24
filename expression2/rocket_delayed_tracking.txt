@@ -25,7 +25,8 @@ if(~Clk & Clk & propCanCreate() & F){
 
 event tick(){
     if(!F:isValid()){ #Only run find operations if we have no target
-        findByClass("npc_*")
+        findIncludePlayerProps(findPlayerByName("Raven"))
+        findByModel("models/props_c17/oildrum001.mdl")
         F = findClosest(entity():pos())
     }
     
@@ -36,7 +37,8 @@ event tick(){
         }
         
         if(F){ #Only change the angle if theres a target
-            Dir = (F:boxCenterW() - E:massCenter()):normalized()
+            local Dist = min(F:boxCenterW():distance(E:massCenter()), 5000) / 3000
+            Dir = ((F:boxCenterW() + F:vel() * Dist) - E:massCenter()):normalized()
             local D_Cross = E["Cross", vector] 
             E["Cross", vector] = E:forward():cross(Dir) * 300
             D_Cross = E["Cross", vector] - D_Cross

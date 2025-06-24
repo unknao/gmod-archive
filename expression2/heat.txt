@@ -1,0 +1,122 @@
+@name HEAT
+@strict
+@trigger none
+#include "includes/lib/ballistics"
+
+propSpawnUndo(0)
+const Heat_Rounds = array()
+let On_Cooldown = 0
+let Shrapnel_Model = "models/hunter/plates/plate.mdl"
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player != owner()){ exit() }
+    if(!Down){ exit() }
+    if(KeyBind != "walk"){ exit() }
+    if(On_Cooldown){ exit() }
+    
+    On_Cooldown = 1
+    timer("Cooldown", 0.4, 1, function(){
+        On_Cooldown = 0
+    })
+    let Dir = calculateTrajectory(owner():shootPos(), min(5000, speedLimit()), owner():aimPos())
+    
+    let E = propSpawn("models/props_junk/CinderBlock01a.mdl", owner():shootPos(), owner():eye():toAngle() - ang(90, 0, 0), 0)
+    E:setMass(200)
+    E:propDrag(0)
+    E:propSetVelocity(Dir)
+    E:setCollisionGroup(_COLLISION_GROUP_PASSABLE_DOOR)  
+    trackCollision(E)
+    
+    E["Cross", vector] = owner():eye():cross(E:up()) * 1000,
+    E["D_Cross", vector] = E["Cross", vector]
+    
+    timer(0, function(){
+        if(!E:isValid()){ return }
+        E:setCollisionGroup(_COLLISION_GROUP_NONE)  
+    })
+    
+    Heat_Rounds:pushEntity(E)
+    owner():emitSound("^physics/metal/metal_barrel_impact_hard3.wav", 100, 200 + random(-5, 5))
+    owner():emitSound("^physics/metal/metal_barrel_impact_hard6.wav", 100, 50 + random(-5, 5))
+    owner():emitSound("^physics/body/body_medium_impact_hard2.wav", 100, 30 + random(-5, 5))
+} 
+
+event tick(){
+    if(!Heat_Rounds:count()){ exit() }
+    foreach(I:number, E:entity = Heat_Rounds){
+        if(!E:isValid()){
+            Heat_Rounds:remove(I)
+            continue
+        }
+        E["D_Cross", vector] = E["Cross", vector]
+        E["Cross", vector] = E:vel():normalized():cross(E:up()) * 1000
+        #E["D_Cross", vector] = E["Cross", vector] - E["D_Cross", vector]
+        E:propSetAngVelocity(E:toLocalAxis(E["Cross", vector]))
+    }
+}
+
+let Time = curtime()
+let CaptureProps = 0
+let Shrapnel = table()
+
+event entityCollision(Entity:entity, _:entity, Col:collision) {
+    if(!Entity:isValid()){ exit() }
+    if(Time == curtime()){ exit() }
+    Time = curtime()
+    
+    Entity:emitSound("ambient/explosions/explode_2.wav", 70, 220 + random(-30, 30))
+    CaptureProps = 1
+    let Round_Dir = Col:ourOldVelocity():normalized()
+    for(_ = 1, 10){
+        let Dir = (Round_Dir + randvec(-0.3, 0.3)):normalized()
+        let SpawnPos = Entity:boxCenterW() + Dir * 30
+        if(!SpawnPos:isInWorld()){ continue }
+        
+        Shrapnel:pushArray(array(SpawnPos, Dir * 2000))
+        concmd("gm_spawn " + Shrapnel_Model)
+    }
+    if(timerExists("CaptureWindow")){
+        timerRestart("CaptureWindow")
+    }else{
+        timer("CaptureWindow", 0.5, 1, function(){
+            CaptureProps = 0
+        })
+    }
+    Entity:propDelete()
+}
+
+let ShrapnelArray = array()
+event entityCreated(Entity:entity) {
+    if(!CaptureProps){ exit() }
+    if(!Entity:isValid()){ exit() }
+    if(Entity:owner() != owner()){ exit() }
+    if(Entity:model() != Shrapnel_Model){ exit() }
+    
+    local Data = Shrapnel[1, array]
+    
+    Entity:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+    Entity:setMaterial("engine/singlecolor")
+    Entity:setPos(Data[1, vector])
+    Entity:propSetVelocity(Data[2, vector])
+    Entity:setMass(50)
+    Entity:setColor(vec(255, 150, 0))
+    Entity:emitSound("physics/metal/metal_sheet_impact_soft2.wav", 85, 220 + random(-30, 30))
+    Shrapnel:remove(1)
+    ShrapnelArray:pushEntity(Entity)
+    
+    if(timerExists("HEAT_Shrapnel_Flush_Queue")) {
+        timerRestart("HEAT_Shrapnel_Flush_Queue")
+    }else{
+        timer("HEAT_Shrapnel_Flush_Queue", 0.1, 1, function(){
+            let Temp = ShrapnelArray
+            ShrapnelArray = array()
+            timer(0.2, function() {
+                foreach(_:number, E:entity = Temp) {
+                    if(!E:isValid()){ continue }
+                    
+                    E:propBreak()
+                }
+            })
+        })
+    }
+}

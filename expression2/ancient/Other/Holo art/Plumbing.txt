@@ -1,0 +1,88 @@
+@name Plumbing
+
+E2 = entity()
+if(first() | duped()){
+holoCreate(1, E2:toWorld(vec(30,0,35)), vec(4), E2:toWorld(ang(0,0,0)))
+holoModel(1, "models/sprops/cylinders/size_5/cylinder_12x18.mdl")
+holoParent(1, E2)
+holoMaterial(1, "phoenix_storms/fender_chrome")
+
+holoCreate(2, E2:toWorld(vec(-10,0,15)), vec(1,1,2), E2:toWorld(ang(90,0,0)))
+holoModel(2, "models/sprops/cylinders/size_4/cylinder_9x18.mdl")
+holoParent(2, E2)
+holoMaterial(2, "phoenix_storms/fender_chrome")
+
+holoCreate(3, E2:toWorld(vec(30,0,71)), vec(4,4,1), E2:toWorld(ang(0,0,0)))
+holoModel(3, "models/sprops/geometry/sphere_12.mdl")
+holoParent(3, E2)
+holoMaterial(3, "phoenix_storms/fender_chrome")
+
+holoCreate(4, E2:toWorld(vec(-39,0,21.75)), vec(1,1,1), E2:toWorld(ang(180,0,0)))
+holoModel(4, "models/sprops/misc/fittings/bend_long_90_9.mdl")
+holoParent(4, E2)
+holoMaterial(4, "phoenix_storms/fender_chrome")
+
+holoCreate(5, E2:toWorld(vec(-52.5,0,44)), vec(1,1,1), E2:toWorld(ang(0,0,0)))
+holoModel(5, "models/sprops/misc/fittings/bend_long_90_9.mdl")
+holoParent(5, E2)
+holoMaterial(5, "phoenix_storms/fender_chrome")
+
+holoCreate(6, E2:toWorld(vec(-66.75,0,50.75)), vec(1,1,1), E2:toWorld(ang(-90,0,0)))
+holoModel(6, "models/sprops/misc/fittings/cred_9_6_short.mdl")
+holoParent(6, E2)
+holoMaterial(6, "phoenix_storms/fender_chrome")
+
+holoCreate(7, E2:toWorld(vec(-71.22,0,50.75)), vec(1,1,1), E2:toWorld(ang(-90,0,0)))
+holoModel(7, "models/sprops/misc/fittings/cred_6_3_short.mdl")
+holoParent(7, E2)
+holoMaterial(7, "phoenix_storms/fender_chrome")
+
+holoCreate(8, E2:toWorld(vec(-75,0,50)), vec(1,1,1), E2:toWorld(ang(0,0,180)))
+holoModel(8, "models/sprops/misc/fittings/t_fitting_3_to_3.mdl")
+holoParent(8, E2)
+holoMaterial(8, "phoenix_storms/fender_chrome")
+
+holoCreate(9, E2:toWorld(vec(-75,0,40)), vec(1,1,1), E2:toWorld(ang(0,0,180)))
+holoModel(9, "models/sprops/cylinders/size_2/cylinder_3x18.mdl")
+holoParent(9, E2)
+holoMaterial(9, "phoenix_storms/fender_chrome")
+
+holoCreate(10, E2:toWorld(vec(-75.75,0,28.8)), vec(1,1,1), E2:toWorld(ang(0,0,180)))
+holoModel(10, "models/sprops/misc/fittings/bend_short_90_3.mdl")
+holoParent(10, E2)
+holoMaterial(10, "phoenix_storms/fender_chrome")
+
+holoCreate(11, E2:toWorld(vec(-98,0,40)), vec(1,1,1), E2:toWorld(ang(0,90,180)))
+holoModel(11, "models/props_interiors/Radiator01a.mdl")
+holoParent(11, E2)
+holoMaterial(11, "phoenix_storms/fender_chrome")
+
+holoCreate(12, E2:toWorld(vec(-123,0,28.8)), vec(1,1,1), E2:toWorld(ang(90,0,180)))
+holoModel(12, "models/sprops/misc/fittings/bend_short_90_3.mdl")
+holoParent(12, E2)
+holoMaterial(12, "phoenix_storms/fender_chrome")
+
+holoCreate(13, E2:toWorld(vec(-123.75,0,42)), vec(1,1,1.3), E2:toWorld(ang(0,0,180)))
+holoModel(13, "models/sprops/cylinders/size_2/cylinder_3x18.mdl")
+holoParent(13, E2)
+holoMaterial(13, "phoenix_storms/fender_chrome")
+
+holoCreate(14, E2:toWorld(vec(-123,0,55)), vec(1,1,1), E2:toWorld(ang(90,0,0)))
+holoModel(14, "models/sprops/misc/fittings/t_fitting_3_to_3.mdl")
+holoParent(14, E2)
+holoMaterial(14, "phoenix_storms/fender_chrome")
+
+holoCreate(15, E2:toWorld(vec(-121.5,0,60)), vec(1,1,1), E2:toWorld(ang(0,180,0)))
+holoModel(15, "models/sprops/misc/fittings/bend_long_90_3.mdl")
+holoParent(15, E2)
+holoMaterial(15, "phoenix_storms/fender_chrome")
+
+holoCreate(16, E2:toWorld(vec(-51,0,62.28)), vec(1,1,4.5), E2:toWorld(ang(90,0,0)))
+holoModel(16, "models/sprops/cylinders/size_2/cylinder_3x30.mdl")
+holoParent(16, E2)
+holoMaterial(16, "phoenix_storms/fender_chrome")
+
+
+
+
+}

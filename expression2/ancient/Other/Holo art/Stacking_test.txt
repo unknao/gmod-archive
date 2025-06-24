@@ -1,0 +1,70 @@
+@name Stacking test
+@persist T1 T2 V1 V2 V3 C1 C2 C3 P1 P2 P3 
+
+if(first()){
+holoCreate(1, entity():toWorld(vec(0,0,20)), vec(1,1,0.1), entity():toWorld(ang()))
+holoColor(1, vec(50))
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(12,0,0)), vec(1,1,0.1), holoEntity(1):toWorld(ang()))
+holoColor(2, vec(60))
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(1):toWorld(vec(12,12,0)), vec(1,1,0.1), holoEntity(1):toWorld(ang()))
+holoColor(3, vec(70))
+holoParent(3, 1)
+
+holoCreate(4, holoEntity(1):toWorld(vec(0,12,0)), vec(1,1,0.1), holoEntity(1):toWorld(ang()))
+holoColor(4, vec(80))
+holoParent(4, 1)
+
+}
+interval(20)
+C1 = clamp(C1,0,1.09)+0.1
+if(changed(C1)){
+holoPos(2, holoEntity(1):toWorld(vec(12,0,C1)))
+timer("1",500)}
+if(clk("1")){
+P1 = 1}
+if(P1){
+V1 = clamp(V1,0,11.5)+0.5
+holoPos(2, holoEntity(1):toWorld(vec(12-V1,0,1.2)))
+timer("switch1",700)}
+if(clk("switch1")){
+V1 = 0
+P1 = 0
+T1 = 1}
+if(T1){
+C2 = clamp(C2,0,2.29)+0.1
+holoPos(3, holoEntity(1):toWorld(vec(12,12,C2)))
+timer("2",1000)}
+if(clk("2")){
+P2 = 1}
+if(P2){
+V2 = clamp(V2,0,11.5)+0.5
+holoPos(3, holoEntity(1):toWorld(vec(12-V2,12-V2,2.4)))
+timer("switch2",700)}
+if(clk("switch2")){
+T1 = 0
+P2 = 0
+T2 = 1}
+if(T2){
+C3 = clamp(C3,0,3.49)+0.1
+holoPos(4, holoEntity(1):toWorld(vec(0,12,C3)))
+timer("3",1500)}
+if(clk("3")){
+P3 = 1}
+if(P3){
+V3 = clamp(V3,0,11.5)+0.5
+holoPos(4, holoEntity(1):toWorld(vec(0,12-V3,3.6)))
+timer("kill",700)}
+if(clk("kill")){
+T2 = 0
+P3 = 0}
+
+
+
+
+
+
+

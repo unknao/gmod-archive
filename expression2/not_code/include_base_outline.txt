@@ -1,0 +1,46 @@
+@name Include-Base guidelines v1
+
+#All e2s made using this outline need to work flawlessly when included in other e2s using the #include directive
+#All settings should be easily editable without the editing the main code of the e2
+
+#[Functionals:
+    -Clearly define where the editable constants begin and end
+    -Avoid using entity directions such as entity():up(), entity():forward(), etc
+    -Instead define directions as such: 
+        ...Dir_FWD = vec(1, 0, 0)...
+    -and use as such: 
+        ...let Forward = entity:toLocalAxis(Dir_FWD)...
+    -Do not hardcode sounds into functionality, instead make use of function variables.
+    -Widely used non-default functions should have their own lib #include
+    -Do not use @persist
+    -Use @strict
+    -Whilst the idea is to use @trigger none for everything, dont put it in the e2 includeable e2s, instead put it in the master include e2
+]#   
+
+#[Inputs:
+    -@inputs names should be standardized across all e2s to avoid retreading the same ground
+    -Naming scheme:
+        -The main central prop = "Base"
+        -Horizontal rotation turret = "Turret"
+        -Vertical rotation turret = "Gun"
+        -Pod Controller inputs should be named the same as they are on the Pod Controller
+        -Cam Controller same as Pod Controller, or a wirelink
+        -EGP wirelink = "EGP"
+    -Avoid having many [ENTITY] inputs of the same function (eg. Turret1, Turret2, Turret3), instead opt to use the Advanced Entity Marker
+]#
+
+#[Code Style Guide:
+    -Constants should be SCREAMING_SNAKE_CASE
+    -Globals should be PascalCase
+    -Locals should be Pascal_Snake_Case
+    -Add spaces inbetween brackets and code on a 1-liner if statement, example:
+        ...if(!Player:isValid){ exit() }...
+    -Add spaces at the beginning and end of every math symbol
+    -Avoid using 1 letter long variable names such as E, A, W, N, etc... Instead use context-appropriate variable names
+    -Use "let" instead of "local"
+    -Non-editable constants should use "const"
+]#
+
+#[Limitations:
+    -Locals defined inside the main scope of the file do not work in events when included in another file
+]#

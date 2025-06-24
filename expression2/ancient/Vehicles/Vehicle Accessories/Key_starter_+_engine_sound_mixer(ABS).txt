@@ -1,0 +1,42 @@
+@name Key starter + engine sound mixer(ABS)
+@inputs [Pod Engine]:wirelink
+@outputs On Brakes
+@persist R S Brakes RPM
+
+if(dupefinished()){reset()}
+interval(100)
+
+Active = Pod["Active",number]
+R = Pod["R",number]
+RPM = Engine["RPM",number]
+
+############################!engine starter!#########################
+if (changed(R) & R){
+    if( On )
+    {
+        On = 0
+        soundStop("engine2")
+    }
+    else
+    {
+        Engine:entity():soundPlay("engine",0,"acf_extra/vehiclefx/starters/starter2.wav")
+        timer("EngineOn",1100)
+    }
+}
+if( clk("EngineOn") )
+{
+    soundStop("engine")
+     Engine On = 1
+    Engine:entity():soundPlay("engine2",999,"acf_engines/electric_small.wav")
+    
+    
+}
+soundPitch("engine2",RPM*0.02)
+
+if(S==1){
+Brakes = clamp(Brakes,0,5) +0.30
+}
+else{
+Brakes = 0
+}
+

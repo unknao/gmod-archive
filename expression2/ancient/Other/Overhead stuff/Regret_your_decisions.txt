@@ -1,0 +1,52 @@
+@name Regret your decisions
+@outputs Fire
+@persist [T1 T]:entity Tog AF
+if(first()){
+entity():propNotSolid(1)
+entity():setAlpha(0)
+T = owner()
+AF = 0
+}
+
+interval(100)
+runOnChat(1)
+S = owner():lastSaid():explode(" ")
+
+if(!T1){
+findByClass("gmod_wire_turret")
+findSortByDistance(entity():pos()) 
+if(find() & find():owner()==owner()){
+T1 = find()
+T1:propNotSolid(1)
+T1:setAlpha(0)
+T1:createWire(entity(),"Fire","Fire")
+}}
+if(changed(owner():lastSaidWhen()) & !first()){
+if(S[1,string] == "!rip" & !first()){
+hideChat(1)
+T = findPlayerByName(S[2,string])
+print(_HUD_PRINTCENTER,"Following: "+T:toString())
+AF = 1}
+
+elseif(S[1,string] == "!unrip"){
+hideChat(1)
+print(_HUD_PRINTCENTER,"Stopped following.")
+T = owner()
+AF = 0}
+}
+
+T1:setPos(T:pos()+vec(-3,0,100))
+
+T1:setAng(ang(90,0,0))
+
+if(owner():keyPressed("l") & T1 & AF){
+Tog = !Tog}
+if(changed(Tog) & Tog & !first()){
+print(_HUD_PRINTCENTER,"rip")}
+if(changed(!Tog) & !Tog & !first()){
+print(_HUD_PRINTCENTER,"unrip")}
+if(Tog & AF){
+Fire = 1
+}else{
+Fire = 0}
+

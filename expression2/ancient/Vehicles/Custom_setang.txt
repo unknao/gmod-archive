@@ -1,0 +1,26 @@
+@name Custom setang
+@inputs [Seat CHASSIS]:wirelink
+@persist [C S SLAVE]:entity TURN_RATE Anghoul TURN Ang:angle A D
+@model models/sprops/rectangles_thin/size_1/rect_3x3x1_5.mdl
+
+if(first()){
+SLAVE = entity()
+TURN_RATE = 6
+S = Seat:entity()
+C = CHASSIS:entity()}
+if (duped() | dupefinished()) {reset()}
+
+Anghoul = clamp(45-C:vel():length()/18.5,25,45)
+
+A = S:driver():keyLeft()
+D = S:driver():keyRight()
+interval(30)
+
+if(!SLAVE:isPlayerHolding()){
+        TURN += clamp((A-D)*Anghoul - TURN,-6,6)
+        Ang = C:toWorld(ang(0, TURN, 0))
+        SLAVE:setAng(Ang)
+        if(!SLAVE:isFrozen()){
+        SLAVE:propFreeze(1)}
+       }
+

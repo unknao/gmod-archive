@@ -1,0 +1,124 @@
+@name Racing light
+@persist [Black Green Yellow Red]:vector A
+@outputs A
+Black = vec(0,0,0)
+Green = vec(0,255,0)
+Yellow = vec(255,255,0)
+Red = vec(255,0,0)
+
+runOnChat(1)
+S = owner():lastSaid():explode(" ")
+
+if(first()){
+entity():setAlpha(0)
+holoCreate(1, entity():toWorld(vec(3,0,120)), vec(1), entity():toWorld(ang(0,0,90)))
+holoModel(1, "models/sprops/cylinders/size_5/cylinder_12x24.mdl")
+holoMaterial(1, "models/debug/debugwhite")
+holoDisableShading(1, 1)
+holoColor(1, Black)
+holoParent(1, entity())
+
+holoCreate(2, entity():toWorld(vec(3,0,108)), vec(1), entity():toWorld(ang(0,0,90)))
+holoModel(2, "models/sprops/cylinders/size_5/cylinder_12x24.mdl")
+holoDisableShading(2, 1)
+holoMaterial(2, "models/debug/debugwhite")
+holoColor(2, Black)
+holoParent(2, entity())
+
+holoCreate(3, entity():toWorld(vec(3,0,96)), vec(1), entity():toWorld(ang(0,0,90)))
+holoModel(3, "models/sprops/cylinders/size_5/cylinder_12x24.mdl")
+holoDisableShading(3, 1)
+holoMaterial(3, "models/debug/debugwhite")
+holoColor(3, Black)
+holoParent(3, entity())
+
+holoCreate(4, entity():toWorld(vec(3,0,84)), vec(1), entity():toWorld(ang(0,0,90)))
+holoModel(4, "models/sprops/cylinders/size_5/cylinder_12x24.mdl")
+holoDisableShading(4, 1)
+holoMaterial(4, "models/debug/debugwhite")
+holoColor(4, Black)
+holoParent(4, entity())
+
+holoCreate(5, entity():toWorld(vec(3,0,72)), vec(1), entity():toWorld(ang(0,0,90)))
+holoModel(5, "models/sprops/cylinders/size_5/cylinder_12x24.mdl")
+holoDisableShading(5, 1)
+holoMaterial(5, "models/debug/debugwhite")
+holoColor(5, Black)
+holoParent(5, entity())
+
+holoCreate(6, entity():toWorld(vec(0,0,60)), vec(1), entity():toWorld(ang(0,0,0)))
+holoModel(6, "models/sprops/cylinders/size_3/cylinder_6x120.mdl")
+holoColor(6, vec(100,100,100))
+holoMaterial(6, "models/shiny")
+holoParent(6, entity())
+
+holoCreate(7, entity():toWorld(vec(0,0,0)), vec(1), entity():toWorld(ang(0,0,90)))
+holoModel(7, "models/sprops/geometry/fhex_24.mdl")
+holoColor(7, vec(100,100,100))
+holoMaterial(7, "models/shiny")
+holoParent(7, entity())
+
+holoCreate(8, entity():toWorld(vec(-1,0,96)), vec(1), entity():toWorld(ang(90,0,0)))
+holoModel(8, "models/sprops/cuboids/height06/size_4/cube_24x48x6.mdl")
+holoColor(8, vec(100,100,100))
+holoMaterial(8, "models/shiny")
+holoParent(8, entity())
+
+}
+if(S[1,string] == "!start" & chatClk(owner())){
+hideChat(1)
+timer("5",100)
+}
+if(clk("5")){
+holoColor(1, Red)
+holoColor(2, Black)
+holoColor(3, Black)
+holoColor(4, Black)
+holoColor(5, Black)
+soundPlay(2,10,"hl1/fvox/boop.wav")
+timer("4",1000)
+}
+if(clk("4")){
+holoColor(1, Red)
+holoColor(2, Red)
+holoColor(3, Black)
+holoColor(4, Black)
+holoColor(5, Black)
+soundPlay(3,10,"hl1/fvox/boop.wav")
+timer("3",1000)
+}
+if(clk("3")){
+holoColor(1, Red)
+holoColor(2, Red)
+holoColor(3, Red)
+holoColor(4, Black)
+holoColor(5, Black)
+soundPlay(4,10,"hl1/fvox/boop.wav")
+timer("2",1000)
+}
+if(clk("2")){
+holoColor(1, Red)
+holoColor(2, Red)
+holoColor(3, Red)
+holoColor(4, Yellow)
+holoColor(5, Black)
+soundPlay(5,10,"hl1/fvox/boop.wav")
+timer("1",1000)
+}
+if(clk("1")){
+holoColor(1, Green)
+holoColor(2, Green)
+holoColor(3, Green)
+holoColor(4, Green)
+holoColor(5, Green)
+soundPlay(6,10,"hl1/fvox/boop.wav")
+soundPitch(5, 200)
+timer("reset",3000)
+}
+if(clk("reset")){
+holoColor(1, Black)
+holoColor(2, Black)
+holoColor(3, Black)
+holoColor(4, Black)
+holoColor(5, Black)
+}

@@ -1,0 +1,85 @@
+@name rocket delayed tracking autotrigger
+@outputs F:array
+@persist Missiles:array Dir:vector
+@trigger 
+
+if(first()){
+    Missiles = array(), F = array()
+    propSpawnUndo(0)
+}
+
+function entity createMissile(Target:entity){
+    #if(!propCanCreate()){ return }
+    
+    local M = propSpawn("models/props_phx/amraam.mdl", entity():toWorld(vec(0, 0, 150)), entity():toWorld(ang(-90, 0, 0)), 0)
+    M:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+    M:propSetVelocity(entity():up() * 500) #Initial velocity
+    
+    #Cool sounds
+    M:emitSound("EpicMetal_Heavy.ImpactHard")
+    M:emitSound("MVM.GiantDemoman_Grenadeshoot")
+    
+    Missiles:pushEntity(M) #Push all the rockets into the array
+    M["Target", entity] = Target
+    Target["Interceptor", entity] = M
+    
+    return M
+}
+
+event tick(){
+    findInSphere(entity():pos(), 4096)
+    findClipToModel("models/props_phx/amraam.mdl")
+    findExcludePlayerProps(owner())
+    F = findToArray()
+    if(F:count() & propCanCreate()){
+        foreach(_:number, E:entity = F){
+            if(!propCanCreate()){ break }
+            if(E["Interceptor", entity]:isValid()){ continue }
+            
+            createMissile(E)
+        }
+         
+    }
+    
+    foreach(I:number, E:entity = Missiles){
+        if(!E:isValid()){ #If missile doesn't exist, remove it from the array
+            Missiles:remove(I) 
+            continue #Skip to next entry on the array
+        }
+        let Target = E["Target", entity]
+        if(!Target:isValid()){
+            E:propDelete()
+            Missiles:remove(I)
+            continue
+        }
+        
+        if(F){ #Only change the angle if theres a target
+            local Dist = Target:boxCenterW():distance(E:massCenter()) / 6000
+            Dir = ((Target:boxCenterW() + Target:vel() * Dist) - E:massCenter()):normalized()
+            local D_Cross = E["Cross", vector] 
+            E["Cross", vector] = E:forward():cross(Dir) * 1000
+            D_Cross = E["Cross", vector] - D_Cross
+            E:applyTorque((E:toLocalAxis(E["Cross", vector] + D_Cross * 20) - E:angVelVector()) * E:inertia())
+        }
+    
+        if(E["Activate", number]){ #Trigger all these things only once.
+            E["Activate", number] = 0
+            E["Active", number] = 1
+            E:emitSound("Building_Sentrygun.FireRocket")
+            E:soundPlay(E:id(), 0, "Phx.Afterburner3")
+                
+            #Neat missile trail trick (only visible if you have tf2)
+            holoCreate(E:id(), E:toWorld(vec(-70, 0, 8.6)), vec(1), E:toWorld(ang()), vec4(), "models/buildables/sentry3_rockets.mdl")
+            holoParent(E:id(), E)
+            
+        }
+        elseif(E["Active", number]){
+            if(E:boxCenterW():distance2(Target:boxCenterW()) <= 62500){ 
+                E:propBreak()
+                Target["Interceptor", entity] = noentity()
+            }
+            E:propSetVelocity(E:forward() * 6000)
+        }elseif(Dir:dot(E:forward()) >= 0.9){ E["Activate", number] = 1 }
+            
+    }
+}

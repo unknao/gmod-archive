@@ -1,0 +1,12 @@
+@name generick
+@persist [E P]:entity A:array Vec:vector
+
+interval(10)
+if(first()){
+P = findPlayerByName("galaxy")}
+
+findByClass("prop_combine*")
+A = findToArray()
+foreach(I,E:entity=A){
+Vec = (P:boxCenterW()-E:pos())*5000
+E:applyForce(Vec+$Vec*5)}

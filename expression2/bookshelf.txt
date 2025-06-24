@@ -1,0 +1,101 @@
+@name bookshelf
+@strict
+@trigger none
+#@model models/props_interiors/Furniture_shelf01a.mdl
+propSpawnUndo(0)
+const Heights = array(
+    16.1,
+    32.65,
+    50.5,
+    66.55
+)
+const BookModels = table(
+    "models/props_lab/binderblue.mdl" = 1,
+    "models/props_lab/binderbluelabel.mdl" = 1,
+    "models/props_lab/bindergraylabel01a.mdl" = 1,
+    "models/props_lab/bindergreen.mdl" = 1,
+    "models/props_lab/bindergraylabel01b.mdl" = 1,
+    "models/props_lab/bindergreenlabel.mdl" = 1,
+    "models/props_lab/binderredlabel.mdl" = 1
+)
+E = propSpawn("models/props_interiors/Furniture_shelf01a.mdl", entity():toWorld(vec(0, 0, 100)), ang(), 1)
+const BookPosVacant = array()
+const BookPosOccupied = array()
+
+for(I = 0, 10){
+    for(II = 0, 4){
+        BookPosVacant:pushVector(vec(-2.2, -19 + I * 3.8, -39.35 + Heights[II, number]))
+    }
+}
+
+let PlaceVec = vec()
+trackCollision(E, function(E:entity, Ent:entity, XCD:collision){
+    if(!E:isValid()){ return }
+    if(!Ent:isValid()){ return }
+    if(!owner():canTool(Ent, "")){ return }
+    if(!BookModels[Ent:model(), number]){ return }
+    if(XCD:deltaTime() < 0.1){ return }
+    if(Ent["CollisionGracePeriod", number] > curtime()){ return }
+    
+    let Vel = XCD:theirOldVelocity():normalized()
+    if(Vel:dot(E:forward()) > -0.75){ return }
+    
+    let Max = _INF
+    let Chosen = 0
+    foreach(I:number, V:vector = BookPosVacant){
+        let TW = E:toWorld(V)
+        let Dist = TW:distance2(Ent:pos())
+        
+        if(Dist >= 625){ continue }
+        if(Dist > Max){ continue }
+            
+        Chosen = I
+        Max = TW:distance2(Ent:pos())
+        PlaceVec = V
+    }
+    if(!Chosen){ return }
+    
+    BookPosVacant:remove(Chosen)
+    
+    Ent:parentTo(E)
+    Ent["ResidesIn", vector] = PlaceVec
+    Ent:setLocalPos(PlaceVec)
+    Ent:setLocalAng(ang())
+    
+    E:emitSound("buttons/blip2.wav")
+})
+
+function doPickup(Entity:entity){
+    if(!Entity["ResidesIn", vector]){ return }
+    
+    Entity:deparent()
+    Entity:setPos(E:toWorld(Entity["ResidesIn", vector]))
+    
+    foreach(I:number, V:vector = BookPosOccupied){
+        if(V != Entity["ResidesIn", vector]){ continue }
+        
+        BookPosOccupied:remove(I)
+        break
+    }
+    Entity:emitSound("buttons/latchunlocked2.wav")
+    BookPosVacant:pushVector(Entity["ResidesIn", vector])
+    Entity["ResidesIn", vector] = _VECTOR_ORIGIN
+    Entity["CollisionGracePeriod", number] = curtime() + 1
+}
+
+event playerPhysgunPickup(_:entity, Entity:entity) { doPickup(Entity) }
+event playerUse(_:entity, Entity:entity) { doPickup(Entity) }
+
+event entityRemoved(Ent:entity) {
+    if(!Ent:isValid()){ exit() }
+    if(Ent == E){ selfDestruct(), exit() }
+    if(!Ent["ResidesIn", vector]){ exit() }
+    
+    foreach(I:number, V:vector = BookPosOccupied){
+        if(V != Ent["ResidesIn", vector]){ continue }
+        
+        BookPosOccupied:remove(I)
+        break
+    }
+    BookPosVacant:pushVector(Ent["ResidesIn", vector])  
+}

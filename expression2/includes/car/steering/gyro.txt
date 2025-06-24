@@ -1,0 +1,33 @@
+@name gyro adjustment
+@inputs [Base]:entity
+@outputs Gyro
+@strict
+
+#When including, include after the setang file.
+
+GYRO_MUL = 0.4
+GYRO_VEL_OFFSET = vec(53, 0, 0) #From which point the gyro obtains slide from local to the base, set this to inbetween your rear wheels
+GYRO_MIN_SPEED = 50 #Minimum velocity the gyro starts working at
+GYRO_MAX = 45 #Maximum amount the gyro steering can compensate
+
+BASE_DIR_RIGHT = vec(0, 1, 0) #Sideways direction of the base locally
+#Base_Dir_Forward = vec(1, 0, 0) #Forwards direction of the base locally
+
+
+GyroVelOffsetDelta = vec(), GyroVelOffset = vec(), Gyro = 0
+
+event tick(){
+    if(!Base){ exit() }
+        
+    GyroVelOffsetDelta = GyroVelOffset
+    GyroVelOffset = Base:toWorld(GYRO_VEL_OFFSET)
+    
+    let Right = Base:toWorldAxis(BASE_DIR_RIGHT)
+    let Vel = GyroVelOffset - GyroVelOffsetDelta
+        
+    Gyro = asin(Vel:normalized():dot(Right)) * (Base:vel():length() > GYRO_MIN_SPEED)
+    Gyro = clamp((Gyro - clamp(Gyro, -2, 2)) * GYRO_MUL, -GYRO_MAX, GYRO_MAX)
+}
+    
+    
+    

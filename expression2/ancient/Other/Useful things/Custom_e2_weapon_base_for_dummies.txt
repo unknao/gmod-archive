@@ -1,0 +1,24 @@
+@name Custom e2 weapon base for dummies
+@persist Hold
+interval(100)
+if(first()){
+holoCreate(1)
+holoScale(1, vec(0.5))
+holoColor(1, vec(100,0,0))
+holoAlpha(1, 100)
+holoParent(1, entity())
+}
+if(owner():weapon():type() == "weapon_357"){
+Hold = 1
+}else{
+Hold = 0}
+
+if(changed(Hold)){
+timer("change",10)
+holoUnparent(1)
+}
+if(clk("change")){
+holoPos(1, owner():attachmentPos(Hold ?"anim_attachment_rh" : "chest"))
+holoAng(1, owner():attachmentAng(Hold ?"anim_attachment_rh" : "chest"))
+holoParentAttachment(1, owner(), Hold ?"anim_attachment_rh" : "chest")
+owner():weapon():setAlpha(!Hold*255)}

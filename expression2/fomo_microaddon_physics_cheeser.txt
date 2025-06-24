@@ -1,0 +1,46 @@
+@name FOMO microaddon physics cheeser
+@strict
+
+let Rdy = 0
+E = noentity()
+
+if(!entity():isWeldedTo()){ 
+    selfDestruct()
+    exit()
+}else{
+    E = entity():isWeldedTo()
+    entity():parentTo(E)
+    entity():constraintBreak()
+    Origin = E:pos()
+    E:propStatic(1)
+    Rdy = 1
+}
+Time = 0
+F = noentity()
+event tick(){
+    if(!Rdy){ exit() }
+    if(!findCanQuery()){ exit() }
+    
+    if(!F){
+        findByClass("*_item_sent")
+        foreach(_:number, EE:entity = findToArray()){
+            if(EE:vel():length() < 100){ continue }
+            F = EE
+            break
+        }
+    }
+    
+    if(F & (Time < curtime())){
+        E:setPos(F:boxCenterW() - vec(0, 0, 15) + F:vel() * 0.3)
+        Time = curtime() + 0.4
+    }elseif(!F & E:pos() != Origin){
+        E:setPos(Origin)
+    }
+}
+
+
+event removed(_:number) {
+    if(!E){ exit() }
+    E:setPos(Origin)
+    E:propStatic(0)
+}

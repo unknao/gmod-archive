@@ -1,0 +1,58 @@
+@name Seat Previewer V1
+@strict
+@trigger none
+@model models/hunter/blocks/cube025x025x025.mdl
+if(duped()){ exit() }
+Ready = first() | dupefinished()
+
+#Seat Previewer V1 by unknao
+#Usage: press 'walk' bind (Alt by default) to cycle between sitting animations.
+
+Seat = entity():isWeldedTo()
+if(!Seat | !Seat:isVehicle()){ 
+    selfDestruct()
+    error("Vehicle is not valid!") 
+}
+
+let Mat = entity():getMaterial()
+if(Mat:find("SitType")){
+    SitType = Mat:sub(8):toNumber()
+}else{
+    SitType = 1
+}
+
+const SitTypes = array(
+    "sit_rollercoaster",
+    "drive_airboat",
+    "drive_jeep",
+    "drive_pd"
+)
+
+
+holoCreate(1, vec(), vec(1), ang(), vec(255), "models/player/group03/male_06.mdl")
+holoParent(1, Seat)
+holoPos(1, Seat:attachmentPos("vehicle_feet_passenger0"))
+holoAng(1, Seat:attachmentAng("vehicle_feet_passenger0"))
+holoAnim(1, SitTypes[SitType, string])
+
+event keyPressed(Player:entity, Key:string, Down:number, KeyBind:string) {
+    if(!Ready){ exit() }
+    if(Player != owner()){ exit() }
+    if(Player:aimEntity() != entity()){ exit() }
+    if(KeyBind != "walk"){ exit() }
+    if(!Down){ exit() }
+    
+    SitType = (SitType % SitTypes:count()) + 1
+    holoAnim(1, SitTypes[SitType, string])
+    entity():setMaterial("SitType" + SitType)
+    entity():emitSound("buttons/button17.wav", 70, random(98, 102))
+}
+
+event playerEnteredVehicle(_:entity, Vehicle:entity) {
+    if(Vehicle != Seat){ exit() }
+    holoAlpha(1, 0)
+}
+event playerLeftVehicle(_:entity, Vehicle:entity) {
+    if(Vehicle != Seat){ exit() }
+    holoAlpha(1, 255)
+}

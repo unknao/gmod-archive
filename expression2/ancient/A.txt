@@ -1,0 +1,35 @@
+@name A
+@persist C [A Mot]:array 
+runOnTick(1)
+if(first()){C=1}
+if(C<=200){
+if(holoCanCreate()){
+holoCreate(C,entity():toWorld(vec(sin(1.8*C)*100,cos(1.8*C)*100,10+C*0.1)))
+holoColor(C,vec(230,150,64))
+A:pushNumber(C)
+C++}
+}else{
+
+if(owner():keyReload()){
+Ent=holoEntity(A[1,number])
+holoAlpha(A[1,number],255)
+Ent["vel",vector]=(owner():eye()*20)*0.5
+Ent["alpha",number]=0
+holoPos(A[1,number],(owner():pos()+vec(0,0,64))+owner():eye()*10)
+Mot:pushNumber(A[1,number])
+A:shiftNumber()}
+
+foreach(I,N:number=Mot){
+E=holoEntity(N)
+
+holoPos(N,E:pos()+E["vel",vector])
+E["alpha",number]=clamp(E["alpha",number],0,247)+8
+Debug=E["alpha",number]
+holoAlpha(N,255-E["alpha",number])
+
+if(E["alpha",number]==255){
+A:pushNumber(N)
+Mot:remove(I)
+}}
+
+}

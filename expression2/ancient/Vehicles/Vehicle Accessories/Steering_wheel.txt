@@ -1,0 +1,29 @@
+@name Steering wheel
+@inputs A D Setang
+@persist Turn SteeringAngle SteeringRate TurnbackRate Setang A D
+
+interval(100)
+
+if (first() | duped()){
+    #----SETTINGS----#
+    WheelModel = "models/sprops/trans/stwheels/stwheel_3.mdl"
+    SteeringRate = 13.5
+    TurnbackRate = 15.5
+
+    entity():setAlpha(0)
+    holoCreate(1)
+    holoParent(1,entity())
+    holoModel(1,WheelModel)
+    }
+
+if(Setang >= 20){
+SteeringAngle = 25
+}else{
+SteeringAngle = 45
+}
+
+if(A | D) {Rate = SteeringRate} else {Rate = TurnbackRate} #CHANGED SPINNING RATE BASED OF THE INPUTS, A AND D. DEFINES STEERING RATE.
+
+Turn += clamp((A-D)*SteeringAngle - Turn, -Rate, Rate) #CLAMPS TO THE MAX ANGLE YOU HAVE INPUTED, SLOWED DOWN BY THE STEERING RATE.
+
+holoAng(1,entity():toWorld(ang(-90,Turn+180,0))) #THIS IS WHAT ACTUALLY CHANGES THE ANGLE OF THE WHEEL. BASED OF TURN, WE DEFINED 2 LINES UP.

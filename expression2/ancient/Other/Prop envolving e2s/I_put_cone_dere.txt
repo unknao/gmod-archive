@@ -1,0 +1,10 @@
+@name I put cone dere
+@persist E:entity
+interval(10)
+if(first()){
+propSpawnUndo(0)}
+M2 = owner():keyAttack2()
+if(changed(M2) & M2){
+E = propSpawn("models/props_junk/TrafficCone001a.mdl", owner():aimPos()+vec(0,0,15), 1)
+}
+

@@ -1,0 +1,86 @@
+@name RC hover
+@persist Distance E:entity G I Turn Lean Tog R A SH
+
+
+if(first()){
+if(!E){
+findByModel("models/sprops/rectangles/size_2_5/rect_18x24x3.mdl")
+findClosest(entity():pos())
+if(find()){E = find()}else{
+E = propSpawn("models/sprops/rectangles/size_2_5/rect_18x24x3.mdl",entity():pos()+vec(0,0,10),0)}}
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia())
+}
+E:setMass(20)
+E:propFreeze(0)
+rangerHitWater(1)
+rangerPersist(1)
+noCollideAll(entity(),0)
+holoCreate(1)
+rangerFilter(E)
+}
+
+
+
+R = owner():keyPressed("p")
+SH = owner():keySprint()
+
+interval(20)
+
+if(changed(R) & R){
+Tog = !Tog
+soundPlay("ignv",Tog ? 0.8 : 1.13, Tog ? "hl1/fvox/activated.wav" : "hl1/fvox/deactivated.wav")
+soundVolume("ignv", 0.08)
+if(changed(!Tog) & Tog){
+Turn = E:angles():yaw()
+E:soundPlay("idle",0,"hl1/ambience/labdrone2.wav")
+soundVolume("idle", 0.07)
+}
+}
+if(Tog){
+soundPitch("idle", 50+E:vel():length()*0.05)
+Ranger = rangerOffset(100,E:pos()+E:vel():setZ(0)/8,-entity():up())
+holoPos(1,Ranger:position())
+
+if(Ranger:hit()){
+Diff = 40-Ranger:distance()
+E:applyForce((vec(0,0,Diff*0.75)-E:vel()*0.1)*E:mass())
+}
+else{
+E:applyForce((-E:vel()*0.1+Ranger:entity():vel()/6)*E:mass())
+}
+
+soundPitch("loop",50+E:vel():length()*0.025)
+if(!SH){
+soundStop("charge")
+soundStop("loop")
+}
+if(owner():keyPressed("up")){
+G = clamp(G,0,13)+2
+E:applyForce(E:forward()*50*G)}
+else{
+G = clamp(G,2,15)-2}
+
+if(owner():keyPressed("down")){
+I = clamp(I,0,3)+2
+E:applyForce(-E:forward()*50*I)}else{
+I = clamp(I,2,5)-2}
+
+if(owner():keyPressed("left")){
+Turn = Turn + 3.5
+Lean = 20
+}
+if(owner():keyPressed("right")){
+Turn = Turn - 3.5
+Lean = -20
+}
+
+if(!owner():keyPressed("left") & !owner():keyPressed("right"))
+{Lean = 0}
+
+E:faceAng(ang(0,Turn,-Lean),7)
+}
+if(changed(Tog) & !Tog){
+soundStop("idle")
+}

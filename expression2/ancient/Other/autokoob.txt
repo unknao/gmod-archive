@@ -1,0 +1,31 @@
+@name autokoob
+@persist A:array X Y Z SQ E:entity N
+
+interval(20)
+if(first()){
+findIncludePlayerProps(owner())}
+findByClass("prop_physics")
+A = findToArray()
+
+if(changed(A:count())){
+X=0
+Y=0
+Z=0
+N=1
+SQ =round(cbrt(A:count()))
+}
+if(N<=A:count()){
+E = A[N,entity]
+if(X==SQ){
+Y++
+X=0}
+
+if(Y==SQ){
+Z++
+Y=0}
+E:propFreeze(1)
+E:setAng(ang())
+E:setPos(entity():pos()+vec(X*20,Y*20,20+Z*20))
+X+=1
+N+=1}
+

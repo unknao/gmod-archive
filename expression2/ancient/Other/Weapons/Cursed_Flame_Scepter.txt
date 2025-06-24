@@ -1,0 +1,323 @@
+@name Cursed Flame Scepter
+@persist [Fireballs Varrae]:array [E S]:entity Hold R Ready U Alpha 
+runOnTick(1)
+if(first()){
+runOnLast(1)
+propSpawnUndo(0)
+entity():setAlpha(0)
+entity():propNotSolid(1)
+
+#Scepter parts
+holoCreate(1)
+holoColor(1, vec(100,0,0))
+holoEntity(1):propDraw(0)
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec()), vec(0.1,0.1,4), holoEntity(1):toWorld(ang()))
+holoModel(2, "hq_cylinder")
+holoColor(2, vec(70))
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(0,0,-25)), vec(0.25), holoEntity(2):toWorld(ang()))
+holoModel(3, "hq_sphere")
+holoColor(3, vec(119,146,0))
+holoDisableShading(3, 1)
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(2):toWorld(vec(0,0,20)), vec(0.6,0.6,1.3), holoEntity(2):toWorld(ang()))
+holoModel(4, "hq_rcylinder_thick")
+holoColor(4, vec(119,146,0))
+holoDisableShading(4, 1)
+holoParent(4, 2)
+
+holoCreate(5, holoEntity(2):toWorld(vec(0,0,10)), vec(0.125), holoEntity(2):toWorld(ang()))
+holoModel(5,"hq_torus_thick")
+holoColor(5, vec(119,146,0))
+holoDisableShading(5, 1)
+holoParent(5, 2)
+
+holoCreate(6, holoEntity(2):toWorld(vec(0,0,8)), vec(0.125), holoEntity(2):toWorld(ang()))
+holoModel(6,"hq_torus_thick")
+holoColor(6, vec(119,146,0))
+holoDisableShading(6, 1)
+holoParent(6, 2)
+
+holoCreate(7, holoEntity(2):toWorld(vec(0,0,-15)), vec(0.125), holoEntity(2):toWorld(ang()))
+holoModel(7,"hq_torus_thick")
+holoColor(7, vec(119,146,0))
+holoDisableShading(7, 1)
+holoParent(7, 2)
+
+holoCreate(8, holoEntity(2):toWorld(vec(0,0,6)), vec(0.125), holoEntity(2):toWorld(ang()))
+holoModel(8,"hq_torus_thick")
+holoColor(8, vec(119,146,0))
+holoDisableShading(8, 1)
+holoParent(8, 2)
+
+holoCreate(9, holoEntity(2):toWorld(vec(0,0,20)), vec(1), holoEntity(2):toWorld(ang()))
+holoModel(9,"hq_torus")
+holoColor(9, vec(70))
+holoParent(9, 2)
+
+holoCreate(10, holoEntity(2):toWorld(vec(0,0,16.5)), vec(1), holoEntity(2):toWorld(ang()))
+holoModel(10,"hq_torus")
+holoColor(10, vec(70))
+holoParent(10, 2)
+
+holoCreate(11, holoEntity(10):toWorld(vec(5.3,0,-3)), vec(0.1,0.1,0.5), holoEntity(10):toWorld(ang(0,0,180)))
+holoModel(11,"right_prism")
+holoColor(11, vec(70))
+holoParent(11, 10)
+
+holoCreate(12, holoEntity(10):toWorld(vec(-5.3,0,-3)), vec(0.1,0.1,0.5), holoEntity(10):toWorld(ang(0,180,180)))
+holoModel(12,"right_prism")
+holoColor(12, vec(70))
+holoParent(12, 10)
+
+holoCreate(13, holoEntity(10):toWorld(vec(0,5.3,-3)), vec(0.1,0.1,0.5), holoEntity(10):toWorld(ang(0,90,180)))
+holoModel(13,"right_prism")
+holoColor(13, vec(70))
+holoParent(13, 10)
+
+holoCreate(14, holoEntity(10):toWorld(vec(0,-5.3,-3)), vec(0.1,0.1,0.5), holoEntity(10):toWorld(ang(0,-90,180)))
+holoModel(14,"right_prism")
+holoColor(14, vec(70))
+holoParent(14, 10)
+
+holoCreate(15, holoEntity(9):toWorld(vec(5.3,0,4.5)), vec(0.1,0.1,0.8), holoEntity(10):toWorld(ang(0,0,0)))
+holoModel(15,"right_prism")
+holoColor(15, vec(70))
+holoParent(15, 9)
+
+holoCreate(16, holoEntity(9):toWorld(vec(-5.3,0,4.5)), vec(0.1,0.1,0.8), holoEntity(10):toWorld(ang(0,180,0)))
+holoModel(16,"right_prism")
+holoColor(16, vec(70))
+holoParent(16, 9)
+
+holoCreate(17, holoEntity(9):toWorld(vec(0,5.3,4.5)), vec(0.1,0.1,0.8), holoEntity(10):toWorld(ang(0,90,0)))
+holoModel(17,"right_prism")
+holoColor(17, vec(70))
+holoParent(17, 9)
+
+holoCreate(18, holoEntity(9):toWorld(vec(0,-5.3,4.5)), vec(0.1,0.1,0.8), holoEntity(10):toWorld(ang(0,-90,0)))
+holoModel(18,"right_prism")
+holoColor(18, vec(70))
+holoParent(18, 9)
+
+holoCreate(19, holoEntity(2):toWorld(vec(1.4,0,-22.5)), vec(0.15,0.05,0.15), holoEntity(2):toWorld(ang()))
+holoModel(19, "right_prism")
+holoColor(19, vec(70))
+holoParent(19, 9)
+
+holoCreate(20, holoEntity(19):toWorld(vec(0,0,-1.8)), vec(0.15,0.05,0.15), holoEntity(19):toWorld(ang(180,0,0)))
+holoModel(20, "right_prism")
+holoColor(20, vec(70))
+holoParent(20, 19)
+
+holoCreate(21, holoEntity(2):toWorld(vec(-1.4,0,-22.5)), vec(0.15,0.05,0.15), holoEntity(2):toWorld(ang(0,180,0)))
+holoModel(21, "right_prism")
+holoColor(21, vec(70))
+holoParent(21, 9)
+
+holoCreate(22, holoEntity(21):toWorld(vec(0,0,-1.8)), vec(0.15,0.05,0.15), holoEntity(21):toWorld(ang(180,0,0)))
+holoModel(22, "right_prism")
+holoColor(22, vec(70))
+holoParent(22, 21)
+
+holoCreate(23, holoEntity(2):toWorld(vec(0,1.4,-22.5)), vec(0.15,0.05,0.15), holoEntity(2):toWorld(ang(0,90,0)))
+holoModel(23, "right_prism")
+holoColor(23, vec(70))
+holoParent(23, 9)
+
+holoCreate(24, holoEntity(23):toWorld(vec(0,0,-1.8)), vec(0.15,0.05,0.15), holoEntity(23):toWorld(ang(180,0,0)))
+holoModel(24, "right_prism")
+holoColor(24, vec(70))
+holoParent(24, 23)
+
+holoCreate(25, holoEntity(2):toWorld(vec(0,-1.4,-22.5)), vec(0.15,0.05,0.15), holoEntity(2):toWorld(ang(0,-90,0)))
+holoModel(25, "right_prism")
+holoColor(25, vec(70))
+holoParent(25, 9)
+
+holoCreate(26, holoEntity(25):toWorld(vec(0,0,-1.8)), vec(0.15,0.05,0.15), holoEntity(25):toWorld(ang(180,0,0)))
+holoModel(26, "right_prism")
+holoColor(26, vec(70))
+holoParent(26, 25)
+####
+Ready = 1
+
+
+lightCreate(1)
+lightColor(1, vec(6.36666666667,8.5,0))
+lightPos(1, holoEntity(4):pos())
+lightParent(1, holoEntity(4))
+lightToggle(1,0)
+}
+
+if(!S){
+findByModel("models/hunter/blocks/cube4x4x1.mdl")
+findClosest(owner():pos())
+if(find() & find():owner() == owner()){
+S = find()
+}else{
+S = propSpawn("models/hunter/blocks/cube4x4x1.mdl",vec(),1)
+S:propNotSolid(1)
+S:propDraw(0)
+S:propShadow(0)
+S:setMass(50000)
+timer("shieldograms",1000)
+}}
+
+if(clk("shieldograms")){
+#Shield
+holoCreate(27, S:toWorld(vec(0)), vec(16), S:toWorld(ang(0)))
+holoModel(27, "hq_torus_thin")
+holoColor(27, vec(70))
+holoParent(27, S)
+
+holoCreate(28, S:toWorld(vec(0)), vec(8), S:toWorld(ang(0)))
+holoModel(28, "hq_torus_thin")
+holoColor(28, vec(70))
+holoParent(28, S)
+
+holoCreate(29, S:toWorld(vec(0,66,0)), vec(0.5,0.35,3.5), S:toWorld(ang(0,0,-90)))
+holoModel(29, "prism")
+holoColor(29, vec(119,146,0))
+holoDisableShading(29, 1)
+holoParent(29, 27)
+
+holoCreate(30, S:toWorld(vec(0,-66,0)), vec(0.5,0.35,3.5), S:toWorld(ang(0,0,90)))
+holoModel(30, "prism")
+holoColor(30, vec(119,146,0))
+holoDisableShading(30, 1)
+holoParent(30, 27)
+
+holoCreate(31, S:toWorld(vec(-66,0,0)), vec(0.5,0.35,3.5), S:toWorld(ang(0,-90,90)))
+holoModel(31, "prism")
+holoColor(31, vec(119,146,0))
+holoDisableShading(31, 1)
+holoParent(31, 27)
+
+holoCreate(32, S:toWorld(vec(66,0,0)), vec(0.5,0.35,3.5), S:toWorld(ang(0,90,90)))
+holoModel(32, "prism")
+holoColor(32, vec(119,146,0))
+holoDisableShading(32, 1)
+holoParent(32, 27)
+
+holoCreate(33, S:toWorld(vec(101,0,0)), vec(0.8,0.35,1.5), S:toWorld(ang(90,0,0)))
+holoModel(33, "prism")
+holoColor(33, vec(119,146,0))
+holoDisableShading(33, 1)
+holoParent(33, 28)
+
+holoCreate(34, S:toWorld(vec(-101,0,0)), vec(0.8,0.35,1.5), S:toWorld(ang(-90,0,0)))
+holoModel(34, "prism")
+holoColor(34, vec(119,146,0))
+holoDisableShading(34, 1)
+holoParent(34, 28)
+
+holoCreate(35, S:toWorld(vec(0,101,0)), vec(0.8,0.35,1.5), S:toWorld(ang(-90,-90,0)))
+holoModel(35, "prism")
+holoColor(35, vec(119,146,0))
+holoDisableShading(35, 1)
+holoParent(35, 28)
+
+holoCreate(36, S:toWorld(vec(0,-101,0)), vec(0.8,0.35,1.5), S:toWorld(ang(-90,90,0)))
+holoModel(36, "prism")
+holoColor(36, vec(119,146,0))
+holoDisableShading(36, 1)
+holoParent(36, 28)
+
+holoCreate(37, S:toWorld(vec(0,0,0)), vec(4), S:toWorld(ang()))
+holoColor(37, vec(119,146,0))
+holoDisableShading(37, 1)
+holoModel(37, "icosphere")
+holoParent(37, S)
+
+for(I=27,37){
+holoAlpha(I,0)}
+####
+}
+Hold=owner():weapon():type() == "weapon_crowbar" ? 1 : 0
+
+R+=2
+holoAng(10, holoEntity(2):toWorld(ang(0,R,0)))
+holoAng(9, holoEntity(2):toWorld(ang(0,-R,0)))
+
+#Swapper
+if(changed(Hold)){
+lightToggle(1,Hold)
+timer("change",1)
+for(I=1,26){
+holoVisible(I,owner(),Hold)}
+holoUnparent(1)}
+
+if(clk("change")){
+Varrae=toWorldPosAng(vec(),ang(),owner():attachmentPos(Hold ? "anim_attachment_rh" : "chest"),owner():attachmentAng(Hold ? "anim_attachment_rh" : "chest"))
+holoPos(1, Varrae[1,vector])
+holoAng(1, Varrae[2,angle])
+holoParentAttachment(1, owner(), Hold ? "anim_attachment_rh" : "chest")
+holoPos(2, holoEntity(1):toWorld(vec(-7,0,-3)*!Hold))
+holoAng(2, holoEntity(1):toWorld(ang(0,0,170)*!Hold))
+owner():weapon():setAlpha(!Hold*255)
+holoEntity(4):setTrails(20,1,0.1,"trails/plasma",vec(191,255,0),Hold*255)}
+####
+
+if(Hold){
+#fireball functionality
+if(owner():keyAttack1() & Ready){
+E = propSpawn("models/sprops/geometry/sphere_18.mdl",owner():pos()+owner():eye()*80+vec(0,0,64),0)  
+E:soundPlay(E:id(),2,"weapons/3rd_degree_hit_0"+randint(1,4)+".wav")
+soundVolume(E:id(),0.8)
+E:setMass(1000)
+E:setMaterial("models/debug/debugwhite")
+E:setColor(191,255,0)
+E:setTrails(50,1,0.2,"trails/plasma",vec(191,255,0),255)
+E:propGravity(0)
+E:propDrag(0)
+E:applyForce(owner():eye()*8000*E:mass())
+Fireballs:pushEntity(E)
+Ready = 0
+timer("reready",400)}
+Mouse2 = owner():keyAttack2()
+#Shield functionality
+if(Mouse2){
+U+=3
+S:propNotSolid(0)
+S:setPos(owner():pos()+owner():eye()*125+vec(0,0,55))
+S:setAng(owner():eyeAngles()+ang(90,0,0))
+holoAng(27, S:toWorld(ang(0,U,0)))
+holoAng(28, S:toWorld(ang(0,-U,0)))
+holoAng(37, S:toWorld(ang(U,U,U)*0.5))
+}}
+
+if(changed(Mouse2) & !first()){
+S:setPos(vec())
+S:setAng(ang())
+S:propNotSolid(1)
+S:propFreeze(1)
+owner():soundPlay(2,0,Mouse2 ? "ambient/energy/newspark05.wav" : "ambient/energy/newspark06.wav")
+soundVolume(2,0.2)
+soundPitch(2,20)
+S:propNotSolid(!Mouse2)
+owner():soundPlay(1,0,Mouse2 ? "ambient/levels/citadel/extract_loop1.wav" : "")
+soundPitch(1, 25)
+soundVolume(1, 0.15)
+for(I=27,37){
+holoAlpha(I,Mouse2*255)}
+for(I=29,36){
+if(Mouse2){
+holoEntity(I):setTrails(20,1,0.25,"trails/plasma",vec(191,255,0),255)
+}else{
+holoEntity(I):removeTrails()}}}
+
+if(clk("reready")){
+Ready = 1}
+
+foreach(I,Ds:entity = Fireballs){
+if(Ds:vel():length() <= 2000){
+Ds:propDelete()
+Fireballs:remove(I)}
+}
+
+if(last()){lightRemove(1)}

@@ -1,0 +1,13 @@
+@name misc
+@strict
+
+#Global constants
+TICK_ADJUST = 66.66 * _TICKINTERVAL
+
+#functions that don't fit anywhere else
+function canActionEntity(Ent:entity){
+    if(!Ent:isValid()){ return }
+    if(!owner():canTool(Ent, "")){ return }
+    
+    return 1
+}

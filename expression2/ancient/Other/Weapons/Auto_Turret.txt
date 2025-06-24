@@ -1,0 +1,34 @@
+@name Auto Turret
+@outputs Fire
+@persist [E T]:entity
+
+if(first()){
+propSpawnUndo(0)
+entity():propNotSolid(1)
+entity():setAlpha(0)
+}
+
+runOnTick(1)
+
+if(!T){
+findIncludePlayerProps(owner())
+findByClass("gmod_wire_turret")
+findClosest(entity():pos())
+if(find() & find():owner()==owner()){
+T = find()
+T:propNotSolid(1)
+T:createWire(entity(),"Fire","Fire")
+findClearBlackList()
+findClearWhiteList()
+}}
+
+T:setPos(entity():pos()+vec(0,0,50)-T:up()*9)
+
+findByModel("models/props_lab/monitor01a.mdl")
+G = findClosest(entity():pos())
+
+if(G){
+T:setAng(((G:massCenter())-(T:pos()+T:up()*9)):toAngle())}
+Fire=G:isValid()
+
+

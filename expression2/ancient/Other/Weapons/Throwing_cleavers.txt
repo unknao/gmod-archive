@@ -1,0 +1,66 @@
+@name Throwing cleavers
+@persist [Indexes,Velocities]:array CanThrow Gravity:vector C A
+if(first())
+{
+CanThrow = 1
+rangerPersist(1)
+rangerFilter(owner())
+Gravity = vec(0,0,0.2)
+}
+runOnTick(1)
+
+
+if(owner():keyReload() & CanThrow)
+{
+CanThrow = 0
+C++
+timer("CanThrow",100)
+A=randint(0,360)
+H = holoCreate(C,owner():shootPos(),vec(1),owner():eyeAngles()+ang(90,0,180))
+holoEntity(C):setTrails(10,1,5,"trails/smoke",hsv2rgb(A,1,1),255)
+holoColor(C,hsv2rgb(A,1,1))
+holoModel(C,"models/props_lab/Cleaver.mdl")
+H:soundPlay(H:id(),0.2,"weapons/cbar_miss1.wav")
+
+H["vel",vector] = owner():eye()*40+owner():vel()/150
+Indexes:pushNumber(C)
+}
+
+if(clk("CanThrow")){CanThrow = 1}
+
+foreach(K,I:number=Indexes)
+{
+Ent = holoEntity(I)
+
+if(Ent["stahp",number])
+{
+if(clk("kebab"+I))
+{
+holoDelete(I)
+Indexes:remove(K)
+}
+}
+else
+{
+Pos = Ent:pos()
+Vel = Ent["vel",vector]-Gravity
+
+Ranger = rangerOffset(10+Vel:length(),Pos,Vel)
+if(Ranger:hit())
+{
+holoEntity(I):soundPlay(H:id(),0.3,"weapons/cleaver_hit_world_0"+randint(1,5)+".wav")
+holoAng(I,Ent:angles()+ang(150-Ent:angles():pitch(),0,0))
+holoParentAttachment(I,Ranger:entity(),"chest")
+
+Ent["stahp",number] = 1
+timer("kebab"+I,5000)
+}
+
+
+holoPos(I,Pos+Vel)
+holoAng(I,Ent:angles()+ang(12,0,0))
+
+Ent["vel",vector] = Vel
+}
+}
+

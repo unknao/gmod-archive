@@ -1,0 +1,80 @@
+@name Hypersonic prop gun but entity-efficient 
+@strict
+@trigger none
+
+#include "includes/lib/prop"
+
+const Projectile = "models/props_lab/blastdoor001c.mdl"   
+const ShootVel = 4000
+const ProjectilesDormant = array()
+const ProjectileStragglers = array()
+
+function entity:shoot(){
+    let Pos = owner():shootPos()
+    This:setDormant(0)
+    This:setPos(Pos)
+    This:setMass(10000)
+    This:setCollisionGroup(_COLLISION_GROUP_PROJECTILE)
+    This:propDrag(0)
+        
+    let Vel = (owner():eye() + randvec(-0.06, 0.06)):normalized()
+    This:setAng(Vel:toAngle())
+    This:propSetVelocity(Vel * ShootVel)
+    ProjectileStragglers:pushEntity(This)
+    if(ProjectileStragglers:count() >= 10){
+        if(timerExists("DealWithStragglers")){ stoptimer("DealWithStragglers") }
+        
+        let A = ProjectileStragglers
+        ProjectileStragglers:clear()
+        timer(2, function(){
+            foreach(_:number, E:entity = A){
+                E:setDormant(1)
+            }
+            ProjectilesDormant:add(ProjectileStragglers)
+            ProjectileStragglers:clear()
+        })
+        return
+    }
+    elseif(timerExists("DealWithStragglers")){
+        timerRestart("DealWithStragglers")
+        return
+    }else{
+        timer("DealWithStragglers", 2, 1, function(){
+            foreach(_:number, E:entity = ProjectileStragglers){
+                E:setDormant(1)
+            }
+            ProjectilesDormant:add(ProjectileStragglers)
+            ProjectileStragglers:clear()
+        })
+    }
+}
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(Player != owner()){ exit() }
+    if(KeyBind != "walk"){ exit() }
+    
+    if(Down){
+        timer("FireLoop", 0.05, 0, function(){
+            if(ProjectilesDormant:count()){
+                let E = noentity()
+                while(!E:isValid() & ProjectilesDormant:count()){
+                    if(!ProjectilesDormant[1, entity]:isValid()){ ProjectilesDormant:remove(1), continue }
+                    
+                    E = ProjectilesDormant[1, entity]
+                    if(E["LastActioned", number] == curtime()){ exit() }
+                    E["LastActioned", number] = curtime()
+                    ProjectilesDormant:remove(1)
+                }
+                if(!E:isValid()){ print("wtf??") exit() }
+                E:shoot()
+        
+            }else{
+                propSpawnUnrestricted(Projectile, function(E:entity){
+                    E:shoot() 
+                })
+            }
+        })
+    }else{
+        stoptimer("FireLoop")
+    }
+}

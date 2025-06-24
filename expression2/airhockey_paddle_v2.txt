@@ -1,0 +1,77 @@
+@name Airhockey Paddle v2
+@inputs [Paddle MainTable]:entity
+@outputs 
+@strict
+@trigger none
+
+let Occupier = noentity()
+let R = 0
+const Hold_Distance = 35
+const Push_Distance = 30
+const Vertical_Offset = -20
+function setOccupier(Ent:entity){ #Same function for setting and resetting owner
+    let Valid = Ent:isValid()
+    Occupier = Ent
+    Paddle:setCollisionGroup(Valid ? _COLLISION_GROUP_PASSABLE_DOOR : _COLLISION_GROUP_NONE)
+    Paddle:emitSound("weapons/pistol/pistol_empty.wav", 70, 150 + 50 * Valid)
+    
+    if(->MainTable){
+        Paddle:propFreeze(!Valid)
+        if(!Valid){
+            Paddle:setPos(MainTable:toWorld(vec(-80, 0, 10)))
+            Paddle:setAng(ang(0, 0, 90))
+        }
+    }
+    R = 0
+}
+    
+event keyPressed(Ply:entity, _:string, Down:number, KeyBind:string) {
+    if(!Occupier){
+        let Ent = Ply:aimEntity()
+        if(!Ent:isValid()){ exit() } #If it isn't real, bail
+        if(Ent != Paddle){ exit() } #if its not the paddle, bail
+        if(Ply:shootPos():distance(Ent:pos()) > 100){ exit() } #If it't too far, bail
+        
+        
+        if(Down & KeyBind == "use"){
+            setOccupier(Ply)
+            exit()
+        }
+    }elseif(Ply == Occupier){
+        if(Down){
+            if(KeyBind == "attack2"){
+                setOccupier(noentity())
+            }
+        }
+        if(KeyBind == "reload"){
+            if(Down){ Paddle:emitSound("weapons/slam/throw.wav") }
+            R = Down * Push_Distance
+        }
+    }
+}
+
+const TickAdjust = 66 * tickInterval()
+event tick(){
+    if(!Paddle:isValid()){ exit() }
+    if(!Occupier:isValid()){ exit() }
+    if(!Occupier:isAlive()){
+        setOccupier(noentity())
+        exit()
+    }
+    if(->MainTable & Occupier:pos():distance(MainTable:pos()) > 200){
+        setOccupier(noentity())
+        exit()
+    }
+    
+    let Pos = Occupier:shootPos() + vec(0, 0, Vertical_Offset) + Occupier:eye() * (Hold_Distance + R) 
+    Paddle:propSetVelocity((Pos - Paddle:pos()) * 20 * TickAdjust)
+    let Cross = vec(0, 0, 1):cross(Paddle:right()) * 1000
+    Paddle:propSetAngVelocity(Paddle:toLocalAxis(Cross))
+    
+}
+
+
+
+
+
+

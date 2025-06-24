@@ -1,0 +1,96 @@
+@name Tank Chip
+@inputs W A S D  Active Speed 
+@outputs  Throttle  LeftGear RightGear LeftBrake RightBrake LeftClutch RightClutch  Forward SoundPlay SoundVolume SoundPitch
+@persist Brake
+@trigger 
+
+runOnTick(1)
+
+IdlePower = 0
+Power     = 500                   "Throttle power    more higher value,more stronger throttle power"
+LB        = 11                    "Left brake power  more higher value,more stronger brake power"
+RB        = 11                 "Right brake power  more higher value,more stronger brake power"
+LC        = 20                 "Left clutch power   dont touch this"
+RC        = 20                  "Right clutch power dont touch this"
+
+#############################################################################################################################
+Speed2 = 3
+Speed3 = 6
+Speed4 = 9
+Speed5 = 12
+Speed6 = 18
+Speed7 = 26
+Speed8 = 9999
+
+##############################################################################################################################
+
+
+#Track Sound
+if(Speed>1.5){SoundPlay=1}else{SoundPlay=0}
+SoundVolume=25
+SoundPitch=Speed*0.005+0.5
+
+
+Back      = 1   
+if(0<Speed){
+    Forward = 2}
+if(Speed2<Speed){
+    Forward = 3}
+if(Speed3<Speed){
+    Forward = 4}
+if(Speed4<Speed){
+    Forward = 5}
+if(Speed5<Speed){
+    Forward = 6}
+if(Speed6<Speed){
+    Forward = 7}
+if(Speed7<Speed){
+    Forward = 8}
+    
+
+               
+
+Gear = W*Forward + S*Back
+
+if(Active == 1)
+{Throttle = IdlePower}
+
+else{Throttle = 0}
+
+if(W == 1 | A == 1 | S == 1 | D == 1){
+    Throttle = Power
+    LeftGear = Gear
+    RightGear = Gear
+if(W == 1 | S == 1){
+
+    LeftBrake = LB*sign(A)
+    RightBrake = RB*sign(D)
+    LeftClutch = LC*sign(A)
+    RightClutch = RC*sign(D)
+    
+}
+if(W == 0 & S == 0){
+    LeftGear = A + 3*D
+    RightGear = D + 3*A
+    LeftBrake = 0
+    RightBrake = 0
+    LeftClutch = 0
+    RightClutch = 0
+}
+
+
+
+}
+else{
+    Throttle = IdlePower
+    LeftBrake = LB
+    RightBrake =RB
+    LeftClutch = 0 
+    RightClutch = 0}
+
+
+    
+
+
+
+"made by [M] will show inmin's gun"

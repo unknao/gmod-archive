@@ -1,0 +1,62 @@
+@name E2 Engine v1.01 2WD
+@inputs W S Active Ratio Starter Space #You have to input gear ratios, otherwise it won't work
+@inputs [Wheel,Body]:entity
+@outputs RPMnorm RPMs
+@persist Gas Brake Clutch ClutchIn DClutch Tickrate
+@persist Wm Wmax Wr Wdiff Amges Amr Amb Amax Rm J Torquer Torquemax Braketorque RPMm RPMidle RPMmax
+@trigger none
+     
+    runOnTick(1)
+     
+    #Wm = Winkelgeschwindigkeit Motor
+    #Wr = Winkelgeschwindigkeit Schwungrad
+    #Amges = Winkelbeschleunigung Gesamt Motor
+    #Amax = Maximale Winkelbeschleunigung am Motor
+    #Amr = Winkelbeschleunigung durch Reibung Motor
+    #Amb = Winkelbeschleunigung durch Kraftstoff
+    #J = Traegheitsmoment Motor in Drehrichtung
+    #DClutch = Kupplungsrate
+     
+     
+    if(first()|dupefinished()){
+        #Variables
+        RPMidle = 800
+        RPMmax = 11000
+        J = 500
+        Torquemax = 554*fromUnit("m",1)^2
+        Braketorque = 45*fromUnit("m",1)^2
+       
+        #Constants (Do not change)
+        Wmax = RPMmax /30*pi()
+        Amax = Torquemax /J /Tickrate
+        Tickrate = 1/tickInterval()
+        Clutch = 0
+    }
+     
+    #Inputs
+    Gas    = W + ((RPMm<RPMidle)&Active)
+    Brake  = S*sign(Wr)*Braketorque
+    ClutchIn = ((changed(Ratio)|!Ratio)+(RPMm<RPMidle))*!Space
+     
+    #Clutch
+        DClutch = 0.02 + changed(Ratio)*0.98
+    Clutch = clamp(Clutch +((Clutch<ClutchIn) -(Clutch>ClutchIn))*DClutch,0,1)
+     
+    #Motor
+    Amges = Amb + Amr
+        Amb = Gas *(9.5*RPMnorm/2^(5*RPMnorm))*Amax #Torque Curve
+        Amr = (-RPMnorm *Amax /25 -Amax/20)*!Gas
+     
+    Wm = clamp(Wm +Amges +Wdiff*(1-Clutch)^2 +Starter,0,Wmax)
+        Wr = Wheel:angVel():yaw()*pi()/180 #Might have to change yaw for something else. It's the rotation direction of the Wheel
+        Wdiff = Wr*Ratio - Wm
+     
+    RPMm = Wm *30/pi()
+    RPMnorm = RPMm/RPMmax
+    RPMs += (RPMnorm-RPMs)*0.1
+     
+    Torquer = Amb*J*Ratio*(1-Clutch)
+     
+     
+    Wheel:applyTorque(vec(0,0,1)*(Torquer-Brake)) #Change according to rotation of Wheel
+     Body:applyTorque(vec(0,1,0)*(Torquer-Brake)) #Change so that Chassis tilts upwards while accelerating

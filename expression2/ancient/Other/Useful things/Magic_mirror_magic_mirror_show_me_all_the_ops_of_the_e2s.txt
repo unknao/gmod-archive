@@ -1,0 +1,15 @@
+@name Magic mirror magic mirror show me all the ops of the e2s
+@inputs Egp:wirelink
+@persist T:entity
+interval(500)
+if(first()){
+findExcludeEntity(entity())}
+findByClass("gmod_wire_expression2")
+E2s = findToArray()
+foreach(I,T:entity=E2s){
+if(T){
+Text = format("Name: %s Ops: %s Owner: %s",T:getName(),T:ops(),T:owner():toString():replace("Player",""):replace("[",""):replace("]"," "):replace("(null)"," Disconnected"):replace(T:owner():id():toString(),""))
+Egp:egpText(I,Text, vec2(0,I*20))
+Egp:egpSize(I,clamp(20-T:getName():length()/7,6,20))}}
+if(changed(E2s:count())){
+Egp:egpClear()}

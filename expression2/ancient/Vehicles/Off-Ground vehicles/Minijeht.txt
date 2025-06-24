@@ -1,0 +1,221 @@
+@name Minijeht
+@persist [E P Driver CA]:entity [A Opt]:angle Ranger:ranger S Dist Y Vec:vector Var Acl Mass
+
+interval(20)
+
+if(first()){
+entity():propNotSolid(1)
+cameraCreate(1,E:pos()+vec(-50,0,17), E:angles())
+CA = cameraEntity(1)
+rangerPersist(1)
+rangerFilter(E)
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:bone(0):toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia()) #boners are more efficient
+}
+
+propSpawnUndo(0)
+findIncludePlayerProps(owner())
+if(!E){
+findByModel("models/sprops/cuboids/height12/size_2/cube_24x36x12.mdl")
+findClosest(entity():pos())
+if(find()){
+E = find()
+E:setPos(entity():pos()+vec(50,-50,7))
+}else{
+E = propSpawn("models/sprops/cuboids/height12/size_2/cube_24x36x12.mdl",entity():pos()+vec(50,-50,7),0)}
+Mass = E:mass()
+E:setAlpha(0)
+timer("holo",100)}
+
+if(!P){
+findByModel("models/nova/jeep_seat.mdl")
+findClosest(entity():pos())
+if(find()){
+P = find()}else{
+P = seatSpawn("models/nova/jeep_seat.mdl",entity():pos(),ang(0,-90,0),1)}}
+}
+if(!holoEntity(27)){
+holoCreate(1, E:toWorld(vec(-2.5,0,0)), vec(0.6,0.8,3.2), E:toWorld(ang(-90,0,0)))
+holoModel(1, "hq_cone")
+holoColor(1, vec(40))
+holoParent(1, E)
+
+holoCreate(2, holoEntity(1):toWorld(vec(0,0,-2)), vec(0.25,1.1,2.5), holoEntity(1):toWorld(ang(0,0,0)))
+holoModel(2, "hq_cylinder")
+holoColor(2, vec(40))
+holoMaterial(2, "models/debug/debugwhite")
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(0,3.5,15.5)), vec(0.5,0.5,1.1), holoEntity(2):toWorld(ang(180,0,0)))
+holoModel(3, "models/sprops/misc/domes/size_1/dome_12x12.mdl")
+holoMaterial(3, "models/debug/debugwhite")
+holoColor(3, vec(40))
+holoParent(3, 1)
+
+holoCreate(4, holoEntity(2):toWorld(vec(0,-3.5,15.5)), vec(0.5,0.5,1.1), holoEntity(2):toWorld(ang(180,0,0)))
+holoModel(4, "models/sprops/misc/domes/size_1/dome_12x12.mdl")
+holoMaterial(4, "models/debug/debugwhite")
+holoColor(4, vec(40))
+holoParent(4, 1)
+
+holoCreate(5, holoEntity(2):toWorld(vec(0,-3.5,7)), vec(0.05,1,0.7), holoEntity(2):toWorld(ang(0,0,-10)))
+holoColor(5, vec(40))
+holoParent(5, 1)
+
+holoCreate(6, holoEntity(5):toWorld(vec(0,-10.717,-3.836)), vec(0.3,0.05,1.8), holoEntity(5):toWorld(ang(220,90,0)))
+holoModel(6, "right_prism")
+holoColor(6, vec(40))
+holoParent(6, 1)
+
+holoCreate(7, holoEntity(6):toWorld(vec(-3.6,0,0)), vec(0.3,0.05,1.8), holoEntity(6):toWorld(ang(0,180,0)))
+holoModel(7, "right_prism")
+holoColor(7, vec(40))
+holoParent(7, 1)
+
+holoCreate(8, holoEntity(5):toWorld(vec(0,-4,5.2)), vec(0.05,0.8,0.4), holoEntity(5):toWorld(ang(0,0,-20)))
+holoColor(8, vec(40))
+holoParent(8, 1)
+
+holoCreate(9, holoEntity(2):toWorld(vec(0,3.5,7)), vec(0.05,1,0.7), holoEntity(2):toWorld(ang(0,0,10)))
+holoColor(9, vec(40))
+holoParent(9, 1)
+
+holoCreate(10, holoEntity(9):toWorld(vec(0,10.717,-3.836)), vec(0.3,0.05,1.8), holoEntity(9):toWorld(ang(-40,90,180)))
+holoModel(10, "right_prism")
+holoColor(10, vec(40))
+holoParent(10, 1)
+
+holoCreate(11, holoEntity(10):toWorld(vec(-3.6,0,0)), vec(0.3,0.05,1.8), holoEntity(10):toWorld(ang(0,180,0)))
+holoModel(11, "right_prism")
+holoColor(11, vec(40))
+holoParent(11, 1)
+
+holoCreate(12, holoEntity(9):toWorld(vec(0,4,5.2)), vec(0.05,0.8,0.4), holoEntity(9):toWorld(ang(0,0,20)))
+holoColor(12, vec(40))
+holoParent(12, 1)
+
+holoCreate(13, holoEntity(2):toWorld(vec(0,9.1,-8.05)), vec(0.3,0.05,1.2), holoEntity(2):toWorld(ang(35,90,0)))
+holoModel(13, "right_prism")
+holoColor(13, vec(40))
+holoParent(13, 1)
+
+holoCreate(14, holoEntity(13):toWorld(vec(-3.59,0,0)), vec(0.3,0.05,1.2), holoEntity(13):toWorld(ang(0,180,0)))
+holoModel(14, "right_prism")
+holoColor(14, vec(40))
+holoParent(14, 1)
+
+holoCreate(15, holoEntity(2):toWorld(vec(0,-9.1,-8.05)), vec(0.3,0.05,1.2), holoEntity(2):toWorld(ang(-215,90,180)))
+holoModel(15, "right_prism")
+holoColor(15, vec(40))
+holoParent(15, 1)
+
+holoCreate(16, holoEntity(15):toWorld(vec(-3.59,0,0)), vec(0.3,0.05,1.2), holoEntity(15):toWorld(ang(0,180,0)))
+holoModel(16, "right_prism")
+holoColor(16, vec(40))
+holoParent(16, 1)
+
+holoCreate(17, holoEntity(2):toWorld(vec(0,0,-16.19)), vec(0.25,1.1,0.2), holoEntity(2):toWorld(ang(180,0,0)))
+holoModel(17, "hq_cone")
+holoColor(17, vec(40))
+holoParent(17, 1)
+
+holoCreate(18, holoEntity(1):toWorld(vec(0,0,-24)), vec(0.6,0.8,0.8), holoEntity(1):toWorld(ang(180,0,0)))
+holoModel(18, "hq_cone")
+holoColor(18, vec(40))
+holoParent(18, 1)
+
+holoCreate(19, holoEntity(18):toWorld(vec(-1.6,0,-1)), vec(0.1,0.2,0.4), holoEntity(18):toWorld(ang(21.5,0,0)))
+holoModel(19, "hq_rcube_thick")
+holoColor(19, vec(191,255,0))
+holoDisableShading(19,1)
+holoParent(19, 1)
+
+holoCreate(20, holoEntity(4):toWorld(vec(0,0,-0.45)), vec(0.5,0.15,0.5), holoEntity(4):toWorld(ang(0,0,90)))
+holoModel(20, "models/sprops/misc/tubes_thin/size_1/t_tube_12x6.mdl")
+holoMaterial(20, "models/debug/debugwhite")
+holoColor(20, vec(40))
+holoParent(20, 1)
+
+holoCreate(21, holoEntity(4):toWorld(vec(0,0,0.7)), vec(0.5), holoEntity(4):toWorld(ang(0,0,180)))
+holoModel(21, "models/cheeze/wires/speaker.mdl")
+holoColor(21, vec(80))
+holoParent(21, 1)
+
+holoCreate(22, holoEntity(4):toWorld(vec(-5,0,3)), vec(0.4,0.05,0.5), holoEntity(4):toWorld(ang(0,180,0)))
+holoModel(22, "right_prism")
+holoColor(22, vec(40))
+holoParent(22, 1)
+
+holoCreate(23, holoEntity(22):toWorld(vec(0,0,-4.2)), vec(0.4,0.05,0.2), holoEntity(22):toWorld(ang(0,180,180)))
+holoModel(23, "right_prism")
+holoColor(23, vec(40))
+holoParent(23, 1)
+
+holoCreate(24, holoEntity(3):toWorld(vec(0,0,-0.45)), vec(0.5,0.15,0.5), holoEntity(3):toWorld(ang(0,0,90)))
+holoModel(24, "models/sprops/misc/tubes_thin/size_1/t_tube_12x6.mdl")
+holoMaterial(24, "models/debug/debugwhite")
+holoColor(24, vec(40))
+holoParent(24, 1)
+
+holoCreate(25, holoEntity(3):toWorld(vec(0,0,0.7)), vec(0.5), holoEntity(3):toWorld(ang(0,0,180)))
+holoModel(25, "models/cheeze/wires/speaker.mdl")
+holoColor(25, vec(80))
+holoParent(25, 1)
+
+holoCreate(26, holoEntity(3):toWorld(vec(-5,0,3)), vec(0.4,0.05,0.5), holoEntity(3):toWorld(ang(0,180,0)))
+holoModel(26, "right_prism")
+holoColor(26, vec(40))
+holoParent(26, 1)
+
+holoCreate(27, holoEntity(26):toWorld(vec(0,0,-4.2)), vec(0.4,0.05,0.2), holoEntity(26):toWorld(ang(0,180,180)))
+holoModel(27, "right_prism")
+holoColor(27, vec(40))
+holoParent(27, 1)
+}
+if(changed(P:driver())){
+Driver = P:driver()}
+
+if(changed(Driver)){
+E:soundPlay(1,0,Driver ? "Phx.Jet3" : "")
+soundVolume(1,0.2)
+cameraPos(1, E:pos()+vec(-50,0,17))
+cameraToggle(1,Driver:isValid(),P)
+P:propNotSolid(Driver:isValid())
+E:propGravity(1)}
+
+if(Driver){
+Dist = CA:pos():distance(E:pos()+vec(-50,0,17))
+Ranger = rangerOffset(50, E:pos(), -E:up())
+A = CA:angles()+angnorm(Driver:eyeAngles()-CA:angles())/3
+cameraAng(1, A)
+cameraPos(1,CA:pos()+((E:pos()+vec(-50,0,17)-CA:pos()):normalized()) *Dist/1.5)
+soundPitch(1, 10+0.5*E:vel():length()/10)
+
+if(changed(Driver:keySprint())){S = 1+1*Driver:keySprint()}
+
+KFwd = Driver:keyForward()
+if(changed(KFwd)){
+holoEntity(21):setTrails(10,0,0.05,"trails/plasma",vec(191,255,0),255*KFwd)
+holoEntity(25):setTrails(10,0,0.05,"trails/plasma",vec(191,255,0),255*KFwd)
+holoDisableShading(21,KFwd)
+holoDisableShading(25,KFwd)
+holoColor(21,vec(40+(KFwd*151),40+(KFwd*215),40-(KFwd*40)))
+holoColor(25,vec(40+(KFwd*151),40+(KFwd*215),40-(KFwd*40)))
+Acl = 2.5-(KFwd*12.5)}
+Var = clamp(Var-Acl,0,75)
+
+if(Var){
+Vec = (E:forward()*Var*S)*Mass
+E:applyForce(Vec)}
+
+Hit = !Ranger:hit()
+
+if(changed(Hit)){E:propGravity(!Var)}
+
+Y =E:angles():yaw()
+
+if(Hit){Opt = A+ang(0,0,clamp(-$Y*20,-90,90))}else{Opt = A}
+
+if(E:vel():length() >= 10){E:faceAng(Opt,10)}}
+

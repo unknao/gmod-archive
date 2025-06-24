@@ -1,0 +1,39 @@
+@name propengine
+@inputs [Crankshaft Base]:entity A
+@outputs Bearing Bearing_Debug:vector RPM HE_Constant HE_Damping H1 H2 H3 H4 H5
+@strict
+@trigger none
+if(duped()){ exit() }
+
+CRANK_UP_DIR = vec(0, 0, 1)
+#Adjust these until the Crankshaft spin achieves a smoothly transitioning bearing (ranging from -180 to 180).
+CRANK_BEARING_1 = 1 #The first axis of rotation of the Crankshaft local to the Base (ranging from 1 to 3).
+CRANK_BEARING_2 = 3 #The first axis of rotation of the Crankshaft local to the Base (ranging from 1 to 3).
+CRANK_SPIN_DIR = 2 #The direction of the Crankshaft spin local to the Crankshaft itself (ranging from 1 to 3).
+
+HYDRO_PISTONS_COUNT = 5 #Amount of piston firing positions (Include 'H(numberhere)' for every firing position in the @outputs!!!!!)
+HYDRO_IDLE_LENGTH = 15 #How long is the hydraulic from the anchor point to the Base to the center line of the Crankshaft.
+HYDRO_THROTTLE_MUL = 3
+HE_Constant = 10000
+HE_Damping = 0.01
+
+HydroAngleDifference = 360 / HYDRO_PISTONS_COUNT
+timer("HE_Post_First", 1, 0, function(){
+    HydroAngleDifference = 360 / HYDRO_PISTONS_COUNT
+})
+
+event tick(){
+    if(!Base:isValid() | !Crankshaft:isValid()){ exit() }
+    
+    let Crank_Up = Crankshaft:toWorldAxis(CRANK_UP_DIR)
+    
+    Bearing_Debug = Base:toLocalAxis(Crank_Up)
+    Bearing = toDeg(atan2(Bearing_Debug[CRANK_BEARING_1], Bearing_Debug[CRANK_BEARING_2]))
+    Bearing += Crankshaft:angVelVector()[CRANK_SPIN_DIR] * _TICKINTERVAL
+    
+    RPM = abs(Crankshaft:angVelVector()[CRANK_SPIN_DIR] / 6)
+    
+    for(I = 0, HYDRO_PISTONS_COUNT - 1){
+        ioSetOutput("H" + (I + 1), HYDRO_IDLE_LENGTH + sin(Bearing - HydroAngleDifference * I) * HYDRO_THROTTLE_MUL * A)
+    }
+}

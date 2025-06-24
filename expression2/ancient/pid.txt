@@ -1,0 +1,19 @@
+@name pid
+@outputs Err Vi T
+@persist PID:vector E:entity Err Rang:ranger Vi T
+@model models/props_c17/oildrum001.mdl
+runOnTick(1)
+if(first()){
+E:propFreeze(0)
+holoCreate(1)
+E=entity()
+PID=vec(250,10,1000)
+rangerFilter(E)}
+Rang=Ranger=rangerOffset(150,E:boxCenterW(),vec(0,0,-1))
+holoPos(1,Rang:position())
+Err =70-Rang:distance()
+if(Rang:hit()){
+Vi = Vi + PID:y()*Err
+T=PID:x()*Err + Vi + PID:z()*$Err
+E:applyForce(vec(0,0,T))
+}

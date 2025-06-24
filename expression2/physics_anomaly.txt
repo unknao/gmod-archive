@@ -1,0 +1,22 @@
+@name physics anomaly
+@persist X Y R R1 R2
+@strict
+interval(1)
+
+R2++
+if(propCanCreate()){
+    E=propSpawn("models/hunter/blocks/cube025x025x025.mdl",1)
+    R++
+    if(E:isValid()){
+        X++
+        E:setPos(entity():pos()+vec(X*5,Y*5,100))
+        R1++
+    }
+}
+if(X>5){
+    X=0
+    Y++
+}
+if(canSetName()){
+    entity():setName("total="+R+" valid="+R1+" attempts="+R2)
+}

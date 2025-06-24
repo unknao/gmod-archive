@@ -1,0 +1,8 @@
+@name ab2p
+@inputs [En1 En2]:wirelink 
+@persist [E E1 E2]:entity
+
+E1=En1:entity()
+E2=En2:entity()
+E=entity():isWeldedTo()
+E:setAng((E2:boxCenterW()-E1:boxCenterW()):toAngle()+ang(90,0,0))

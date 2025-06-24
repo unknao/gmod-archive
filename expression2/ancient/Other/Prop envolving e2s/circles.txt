@@ -1,0 +1,28 @@
+@name tornado
+@persist A:array S:entity E
+
+interval(100)
+if(first()){
+entity():propNotSolid(1)
+entity():propDraw(0)
+findIncludePlayerProps(owner())}
+
+findByModel("models/props_c17/oildrum001.mdl")
+A = findToArray()
+
+if(A:count() == 200){
+timer("1",1000)}
+
+if(!E){
+foreach(I,S:entity=A){
+S:propFreeze(1)
+S:setAng(ang())
+S:setPos(entity():pos()+vec(sinr((I*10))*(150+I*3),cosr(I*10)*(150+I*3),I*10))
+if(clk("1")){
+S:parentTo(entity())
+E = 1
+}
+}}
+
+if(E){
+entity():setAng(ang(0,curtime()*100,0))}

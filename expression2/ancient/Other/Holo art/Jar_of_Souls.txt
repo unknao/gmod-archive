@@ -1,0 +1,209 @@
+@name Jar of Souls
+@persist S [A Index Rare]:array C Sk
+@model models/sprops/cuboids/non_set/cube_18x18x18.mdl
+interval(10)
+
+if(first()){
+C=1
+entity():setAlpha(0)
+
+holoCreate(1, entity():toWorld(vec(0,0,1)),vec(1.5,1.5,1.3),entity():toWorld(ang()))
+holoModel(1,"hq_tube_thin")
+holoMaterial(1, "models/debug/debugwhite")
+holoColor(1, vec(0,156,136),100)
+holoParent(1,entity())
+
+holoCreate(2, entity():toWorld(vec(0,0,-7.2)),vec(1.6,1.6,0.1),entity():toWorld(ang()))
+holoModel(2,"hq_cylinder")
+holoMaterial(2, "models/debug/debugwhite")
+holoColor(2, vec(70))
+holoParent(2,entity())
+
+holoCreate(3, entity():toWorld(vec(0,0,8.3)),vec(1.6,1.6,0.1),entity():toWorld(ang()))
+holoModel(3,"hq_cylinder")
+holoMaterial(3, "models/debug/debugwhite")
+holoColor(3, vec(70))
+holoParent(3,entity())
+
+holoCreate(4, entity():toWorld(vec(0,8.5,1)),vec(0.1,0.1,1.3),entity():toWorld(ang()))
+holoMaterial(4, "models/debug/debugwhite")
+holoColor(4, vec(70))
+holoParent(4,entity())
+
+holoCreate(5, entity():toWorld(vec(0,-8.5,1)),vec(0.1,0.1,1.3),entity():toWorld(ang()))
+holoMaterial(5, "models/debug/debugwhite")
+holoColor(5, vec(70))
+holoParent(5,entity())
+
+holoCreate(6, entity():toWorld(vec(8.5,0,1)),vec(0.1,0.1,1.3),entity():toWorld(ang()))
+holoMaterial(6, "models/debug/debugwhite")
+holoColor(6, vec(70))
+holoParent(6,entity())
+
+holoCreate(7, entity():toWorld(vec(-8.5,0,1)),vec(0.1,0.1,1.3),entity():toWorld(ang()))
+holoMaterial(7, "models/debug/debugwhite")
+holoColor(7, vec(70))
+holoParent(7,entity())
+
+holoCreate(8, entity():toWorld(vec(0,0,1)),vec(1.53,1.53,0.1),entity():toWorld(ang()))
+holoModel(8,"hq_tube_thin")
+holoMaterial(8, "models/debug/debugwhite")
+holoColor(8, vec(70))
+holoParent(8,entity())
+
+holoCreate(9, entity():toWorld(vec(-9.5,0,-8.5)),vec(0.4),entity():toWorld(ang(-45,0,0)))
+holoModel(9,"models/sprops/geometry/qring_12.mdl")
+holoMaterial(9, "models/debug/debugwhite")
+holoColor(9, vec(70))
+holoParent(9,entity())
+
+holoCreate(10, entity():toWorld(vec(9.5,0,-8.5)),vec(0.4),entity():toWorld(ang(-45,180,0)))
+holoModel(10,"models/sprops/geometry/qring_12.mdl")
+holoMaterial(10, "models/debug/debugwhite")
+holoColor(10, vec(70))
+holoParent(10,entity())
+
+holoCreate(11, entity():toWorld(vec(0,-9.5,-8.5)),vec(0.4),entity():toWorld(ang(-45,90,0)))
+holoModel(11,"models/sprops/geometry/qring_12.mdl")
+holoMaterial(11, "models/debug/debugwhite")
+holoColor(11, vec(70))
+holoParent(11,entity())
+
+holoCreate(12, entity():toWorld(vec(0,9.5,-8.5)),vec(0.4),entity():toWorld(ang(-45,-90,0)))
+holoModel(12,"models/sprops/geometry/qring_12.mdl")
+holoMaterial(12, "models/debug/debugwhite")
+holoColor(12, vec(70))
+holoParent(12,entity())
+
+holoCreate(13, entity():toWorld(vec(0,0,8.7)),vec(1.5,1.5,0.5),entity():toWorld(ang()))
+holoModel(13,"models/sprops/misc/fittings/cred_6_3_short.mdl")
+holoMaterial(13, "models/debug/debugwhite")
+holoColor(13, vec(110))
+holoParent(13,entity())
+
+holoCreate(14, entity():toWorld(vec(0,0,1)),vec(1.4,1.4,1.3),entity():toWorld(ang()))
+holoModel(14,"hq_cylinder")
+holoMaterial(14, "models/effects/muzzleflash/blurmuzzle")
+holoColor(14, vec(0,166,146),100)
+holoParent(14,entity())
+
+holoCreate(15, entity():toWorld(vec(0,0,1)),vec(1.3,1.3,1.3),entity():toWorld(ang()))
+holoModel(15,"hq_cylinder")
+holoMaterial(15, "models/debug/debugwhite")
+holoColor(15, vec(0,176,156),105)
+holoParent(15,entity())
+
+holoCreate(16, entity():toWorld(vec(0,0,1)),vec(1.2,1.2,1.3),entity():toWorld(ang()))
+holoModel(16,"hq_cylinder")
+holoMaterial(16, "models/debug/debugwhite")
+holoColor(16, vec(0,186,166),110)
+holoParent(16,entity())
+
+holoCreate(17, entity():toWorld(vec(0,0,1)),vec(1.1,1.1,1.3),entity():toWorld(ang()))
+holoModel(17,"hq_cylinder")
+holoMaterial(17, "models/debug/debugwhite")
+holoColor(17, vec(0,196,176),115)
+holoParent(17,entity())
+
+holoCreate(18, entity():toWorld(vec(0,0,1)),vec(1,1,1.3),entity():toWorld(ang()))
+holoModel(18,"hq_cylinder")
+holoMaterial(18, "models/debug/debugwhite")
+holoColor(18, vec(0,206,186),120)
+holoParent(18,entity())
+
+holoCreate(19, entity():toWorld(vec(0,0,1)),vec(0.9,0.9,1.3),entity():toWorld(ang()))
+holoModel(19,"hq_cylinder")
+holoMaterial(19, "models/debug/debugwhite")
+holoColor(19, vec(0,216,196),125)
+holoParent(19,entity())
+
+holoCreate(20, entity():toWorld(vec(0,0,1)),vec(0.9,0.9,1.3),entity():toWorld(ang()))
+holoModel(20,"hq_cylinder")
+holoMaterial(20, "models/debug/debugwhite")
+holoColor(20, vec(0,226,206),100)
+holoParent(20,entity())
+
+holoCreate(21, entity():toWorld(vec(6,0,1)),vec(0.6),entity():toWorld(ang(45,-90,0)))
+holoModel(21,"models/Gibs/HGIBS.mdl")
+holoMaterial(21, "models/debug/debugwhite")
+holoColor(21, vec(0,126,106))
+holoParent(21,20)
+
+holoCreate(22, entity():toWorld(vec(-6,0,-3)),vec(0.6),entity():toWorld(ang(45,90,0)))
+holoModel(22,"models/Gibs/HGIBS.mdl")
+holoMaterial(22, "models/debug/debugwhite")
+holoColor(22, vec(0,126,106))
+holoParent(22,20)
+
+holoCreate(23, entity():toWorld(vec(0,-6,6)),vec(0.6),entity():toWorld(ang(45,180,0)))
+holoModel(23,"models/Gibs/HGIBS.mdl")
+holoMaterial(23, "models/debug/debugwhite")
+holoColor(23, vec(0,126,106))
+holoParent(23,20)
+
+holoCreate(24, entity():toWorld(vec(0,6,1.5)),vec(0.6),entity():toWorld(ang(45,0,0)))
+holoModel(24,"models/Gibs/HGIBS.mdl")
+holoMaterial(24, "models/debug/debugwhite")
+holoColor(24, vec(0,126,106))
+holoParent(24,20)
+
+rangerFilter(entity())
+rangerHitWater(1)
+rangerPersist(1)
+Rare=array("models/Humans/Group03/male_06.mdl","models/Humans/Group03/Male_04.mdl","models/Humans/Group01/Male_Cheaple.mdl","models/Humans/Group01/Female_01.mdl","models/Humans/Group03m/Female_02.mdl","models/Humans/Group03m/male_09.mdl")
+}
+
+S+=5
+holoAng(20,entity():toWorld(ang(0,-S,0)))
+
+Skl=randint(0,20)
+
+
+if(Skl==1){
+Skl=0
+H = holoCreate(1000+C)
+holoEntity(1000+C):setTrails(15,1,0.5,"trails/plasma",vec(0,186,166),255)
+holoPos(1000+C, holoEntity(13):pos()+vec(0,0,10))
+holoModel(1000+C,"models/Gibs/HGIBS.mdl")
+holoMaterial(1000+C, "models/debug/debugwhite")
+holoColor(1000+C, vec(0,126,106))
+H["vel",vector]=vec(random(-5,5),random(-5,5),random(0,5))
+H:soundPlay(H:id(),1.5,"npc/advisor/advisor_scream.wav")
+soundPitch(H:id(),40,0.5)
+Index:pushNumber(C)
+C++
+
+}
+foreach(K,I:number=Index){
+B=1000+I
+Ent=holoEntity(B)
+Vel = Ent["vel",vector]
+Ent["vel",vector]=Vel-vec(0,0,0.1)
+Rang=rangerOffset(1,Ent:pos(),Vel)
+Ent["lastpos",number]=Ent["pos",number]
+Ent["pos",number]=Rang:hit()
+
+
+if(!Rang:hit()){
+holoAng(B,Vel:toAngle()+ang(45,0,0))
+holoPos(B,Ent:pos()+Vel)}
+
+if(Rang:hit()){
+if(Ent["lastpos",number]!=Ent["pos",number]){
+holoScale(B,vec(random(0.2,1.5)))
+holoAng(B, ang(0,random(-180,180),0))
+holoModel(B,Rare[randint(1,Rare:count()),string])
+holoAnim(B,"ACT_WALK")
+holoEntity(B):removeTrails()
+}
+Ent["val",number]=clamp(Ent["val",number],0,253)+2
+holoAlpha(B,255-Ent["val",number])
+holoPos(B, Ent:pos()+Ent:forward()*2)
+if(Ent["val",number]==255 | !(Ent:pos()+vec(0,0,5)):isInWorld()){
+holoDelete(I+1000)
+Index:remove(K)
+}}
+}
+
+
+

@@ -1,0 +1,25 @@
+@name Turret control
+@outputs Fire
+@persist A:array V
+
+if(first()){
+entity():propNotSolid(1)
+entity():setAlpha(0)
+findIncludePlayerProps(owner())
+}
+runOnTick(1)
+findByClass("gmod_wire_turret")
+A=findToArray()
+
+V+=0.5
+if(changed(A:count())){
+foreach(I,T:entity=A){
+T:propNotSolid(1)
+T:createWire(entity(),"Fire","Fire")
+}}
+foreach(I,T:entity=A){
+
+T:setPos(owner():boxCenterW()+vec(sin(((360/A:count())*I)+V)*50,cos(((360/A:count())*I)+V)*50,70))
+T:setAng(((owner():aimPos()-vec(0,0,9))-T:pos()):toAngle())
+}
+Fire=owner():keyAttack2()

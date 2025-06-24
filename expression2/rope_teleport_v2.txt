@@ -1,0 +1,84 @@
+@name rope teleport v2
+@trigger none
+@strict
+
+propSpawnUndo(0)
+Tele = 0
+Dir_Cumulative = vec()
+Eye = vec()
+S = noentity()
+E = noentity()
+
+timer("SpawnProps", 0.2, 0, function(){
+    if(!propCanCreate()){ return }
+    if(!S:isValid()){
+        S = seatSpawn("models/hunter/blocks/cube025x025x025.mdl", owner():boxCenterW(), ang(), 1)
+        S:propNotSolid(1)
+        S:propStatic(1)
+        S:propDraw(0)
+    }
+    
+    if(!propCanCreate()){ return }
+    if(!E:isValid()){
+        E = propSpawn("models/hunter/blocks/cube025x025x025.mdl", owner():boxCenterW(), 1)
+        E:propNotSolid(1)
+        E:propStatic(1)
+        E:propDraw(0)
+    }
+    print("rope teleport ready!")
+    timerPause("SpawnProps")
+})
+
+function doTeleport(Held:number){
+    E:emitSoundStop("ambient/levels/citadel/zapper_warmup1.wav")
+    
+    S:emitSound("ambient/levels/citadel/weapon_disintegrate2.wav")
+    S:emitSound("^ambient/levels/citadel/portal_beam_shoot5.wav")
+    
+    S:constraintBreak()
+    S:use()
+    S:ejectPod()
+    #ifdef e:plyApplyForce(v)
+        if(owner():keyDuck()){
+            owner():plyApplyForce(Eye * Held * 1500)
+        }
+    #endif
+}
+
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string) {
+    if(!S | !E){ timerResume("SpawnProps") exit() }
+    if(Player != owner()){ exit() }
+    if(KeyBind != "reload"){ exit() }
+    
+    if(Down){
+        Tele = curtime()
+        Dir_Cumulative = vec()
+        
+        rope(1, S, vec(), E, vec(), 0, 15, "cable/cable2", 1, vec(255))
+        timer(0, function(){
+            E:emitSound("ambient/levels/citadel/zapper_warmup1.wav")
+            E:emitSound("buttons/combine_button1.wav")
+        })
+                
+        timer("tele_think", 0, 0, function(){
+            Eye = owner():eye()
+            Dir_Cumulative += Eye * 1320 * _TICKINTERVAL
+            
+            E:setPos(owner():boxCenterW())
+            S:setPos(E:pos() + Dir_Cumulative)
+            S:setAng(owner():eyeAngles())
+        })
+        
+        timer("tele", 1.5, 1, function(){
+            if(timerExists("tele_think")) { stoptimer("tele_think") }
+            doTeleport(1.5)
+        })
+    }else{
+        if(timerExists("tele_think")) { stoptimer("tele_think") }
+        if(timerExists("tele")){
+            stoptimer("tele")
+            doTeleport(curtime() - Tele)
+        }
+    }
+}

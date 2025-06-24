@@ -1,0 +1,34 @@
+@name ACF gun holder
+@persist A:entity S G:array
+interval(10)
+if(first()){
+entity():setAlpha(0)
+entity():propNotSolid(1)
+}
+
+if(!A){
+findByClass("acf_ammo")
+findSortByDistance(entity():pos()) 
+if(find() & find():owner()==owner()){
+A = find()
+A:propDraw(0)
+A:acfActive(1)
+}
+}
+S+=0.1
+
+findByClass("acf_gun")
+G=findToArray()
+
+if(G:count()){
+foreach(I,E:entity=G){
+E:acfLinkTo(A,0)
+E:setPos(owner():pos()+vec(sin(((360/G:count())*I)+S)*150,cos(((360/G:count())*I)+S)*150,300))
+E:setAng((owner():aimPos()-E:pos()):toAngle())
+E:acfFire(owner():keyAttack2())
+rangerFilter(E)}}
+
+A:setColor(randvec(0,255))
+A:setPos(owner():pos()+vec(0,0,-100))
+
+

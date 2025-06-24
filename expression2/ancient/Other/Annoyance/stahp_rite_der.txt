@@ -1,0 +1,24 @@
+@name generic
+@persist [P E]:entity
+
+interval(10)
+
+if(first()){
+propSpawnUndo(0)
+findIncludePlayerProps(owner())
+P = findPlayerByName("gai")}
+
+if(!E){
+findByModel("models/props_phx/construct/metal_plate_curve180x2.mdl")
+findClosest(entity():pos())
+if(find()){
+E = find()}else{
+E = propSpawn("models/props_phx/construct/metal_plate_curve180x2.mdl",vec(),1)
+E:propDraw(0)}
+}
+
+
+
+if(P:vel():length()>=1000 & !P:inNoclip()){
+E:setPos((P:pos()+P:vel()*0.05)-(P:right()*20))
+E:setAng((P:boxCenterW()-(P:boxCenterW()+P:vel())):toAngle())}

@@ -1,0 +1,74 @@
+@name phystech jumppad
+@inputs EntCount
+@strict
+@trigger none
+#AKA prediction breaker
+propSpawnUndo(0)
+
+const Width = 10
+const FinalCount = Width ^ 2
+const Props = array()
+const Dist = 0.5
+
+let Count = 0
+let RealWidth = 0
+let RealLength = 0
+let Ready = 0
+let Trigger = noentity()
+
+const WidthOffset = floor(Width * 0.5)
+
+timer("SpawnLoop", 0, 0, function(){
+    if(!propCanCreate()){ return }
+    Count++
+    let E = propSpawn("models/hunter/blocks/cube025x025x025.mdl", entity():toWorld(vec((-WidthOffset + RealWidth) * Dist, (-WidthOffset + RealLength) * Dist, 2)), entity():toWorld(ang()), 1)
+    E:propStatic(1)
+    E:noCollideAll(1)
+    Props:pushEntity(E)
+    
+    RealLength++
+    if(!(Count % Width)){
+        RealWidth++
+        RealLength = 0
+    }
+    if(Count >= FinalCount){
+        stoptimer("SpawnLoop")
+        timer("SpawnTrigger", 0, 0, function(){
+            if(!propCanCreate()){ return }
+            Trigger = sentSpawn("gmod_wire_trigger", entity():toWorld(vec()), entity():toWorld(ang()), 1, table(
+                "sizex" = 31,
+                "sizey" = 31,
+                "sizez" = 8,
+                "filter" = 1
+            ))
+            Trigger:propNotSolid(1)
+            entity():createWire(Trigger, "EntCount", "EntCount")
+            Ready = 1
+            entity():emitSound("weapons/strider_buster/strider_buster_stick1.wav", 80, random(95, 105))
+            stoptimer("SpawnTrigger")
+        })
+    }
+})
+
+Time = 0
+event input(InputName:string) {
+    if(!Ready){ exit() }
+    if(!EntCount){ exit() }
+    if(Time > curtime()){ exit() }
+    
+    Time = curtime() + 0.6
+    timer(0.2, function(){
+        let N = sign(EntCount)
+        entity():emitSound("weapons/grenade_launcher1.wav", 80, random(95, 105))
+        foreach(_:number, E:entity = Props){
+            E:noCollideAll(!N)
+        }
+        timer(0.3, function(){
+            foreach(_:number, E:entity = Props){
+                E:noCollideAll(1)
+            }
+            entity():emitSound("weapons/slam/mine_mode.wav", 80, random(95, 105))
+        })
+    })
+}
+

@@ -1,0 +1,212 @@
+@name Crescent Blade
+@persist Hold CLD LR Var [E S]:entity A:array
+interval(10)
+if(first()){
+entity():propNotSolid(1)
+entity():propDraw(0)
+propSpawnUndo(0)
+holoCreate(1)
+holoScale(1, vec(0.5))
+holoEntity(1):propDraw(0)
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(0,0,12)),vec(0.12,0.12,4.5),holoEntity(1):toWorld(ang()))
+holoModel(2,"hq_cylinder")
+holoColor(2, vec(70))
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(0,-0.4,-23.5)),vec(0.25,0.05,0.25),holoEntity(1):toWorld(ang(0,0,90)))
+holoModel(3,"prism")
+holoColor(3, vec(70))
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(3):toWorld(vec(0,0,1.5)),vec(0.15),holoEntity(3):toWorld(ang(90,0,0)))
+holoModel(4,"hq_torus")
+holoColor(4, vec(120))
+holoParent(4, 2)
+
+holoCreate(5, holoEntity(2):toWorld(vec(0,0,-27)),vec(0.2,0.4,0.2),holoEntity(3):toWorld(ang(90,0,0)))
+holoModel(5,"icosphere")
+holoColor(5, vec(70))
+holoParent(5, 2)
+
+holoCreate(6, holoEntity(2):toWorld(vec(0,0,-20)),vec(0.122,0.086,0.086),holoEntity(3):toWorld(ang(90,0,45)))
+holoColor(6, vec(0,0,70))
+holoParent(6, 2)
+
+holoCreate(7, holoEntity(2):toWorld(vec(0,0,-18)),vec(0.122,0.086,0.086),holoEntity(3):toWorld(ang(90,0,45)))
+holoColor(7, vec(0,0,70))
+holoParent(7, 2)
+
+holoCreate(8, holoEntity(2):toWorld(vec(0,0,-16)),vec(0.122,0.086,0.086),holoEntity(3):toWorld(ang(90,0,45)))
+holoColor(8, vec(0,0,70))
+holoParent(8, 2)
+
+holoCreate(9, holoEntity(2):toWorld(vec(0.8,0,-15)),vec(0.07,0.1,0.04),holoEntity(3):toWorld(ang(-270,0,0)))
+holoModel(9,"pyramid")
+holoColor(9, vec(170))
+holoParent(9, 2)
+
+holoCreate(10, holoEntity(2):toWorld(vec(0.8,0,-17)),vec(0.07,0.1,0.04),holoEntity(3):toWorld(ang(-270,0,0)))
+holoModel(10,"pyramid")
+holoColor(10, vec(170))
+holoParent(10, 2)
+
+holoCreate(11, holoEntity(2):toWorld(vec(0.8,0,-19)),vec(0.07,0.1,0.04),holoEntity(3):toWorld(ang(-270,0,0)))
+holoModel(11,"pyramid")
+holoColor(11, vec(170))
+holoParent(11, 2)
+
+holoCreate(12, holoEntity(2):toWorld(vec(-0.8,0,-15)),vec(0.07,0.1,0.04),holoEntity(3):toWorld(ang(270,0,0)))
+holoModel(12,"pyramid")
+holoColor(12, vec(170))
+holoParent(12, 2)
+
+holoCreate(13, holoEntity(2):toWorld(vec(-0.8,0,-17)),vec(0.07,0.1,0.04),holoEntity(3):toWorld(ang(270,0,0)))
+holoModel(13,"pyramid")
+holoColor(13, vec(170))
+holoParent(13, 2)
+
+holoCreate(14, holoEntity(2):toWorld(vec(-0.8,0,-19)),vec(0.07,0.1,0.04),holoEntity(3):toWorld(ang(270,0,0)))
+holoModel(14,"pyramid")
+holoColor(14, vec(170))
+holoParent(14, 2)
+
+holoCreate(15, holoEntity(2):toWorld(vec(0,0,-21.5)),vec(0.14,0.14,0.2),holoEntity(3):toWorld(ang(0,0,90)))
+holoModel(15,"hq_torus")
+holoColor(15, vec(70,0,0))
+holoParent(15, 2)
+
+holoCreate(16, holoEntity(15):toWorld(vec(0,0.8,0)),vec(0.05,0.05,0.07),holoEntity(3):toWorld(ang(0,0,180)))
+holoModel(16,"pyramid")
+holoColor(16, vec(70,0,0))
+holoParent(16, 2)
+
+holoCreate(17, holoEntity(2):toWorld(vec(0,0,12)),vec(0.125,0.125,1.2),holoEntity(1):toWorld(ang(0,0,0)))
+holoModel(17,"hq_cylinder")
+holoColor(17, vec(200))
+holoParent(17, 2)
+
+holoCreate(18, holoEntity(2):toWorld(vec(0,0,23.5)),vec(0.18),holoEntity(1):toWorld(ang(0,0,0)))
+holoModel(18,"hq_cone")
+holoColor(18, vec(120))
+holoParent(18, 2)
+
+holoCreate(19, holoEntity(2):toWorld(vec(0,0,23)),vec(0.18),holoEntity(1):toWorld(ang(0,0,180)))
+holoModel(19,"hq_cone")
+holoColor(19, vec(120))
+holoParent(19, 2)
+
+holoCreate(20, holoEntity(2):toWorld(vec(0,0,25.5)),vec(0.25,0.17,0.17),holoEntity(1):toWorld(ang(90,0,0)))
+holoModel(20,"icosphere2")
+holoColor(20, vec(120))
+holoParent(20, 2)
+
+holoCreate(21, holoEntity(2):toWorld(vec(0,0,28.2)),vec(0.2,0.3,0.2),holoEntity(1):toWorld(ang(225,90,0)))
+holoModel(21,"models/sprops/geometry/qring_48.mdl")
+holoMaterial(21,"models/debug/debugwhite")
+holoColor(21, vec(70))
+holoParent(21, 2)
+
+holoCreate(22, holoEntity(2):toWorld(vec(0,0,27)),vec(0.12,0.12,0.05),holoEntity(1):toWorld(ang()))
+holoModel(22,"hq_sphere")
+holoColor(22, vec(70))
+holoParent(22, 2)
+
+holoCreate(23, holoEntity(2):toWorld(vec(0,0,34.7)),vec(0.01,0.15,1.3),holoEntity(1):toWorld(ang()))
+holoColor(23, vec(180))
+holoMaterial(23,"models/debug/debugwhite")
+holoParent(23, 2)
+
+holoCreate(24, holoEntity(23):toWorld(vec(0,-2.1,5.4)),vec(0.4,0.04,0.8),holoEntity(1):toWorld(ang(0,90,0)))
+holoModel(24,"models/sprops/misc/sq_holes/qsqhole_d0_12.mdl")
+holoMaterial(24,"models/debug/debugwhite")
+holoColor(24, vec(180))
+holoParent(24, 2)
+
+holoCreate(25, holoEntity(23):toWorld(vec(0,0.9,6)),vec(0.3,0.3,0.01),holoEntity(1):toWorld(ang(90,0,0)))
+holoModel(25,"hq_cylinder")
+holoMaterial(25,"models/debug/debugwhite")
+holoColor(25, vec(180))
+holoParent(25, 2)
+
+holoCreate(26, holoEntity(25):toWorld(vec(6.6,0.9,0)),vec(1.1,0.01,0.15),holoEntity(1):toWorld(ang(90,90,0)))
+holoModel(26,"right_prism")
+holoMaterial(26,"models/debug/debugwhite")
+holoColor(26, vec(180))
+holoParent(26, 2)
+
+Chase = 1
+CLD = 1
+}
+if(changed(owner():weapon():type())){
+if(owner():weapon():type() == "weapon_crowbar"){
+Hold = 1
+}else{
+Hold = 0}}
+
+if(A:count()<=8){ 
+E = propSpawn("models/sprops/cuboids/height06/size_1/cube_6x6x6.mdl",vec(),0)
+E:propDraw(0)
+E:propFreeze(1)
+E:propSetBuoyancy(0)
+E:propPhysicalMaterial("default_silent")
+A:pushEntity(E)
+}
+
+if(changed(Hold)){
+timer("change",10)
+for(I=2,26){
+holoVisible(I,owner(),Hold)}
+}
+if(clk("change")){
+holoPos(1, owner():attachmentPos(Hold ?"anim_attachment_rh" : "chest"))
+holoAng(1, owner():attachmentAng(Hold ?"anim_attachment_rh" : "chest"))
+holoAng(2, holoEntity(1):toWorld(ang(0,0,-20)*!Hold))
+holoPos(2, holoEntity(1):toWorld(vec(-7,-4,-17)*!Hold+vec(0,0,-7)*Hold))
+holoParentAttachment(1, owner(), Hold ?"anim_attachment_rh" : "chest")
+owner():weapon():setAlpha(!Hold*255)}
+
+if(Hold){
+LR = owner():keyRight()-owner():keyLeft()
+
+#Chase
+
+if(owner():keyAttack2() & owner():isOnGround() & CLD & !abs(LR)){
+owner():setTrails(200,0.3,0.3,"trails/plasma",vec(255,131,0),255)
+CLD=0
+owner():applyPlayerForce(-owner():vel()*1.1+owner():forward()*(-1+owner():keyForward()*2)*5000)
+timer("chase",300)
+}
+######
+
+if(abs(LR) & owner():keyAttack2()){
+Var+=30*LR
+Spin=1
+}else{Spin=0}}
+
+if(Spin){
+foreach(I,S:entity=A){
+S:propSetVelocityInstant(((owner():boxCenterW()+vec(sin(I*45+Var)*150,cos(I*45+Var)*150,0))-S:pos())*30)
+}}
+if(changed(Spin)){
+Var = 0
+owner():soundPlay(1,0,Spin ? "ambience/mechwhine.wav" : "")
+owner():soundPlay(2,0,Spin ? "ambient/fire/fire_med_loop1.wav" : "")
+soundPitch(1,50)
+soundVolume(1,0.12)
+soundPitch(2,50)
+soundVolume(2,0.28)
+foreach(I,S:entity=A){
+S:setPos(owner():boxCenterW()+vec(sin(I*45+Var)*200,cos(I*45+Var)*150,0))
+S:propFreeze(!Spin)
+S:propNotSolid(!Spin)}
+if(changed(Spin)&!Spin){
+foreach(I,S:entity=A){S:removeTrails()}}
+if(changed(Spin)&Spin){
+foreach(I,S:entity=A){S:setTrails(20,1,1,"trails/plasma",vec(255,120,0),255)}}
+}
+
+
+if(clk("chase")){CLD=1
+owner():removeTrails()}

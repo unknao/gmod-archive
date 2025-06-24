@@ -1,56 +1,43 @@
 @name Breakable respawner
-@inputs 
-@outputs 
-@persist [T SpawnTable]:table
-@trigger 
+@trigger none
+@strict
+#@persist [T SpawnTable]:table #For whatever reason not having these persisted makes the e2 not work
 
-if(first()){
-    T = table()
-    SpawnTable = table()
-}
+T = table()
+SpawnTable = table()
 
 event entityDamage(Victim:entity, Damage:damage) {
-    if(Victim:maxHealth() & Victim:owner() == owner() & Victim:type() == "prop_physics"){
-        timer(Victim:id():toString(), 0)
-        T[Victim:id():toString(), array] = array(Victim:model(), Victim:pos(), Victim:angles(), Victim:isFrozen())
-    }
-}
-Clk = clkName()
-if(Clk:find("respawn")){
-    local Entry = Clk:replace("respawn", "")
-    SpawnTable[Entry, array] = T[Entry, array]
+    if(!Victim:isValid()){ exit() }
+    if(Victim:owner() != owner()){ exit() }
+    if(Victim:type() != "prop_physics"){ exit() }
+    if(Victim:maxHealth() <= 1){ exit() }
+    if((Victim:health() - Damage:getAmount()) > 0){ exit() }
+    
+    
+    local ID = Victim:id():toString()
+    
+    T[ID, array] = array(Victim:model(), Victim:pos(), Victim:angles(), Victim:isFrozen())
+    timer(3, function(){
+        SpawnTable[ID, array] = T[ID, array]
+    })
 }
 
 event tick(){
-    if(SpawnTable:count()){
-        foreach(K:string, V:array = SpawnTable){
-            if(!propCanCreate()){ 
-                print("aaaaaaaaaaA")
-                break
-            }
-            
-            local Ent = propSpawn(V[1, string], V[2, vector], V[3, angle], V[4, number])
-            Ent:emitSound("items/spawn_item.wav")
-            Ent:setMaterial("models/alyx/emptool_glow")
-            T[K, entity] = Ent
-            SpawnTable:remove(K)
-            
-            timer("killglow" + K, 500)
-        }
+    if(!SpawnTable:count()){ exit() }
+        
+    foreach(K:string, V:array = SpawnTable){
+        if(!propCanCreate()){ break }
+        
+        local Ent = propSpawn(V[1, string], V[2, vector], V[3, angle], V[4, number])
+        Ent:emitSound("items/spawn_item.wav")
+        Ent:setMaterial("models/alyx/emptool_glow")
+        T[K, entity] = Ent
+        SpawnTable:remove(K)
+        timer("killglow" + K, 0.5, 1, function(){
+            T[K, entity]:setMaterial("")
+            T:remove(K)
+        })
     }
 }
 
-if(Clk:find("killglow")){
-    local Entry = Clk:replace("killglow", "")
-    T[Entry, entity]:setMaterial("")
-    T:remove(Entry)
-}
 
-ID = Clk:toNumber()
-if(ID){
-    E = entity(ID)
-
-    if(!E:isValid()){
-        timer("respawn" + ID, 3000)
-    }
-}

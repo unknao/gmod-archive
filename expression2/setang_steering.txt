@@ -1,0 +1,52 @@
+@name setang steering
+@inputs A D
+@inputs [FL_Wheel #[Front left wheel slave]# FB_Wheel #[Front right wheel slave]# B_Wheel #[Base slave]# Base]:entity
+@outputs Curve
+@trigger none
+@strict
+
+Steering_Max = 35 #Maximum steering angle
+Steering_Rate = 0.1 #How fast the steering angle changes
+Steering_Rate_Max = 2.2 #Upper bound of how fast the steering angle can change
+
+Gyro = 0
+Gyro_Mul = 0
+
+Wheel_Track = 83.007 #Distance between the wheels lengthwise
+Wheel_Width = 68.125 / 2 #Distance between the wheels widthwise divided by 2
+
+Curve = 90
+
+let TickAdjust = 66 * tickInterval()
+
+event tick(){
+    let Curve_Target = 90 - clamp((A - D) * Steering_Max + Gyro * Gyro_Mul, -Steering_Max, Steering_Max)
+    if(Curve_Target != Curve){
+        Curve += clamp((Curve_Target - Curve) * Steering_Rate, -Steering_Rate_Max, Steering_Rate_Max) * TickAdjust
+        
+        N = Wheel_Track * tan(Curve)
+        L = atan(Wheel_Track / (N - Wheel_Width))
+        R = atan(Wheel_Track / (N + Wheel_Width))
+    }
+    
+    if(->FL_Wheel & !FL_Wheel:isPlayerHolding()){
+        if(!FL_Wheel:isFrozen()){
+            FL_Wheel:propFreeze(1)
+        }
+        FL_Wheel:setAng(Base:toWorld(ang(0, L, 0)))
+    }    
+    
+    if(->FB_Wheel & !FB_Wheel:isPlayerHolding()){
+        if(!FB_Wheel:isFrozen()){
+            FB_Wheel:propFreeze(1)
+        }
+        FB_Wheel:setAng(Base:toWorld(ang(0, R, 0)))
+    }    
+    
+    if(->B_Wheel & !B_Wheel:isPlayerHolding()){
+        if(!B_Wheel:isFrozen()){
+            B_Wheel:propFreeze(1)
+        }
+        B_Wheel:setAng(Base:toWorld(ang()))
+    }
+}

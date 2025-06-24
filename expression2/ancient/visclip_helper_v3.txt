@@ -1,0 +1,255 @@
+@name visclip helper v3
+@inputs 
+@outputs 
+@persist State:string [PropInfo]:table [LastAimEnt Ent1Selection Ent2Selection]:entity [SpawnedProps Plane1 Plane2]:array Swap
+@trigger 
+
+if (first()) {
+    
+    #ifndef entity:setPos(vector)
+    error("Propcore needs to be enabled for this E2 to work!")
+    #endif
+    
+    function vector2 solve_simultaneuos2([A1 B1 C1 A2 B2 C2]:number) {
+        local D = A1 * B2 - B1 * A2
+        if (D == 0) {
+            return vec2()
+        }
+        return vec2(B2 * C1 - B1 * C2, A1 * C2 - A2 * C1) / D
+    }
+    
+    function vector solve_2line_intersection([Line1 Line2]:array){
+        local A = Line1[2, vector] - Line1[1, vector]
+        local B = Line2[2, vector] - Line2[1, vector]
+        local Normal = (A:cross(B)):normalized()
+        
+        local C = Line2[1, vector] - Line1[1, vector]
+        
+        local Length = solve_simultaneuos2(A:dot(A), -A:dot(B), A:dot(C),
+                                           A:dot(B), -B:dot(B), B:dot(C))
+        local Length1 = Length:x()
+        local Length2 = Length:y()
+        
+        local Point1 = Line1[1, vector] + A * Length1
+        local Point2 = Line2[1, vector] + B * Length2
+        return (Point1 + Point2) * 0.5
+    }
+    
+    function array solve_2plane_intersection([Plane1 Plane2]:array){
+        local Dir = Plane1[2, vector]:cross(Plane2[2, vector])
+        
+        if (Dir:length() == 0) {
+            return array(vec(), vec())
+        }
+        
+        local Line1 = array()
+        local Line2 = array()
+        
+        Line1[1, vector] = Plane1[1, vector]
+        Line1[2, vector] = Plane1[1, vector] + Plane1[2, vector]:cross(Dir)
+        
+        Line2[1, vector] = Plane2[1, vector]
+        Line2[2, vector] = Plane2[1, vector] + Plane2[2, vector]:cross(Dir)
+        
+        local Line = array()
+        Line[1, vector] = solve_2line_intersection(Line1, Line2)
+        Line[2, vector] = Dir:normalized()
+        
+        return Line
+    }
+    
+    function array getClipPlane([Plane1 Plane2]:array) {
+        local Intersection = solve_2plane_intersection(Plane1, Plane2)
+        local Pos = Intersection[1, vector]
+        local Dir = Intersection[2, vector]
+        local ClipPlaneDir = Plane1[2, vector]:rotateAroundAxis(Dir, acos(Plane1[2, vector]:dot(Plane2[2, vector])) * 0.5 + 90)
+        
+        return array(Pos, ClipPlaneDir)
+    }
+    
+    function void printNote(Text:string) {
+        printColor(vec(255), "[", vec(135, 179, 77), "Smart Visclip", vec(255), "] ", vec(255), Text)
+    }
+    
+    function void printError(Text:string) {
+        printColor(vec(255), "[", vec(255, 26, 22), "Smart Visclip", vec(255), "] ", vec(230), Text)
+    }
+    
+    function ranger ignoreVis(Dist:number, Origin:vector, Dir:vector, Depth:number){
+        #ifdef entity:acfHitClip(vector)
+        
+        local Ranger = rangerOffset(Dist, Origin, Dir)
+        if(Depth > 5 | Ranger:hitWorld() | !Ranger:hit()){
+            return Ranger
+        }
+        
+        if(Ranger:entity():acfHitClip(Ranger:pos())){
+            rangerFilter(Ranger:entity())
+            Ranger = ignoreVis(Dist - Ranger:distance(), Ranger:pos(), Dir, Depth + 1)
+        }
+        
+        return Ranger
+        
+        #else
+        return rangerOffset(Dist, Origin, Dir)
+        #endif
+    }
+    
+    function void highlightAimEntity() {
+        
+        local HighlightColor = vec4(255, 90, 90, 255)
+        local HighlightMat = "models/debug/debugwhite"
+        
+        rangerReset()
+        rangerFilter(players())
+        local Ranger = ignoreVis(65536, owner():shootPos(), owner():eye(), 0)
+        
+        if (changed(Ranger:entity())) {
+            local Ent = Ranger:entity()
+            PropInfo["" + Ent:id(), array] = array(Ent:getColor4(), Ent:getMaterial())
+            
+            Ent:setColor(HighlightColor)
+            Ent:setMaterial(HighlightMat)
+            
+            if (LastAimEnt:isValid()) {
+                LastAimEnt:setColor(PropInfo["" + LastAimEnt:id(), array][1, vector4])
+                LastAimEnt:setMaterial(PropInfo["" + LastAimEnt:id(), array][2, string])
+                PropInfo:remove("" + LastAimEnt:id())
+            }
+            
+            LastAimEnt = Ent
+        }
+        
+    }
+    
+    function void showPlane(Idx:number, Plane:array, Size:number, Color:vector) {
+        if (!holoEntity(Idx):isValid()) {
+            holoCreate(Idx)
+            holoColor(Idx, Color)
+            holoDisableShading(Idx, 1)
+            holoMaterial(Idx, "models/debug/debugwhite")
+        }
+        
+        if (holoEntity(Idx):getColor() != Color) {
+            holoColor(Idx, Color)
+        }
+        
+        holoPos(Idx, Plane[1, vector])
+        holoAng(Idx, Plane[2, vector]:toAngle())
+        holoScale(Idx, vec(0.01, Size, Size))
+    }
+        
+    State = "select_1_2"
+    
+    Swap = 1
+    
+    rangerPersist(1)
+    
+    runOnTick(1)
+    runOnChat(1)
+    
+}
+
+if (changed(State)) {
+    
+    switch (State) {
+    case "select_1_2",
+        
+        printNote("E2 made by blnk (STEAM_0:0:41167900)")
+        printNote("For help, type '!help' in chat.")
+        
+        break
+        
+    default,
+        break
+    }
+}    
+    
+
+switch (State) {
+case "select_1_2",
+    
+    if (chatClk(owner())) {
+        switch (owner():lastSaid()) {
+        case "!help",
+            hideChat(1)
+                            # TODO
+            break
+        
+        case "!swapside",
+            hideChat(1)
+            
+            foreach (K, V:entity = SpawnedProps) {
+                V:setPos(V:pos() + V:up() * Swap * 1.5)
+            }
+            
+            if (Swap == 1) {
+                Swap = -1
+            }
+            else {
+                Swap = 1
+            }
+            
+            break
+        
+        default,
+            break
+        }   
+    }
+        
+    highlightAimEntity()
+    
+    if (changed(owner():keyUse()) & owner():keyUse()) {
+        
+        rangerReset()
+        rangerFilter(players())
+        local Ranger = ignoreVis(65536, owner():shootPos(), owner():eye(), 0)
+        local Ent = Ranger:entity()
+        
+        if (Ent2Selection:isValid()) {
+            local Clip = getClipPlane(Plane1, Plane2)
+            showPlane(3, Clip, 2, vec(255, 255, 0)), holoAlpha(3, 100)
+            
+            local Prop = propSpawn("models/sprops/rectangles_thin/size_2/rect_12x12x1_5.mdl", 1)
+            Prop:setPos(Clip[1, vector] + holoEntity(3):forward() * 0.75 * Swap)
+            Prop:setAng(Clip[2, vector]:toAngle():rotateAroundAxis(holoEntity(3):right(), 90))
+            
+            SpawnedProps:pushEntity(Prop)
+            
+            Ent1Selection = noentity()
+            Ent2Selection = noentity()
+            
+            Plane1 = array()
+            Plane2 = array()
+            
+            holoDelete(1)
+            holoDelete(2)
+            holoDelete(3)
+        }
+        else {
+            if (Ent:isValid() & !Ent1Selection:isValid()) {
+                Plane1 = array(Ranger:pos(), Ranger:hitNormal())
+                Ent1Selection = Ent
+                
+                showPlane(1, Plane1, 3, vec(255, 0, 0)), holoAlpha(1, 100)
+            }
+            else {
+                if (Ranger:hitNormal() == Plane1[2, vector]) {
+                    printError("Planes are parallel!")
+                }
+                else {
+                    Plane2 = array(Ranger:pos(), Ranger:hitNormal())
+                    Ent2Selection = Ent
+                    
+                    showPlane(2, Plane2, 3, vec(0, 255, 0)), holoAlpha(2, 100)
+                }
+            }
+        }
+    }
+    
+    break
+    
+default,
+    break
+    
+}

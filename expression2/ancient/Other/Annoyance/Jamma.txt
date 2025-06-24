@@ -1,0 +1,19 @@
+@name Jamma
+@persist T:entity E:entity
+interval(100)
+if(first()){
+entity():propNotSolid(1)
+entity():setAlpha(0)
+holoCreate(1)
+holoAlpha(1, 0)
+E = propSpawn("models/sprops/cuboids/non_set/cube_18x18x18.mdl",entity():pos()+vec(0,0,100),1)
+E:setMass(500000)
+E:setAlpha(0)
+}
+if(owner():keyAttack2()){T = owner():aimEntity()
+holoPos(1, T:pos()+T:forward()*200)
+holoParent(1, T)
+}
+E:setPos(holoEntity(1):pos())
+
+

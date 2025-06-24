@@ -1,0 +1,15 @@
+@name Big radar
+@persist A:array E:entity
+interval(100)
+
+findByClass("player")
+A = findToArray()
+foreach(I,E:entity=A){
+if(changed(E) & E){
+holoCreate(I)
+holoModel(I, E:model())
+holoAnim(I, 3)
+holoScale(I, vec(0.2))}
+holoPos(I, entity():pos()+ -(entity():pos()-E:pos())/180)
+holoAng(I,E:angles())}
+

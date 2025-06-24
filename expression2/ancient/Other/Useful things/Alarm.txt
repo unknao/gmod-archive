@@ -1,0 +1,30 @@
+@name Alarm
+@persist N M
+
+runOnChat(1)
+if(first()){
+entity():setAlpha(0)
+entity():propNotSolid(1)}
+
+if(changed(owner():lastSaidWhen()) & !first()){
+A = owner():lastSaid():explode(" ")
+if(A[1,string] == "!alarm"){
+hideChat(1)
+N = A[2,string]:toNumber()
+
+if(A[3,string] == "sec"){
+M = 1000}
+elseif(A[3,string] == "min"){
+M = 60000}
+else{
+M = 1}
+
+timer("clock",N*M)
+}}
+
+if(clk("clock")){
+owner():soundPlay(1,0,"ambient/alarms/train_crossing_bell_loop1.wav")
+timer("stop",2000)}
+
+if(clk("stop")){
+soundStop(1)}

@@ -1,0 +1,27 @@
+@name real engine experimentation
+@inputs [Crank P1 P2 P3 P4 P5]:wirelink
+@outputs Y
+@persist [C Pi1 Pi2 Pi3 Pi4 Pi5]:entity Y Ang:angle
+interval(1)
+C = Crank:entity()
+Pi1 = P1:entity()
+Pi2 = P2:entity()
+Pi3 = P3:entity()
+Pi4 = P4:entity()
+Pi5 = P5:entity()
+Ang = C:angles()
+Y = Ang:pitch()
+if((Y >= 0)-10){
+Pi1:applyForce((-Pi1:up()*Pi1:mass())*100)}
+
+if((Y >= 72)-10){
+Pi2:applyForce((-Pi2:up()*Pi2:mass())*100)}
+
+if((Y >= 36)-10){
+Pi3:applyForce((-Pi3:up()*Pi3:mass())*100)}
+
+if((Y >= -36)-10){
+Pi4:applyForce((-Pi4:up()*Pi4:mass())*100)}
+
+if((Y >= -72)-10){
+Pi5:applyForce((-Pi5:up()*Pi5:mass())*100)}

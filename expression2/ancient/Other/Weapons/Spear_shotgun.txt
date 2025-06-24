@@ -1,0 +1,319 @@
+@name Spear shotgun
+@outputs Hold
+@persist Hold SW Anim Rdy [E B Ents Expl]:entity A:array Val Cld Thrown [Ranger R]:ranger Reclaim C Vel:vector
+#neither a spear or a shotgun
+runOnTick(1)
+if(first()){
+propSpawnUndo(0)
+entity():propDraw(0)
+entity():propNotSolid(1)
+
+rangerFilter(owner())
+rangerPersist(1)
+
+holoCreate(1)
+holoScale(1, vec(0.5))
+holoEntity(1):propDraw(0)
+holoParent(1, entity())
+
+Anim = 10
+Rdy = 1
+Cld = 1
+lightCreate(1)
+lightColor(1, vec(41,105,0))
+lightToggle(1,0)
+}
+if(!Thrown){
+if(owner():weapon():type() == "none"){
+Hold = 1
+}else{
+Hold = 0}
+
+if(changed(Hold)){
+Val = 2-(4*Hold)
+SW = 10*Hold
+timer("change",1)
+owner():soundPlay("switch",1,Hold ? "weapons/widow_maker_pump_action_forward.wav" : "weapons/widow_maker_pump_action_back.wav")
+soundVolume("switch", 0.5)
+holoUnparent(1)}}
+
+if(!holoEntity(2)){
+holoCreate(2, holoEntity(1):toWorld(vec()),vec(0.15,0.15,1),holoEntity(1):toWorld(ang()))
+holoModel(2, "hq_cylinder")
+holoColor(2, vec(45,48,0))
+holoParent(2, 1)
+
+#bottom rods
+holoCreate(3, holoEntity(2):toWorld(vec(0,0,-10)),vec(0.2,0.2,1),holoEntity(1):toWorld(ang()))
+holoModel(3, "hq_rcylinder")
+holoColor(3, vec(35,38,0))
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(3):toWorld(vec(0,0,-10)),vec(0.25,0.25,0.9),holoEntity(1):toWorld(ang()))
+holoModel(4, "hq_rcylinder")
+holoColor(4, vec(25,28,0))
+holoParent(4, 3)
+
+holoCreate(5, holoEntity(4):toWorld(vec(0,0,-5)),vec(0.25),holoEntity(1):toWorld(ang()))
+holoModel(5, "hq_sphere")
+holoColor(5, vec(30))
+holoParent(5, 4)
+
+holoCreate(23, holoEntity(5):toWorld(vec(1.8,0,-1.8)),vec(0.08,0.08,0.25),holoEntity(1):toWorld(ang(145,0,0)))
+holoModel(23, "hq_cone")
+holoColor(23, vec(30))
+holoParent(23, 4)
+
+holoCreate(24, holoEntity(5):toWorld(vec(0,1.8,-1.8)),vec(0.08,0.08,0.25),holoEntity(1):toWorld(ang(145,90,0)))
+holoModel(24, "hq_cone")
+holoColor(24, vec(30))
+holoParent(24, 4)
+
+holoCreate(25, holoEntity(5):toWorld(vec(0,-1.8,-1.8)),vec(0.08,0.08,0.25),holoEntity(1):toWorld(ang(145,-90,0)))
+holoModel(25, "hq_cone")
+holoColor(25, vec(30))
+holoParent(25, 4)
+
+holoCreate(26, holoEntity(5):toWorld(vec(-1.8,0,-1.8)),vec(0.08,0.08,0.25),holoEntity(1):toWorld(ang(145,180,0)))
+holoModel(26, "hq_cone")
+holoColor(26, vec(30))
+holoParent(26, 4)
+
+#Upper rods
+holoCreate(6, holoEntity(2):toWorld(vec(0,0,10)),vec(0.2,0.2,1),holoEntity(1):toWorld(ang()))
+holoModel(6, "hq_rcylinder")
+holoColor(6, vec(35,38,0))
+holoParent(6, 2)
+
+holoCreate(7, holoEntity(6):toWorld(vec(0,0,10.5)),vec(0.25,0.25,0.95),holoEntity(1):toWorld(ang()))
+holoModel(7, "hq_rcylinder")
+holoColor(7, vec(30,33,0))
+holoParent(7, 6)
+
+#Shotgun head
+holoCreate(8, holoEntity(7):toWorld(vec(1.4,0,5)),vec(0.15,0.25,0.5),holoEntity(1):toWorld(ang()))
+holoModel(8, "prism")
+holoColor(8, vec(25,28,0))
+holoParent(8, 7)
+
+holoCreate(9, holoEntity(7):toWorld(vec(-1.4,0,5)),vec(0.15,0.25,0.5),holoEntity(1):toWorld(ang()))
+holoModel(9, "prism")
+holoColor(9, vec(25,28,0))
+holoParent(9, 7)
+
+holoCreate(10, holoEntity(7):toWorld(vec(1.4,0,0.8125)),vec(0.15,0.25,0.2),holoEntity(1):toWorld(ang(180,0,0)))
+holoModel(10, "prism")
+holoColor(10, vec(25,28,0))
+holoParent(10, 7)
+
+holoCreate(11, holoEntity(7):toWorld(vec(-1.4,0,0.8125)),vec(0.15,0.25,0.2),holoEntity(1):toWorld(ang(180,0,0)))
+holoModel(11, "prism")
+holoColor(11, vec(25,28,0))
+holoParent(11, 7)
+
+holoCreate(12, holoEntity(7):toWorld(vec(-1.4,0,0.8125)),vec(0.15,0.25,0.2),holoEntity(1):toWorld(ang(180,0,0)))
+holoModel(12, "prism")
+holoColor(12, vec(25,28,0))
+holoParent(12, 7)
+
+holoCreate(13, holoEntity(7):toWorld(vec(0,0,3)),vec(0.25,0.25,0.5),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(13, vec(25,28,0))
+holoParent(13, 7)
+
+holoCreate(14, holoEntity(7):toWorld(vec(0,0,-0.7)),vec(0.25,0.25,0.115),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(14, vec(25,28,0))
+holoModel(14, "hq_cubinder")
+holoParent(14, 7)
+
+holoCreate(15, holoEntity(7):toWorld(vec(0,1.38,6.8)),vec(0.229,0.02,0.2),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(15, vec(25,28,0))
+holoParent(15, 7)
+
+holoCreate(16, holoEntity(7):toWorld(vec(0,-1.38,6.8)),vec(0.229,0.02,0.2),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(16, vec(25,28,0))
+holoParent(16, 7)
+
+holoCreate(17, holoEntity(7):toWorld(vec(-0.5,0.6,6.5)),vec(0.1,0.1,0.12),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(17, vec(30))
+holoModel(17, "hq_tube")
+holoParent(17, 7)
+
+holoCreate(18, holoEntity(7):toWorld(vec(0.5,0,6.5)),vec(0.1,0.1,0.12),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(18, vec(30))
+holoModel(18, "hq_tube")
+holoParent(18, 7)
+
+holoCreate(19, holoEntity(7):toWorld(vec(-0.5,-0.6,6.5)),vec(0.1,0.1,0.12),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(19, vec(30))
+holoModel(19, "hq_tube")
+holoParent(19, 7)
+
+holoCreate(20, holoEntity(17):toWorld(vec(0,0,0.4)),vec(0.09,0.09,0.01),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(20, vec(20))
+holoModel(20, "hq_cylinder")
+holoParent(20, 7)
+
+holoCreate(21, holoEntity(18):toWorld(vec(0,0,0.4)),vec(0.09,0.09,0.01),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(21, vec(20))
+holoModel(21, "hq_cylinder")
+holoParent(21, 7)
+
+holoCreate(22, holoEntity(19):toWorld(vec(0,0,0.4)),vec(0.09,0.09,0.01),holoEntity(1):toWorld(ang(180,0,0)))
+holoColor(22, vec(20))
+holoModel(22, "hq_cylinder")
+holoParent(22, 7)
+
+holoCreate(27, holoEntity(7):toWorld(vec(0,0,9)),vec(0.2,0.3,0.3),holoEntity(1):toWorld(ang(-90,0,0)))
+holoColor(27, vec(255,235,0))
+holoAlpha(27, 0)
+holoShadow(27,0)
+holoDisableShading(27,1)
+holoModel(27, "models/effects/muzzleflash/minigunmuzzle.mdl")
+holoParent(27, 7)
+
+holoCreate(28)
+holoAlpha(28, 0)
+holoModel(28, "models/sprops/geometry/sphere_72.mdl")
+holoColor(28, vec(255,155,0))
+holoDisableShading(28,1)
+holoMaterial(28, "models/debug/debugwhite")}
+
+
+
+if(changed(Anim)){
+holoPos(3, holoEntity(2):toWorld(vec(0,0,-10+Anim/3)))
+holoPos(4, holoEntity(3):toWorld(vec(0,0,-10+Anim/1.11111111111)))
+holoPos(6, holoEntity(2):toWorld(vec(0,0,10-Anim/3)))
+holoPos(7, holoEntity(6):toWorld(vec(0,0,10.5-Anim/1.11111111111)))
+}
+
+
+if(clk("change")){
+holoPos(1, owner():attachmentPos(Hold ? "anim_attachment_rh" : "chest"))
+holoAng(1, owner():attachmentAng(Hold ? "anim_attachment_rh" : "chest"))
+holoParentAttachment(1, owner(), Hold ? "anim_attachment_rh" : "chest")
+holoPos(2, holoEntity(1):toWorld(vec(2,6.3,-14)*!Hold))
+holoAng(2, holoEntity(1):toWorld(ang(-160,0,0)*!Hold))
+owner():weapon():setAlpha(!Hold*255)}
+
+Anim = clamp(Anim+Val,0,10)
+
+if(Hold){
+if(owner():keyAttack1() & Rdy & !Thrown){
+timer("fire",300)
+Rdy = 0
+owner():soundPlay("delay",0.3,"weapons/sniper_bolt_forward.wav")
+soundVolume("delay",0.3)}
+if(clk("fire") & !Thrown){
+E = propSpawn("models/sprops/geometry/sphere_3.mdl",owner():pos()+owner():eye()*80+vec(0,0,64),0)
+E:setMass(5000)
+E:propSetBuoyancy(0)
+E:propGravity(0)
+E:setColor(vec(255,153,0))
+E:setMaterial("models/shiny")
+E:propDrag(0)
+E:setTrails(2,0,0.5,"trails/smoke",vec(205,103,0),150)
+E:applyForce(owner():eye()*3000*E:mass())
+A:pushEntity(E)
+owner():soundPlay(1,0.8,"weapons/widow_maker_shot_01.wav")
+soundVolume(1,0.5)
+soundPitch(1, 100+randint(-5,5))
+timer("rdy",700)}
+
+if(owner():keyAttack2() & !Thrown){
+owner():soundPlay(5,1,"weapons/slam/throw.wav")
+soundPitch(5, 100+randint(-5,5))
+Thrown = 1
+Vel = owner():eye()*30+owner():vel()/100
+
+holoUnparent(2)
+holoPos(2,owner():pos()+owner():eye()*50+vec(0,0,64))
+}}else{
+
+if(owner():weapon():type() =="none" & !Thrown){
+if(Cld & owner():keyReload()){
+Cld = 0
+owner():soundPlay(2,2,"weapons/scatter_gun_double_shoot.wav")
+soundPitch(2, 100+randint(-5,5))
+soundVolume(2,0.5)
+timer("cld",1000)
+holoAlpha(27,255)
+timer("1",100)
+owner():applyPlayerForce(owner():forward()*550+vec(0,0,500))
+}
+if(changed(Cld)){
+owner():soundPlay(2,2,Cld ? "" : "weapons/scatter_gun_double_shoot.wav")}
+}}
+
+if(clk("1")){holoAlpha(27,0)}
+if(clk("rdy")){Rdy = 1}
+if(clk("cld")){Cld = 1
+holoEntity(2):soundPlay(3,0.5,"weapons/scatter_gun_double_tube_open.wav")
+soundVolume(3,1)}
+
+if(Thrown){
+Pos = holoEntity(2):pos()
+
+Ranger = rangerOffset(50,holoEntity(7):toWorld(vec(0,0,5)),Vel)
+if(!Reclaim)
+{
+if(Ranger:hit())
+{
+Reclaim = 1
+holoPos(28, Ranger:pos())
+C = 0
+holoParentAttachment(2,Ranger:entity(),"chest")
+soundStop("thrown")
+
+Expl = propSpawn("models/props_phx/torpedo.mdl",Ranger:position(),0)
+Expl:propBreak()
+Vel = vec()
+}
+else
+{
+holoPos(2,Pos+Vel)
+holoAng(2,Vel:toAngle()+ang(270,0,0))
+Vel = Vel - vec(0,0,0.2)
+}
+}
+}
+if(changed(Reclaim)){
+for(I=23,26){
+holoDisableShading(I, Reclaim)
+holoColor(I, vec(30+(Reclaim*161),30+(Reclaim*225),30-(Reclaim*30)))}
+lightToggle(1, Reclaim)
+if(Reclaim){
+lightPos(1, holoEntity(5):toWorld(vec()))}
+}
+
+if(Reclaim){
+lightPos(1, holoEntity(5):toWorld(vec()))
+if(owner():boxCenterW():distance(holoEntity(2):pos())<50){
+holoUnparent(2)
+Thrown = 0
+Reclaim = 0
+holoPos(2, holoEntity(1):pos())
+holoAng(2, holoEntity(1):angles())
+holoParent(2,1)
+timer(Hold ?  "equip" : "unequip",1)}}
+
+if(changed(Thrown)){
+holoEntity(2):soundPlay("thrown",0,Thrown ? "Phx.HoverHeavy" : "")
+soundVolume("thrown",0.1)
+holoEntity(5):setTrails(20,0,5,"trails/electric",vec(191,255,0),Thrown*255)}
+
+if(C!=12.5 & Reclaim){
+C = clamp(C+0.75,0,12.5)
+holoScale(28, vec(C))
+holoAlpha(28, 127.5-C*10.2)
+if(changed(C) & C==12.5){
+holoScale(28,vec(0))}}
+
+if(A){
+rangerFilter(A)
+foreach(I,Ents:entity=A){
+R = rangerOffsetHull(100,Ents:pos(),(Ents:pos()-(Ents:pos()+Ents:vel())),Ents:boxSize())
+if(R:hit()){
+B = propSpawn("models/props_phx/ww2bomb.mdl",Ents:pos(),1)
+B:propBreak()
+Ents:propDelete()}}}

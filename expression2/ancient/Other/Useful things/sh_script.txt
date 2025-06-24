@@ -1,0 +1,12 @@
+@name sh script
+
+if(first()){
+entity():propDraw(0)
+entity():propNotSolid(1)}
+
+runOnChat(1)
+S = lastSaid()
+    
+if(S:find("hsv") | S:find("matrix") | S:find("size") | S:find("chatbubble") | S:find("rotate")){
+if(S:find("<") & S:find(">")){
+concmd("say sh")}}

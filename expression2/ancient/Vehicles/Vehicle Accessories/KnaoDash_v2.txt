@@ -1,0 +1,225 @@
+@name KnaoDash v2
+@inputs Gear RPM
+@persist RPM Speed
+@trigger none
+
+E2 = entity()
+E2:setAlpha(0)
+local Speed = E2:vel():length()
+
+Unit = "km/h"
+ThrottleDialMax = 180
+
+RPMMax = 180
+RPMAdj = (RPM/30)
+SwitchValue = 8000
+
+if(first() | duped())
+{
+    #RPM Meter holos
+    #Dial Case
+    holoCreate(99, E2:toWorld(vec(0,-3,0)), vec(1), E2:toWorld(ang(-90,0,0)))
+    holoModel(99, "models/sprops/trans/misc/gauge_1.mdl")
+    holoSkin(99, 5)
+    holoParent(99, E2)
+    
+    #Dial and knob
+    holoCreate(1, E2:toWorld(vec(0,-3,0.5)), vec(0.05,0.05,0.05), E2:toWorld(ang(0,180,45)))
+    holoColor(1, vec(200))
+    holoModel(1, "hq_sphere")
+    holoParent(1, 99)
+    holoMaterial(1,"models/debug/debugwhite")
+
+    holoCreate(2, E2:toWorld(vec(1,-3,0.5)), vec(0.02,0.01,0.12), E2:toWorld(ang(90,0,0)))
+    holoColor(2, vec(0,255,0))
+    holoMaterial(2, "models/debug/debugwhite")
+    holoModel(2, "models/sprops/triangles_thin/misc/t_ctri_24.mdl")
+    holoDisableShading(2, 1)
+    holoParent(2, 1)
+    
+    #Speedometer holos
+    #Dial Case
+    holoCreate(98, E2:toWorld(vec(0,3,0)), vec(1), E2:toWorld(ang(-90,0,0)))
+    holoModel(98, "models/sprops/trans/misc/gauge_1.mdl")
+    holoSkin(98, 4)
+    holoParent(98, E2)
+    
+    #Dial and needle
+    holoCreate(10, E2:toWorld(vec(0,3,0.5)), vec(0.05,0.05,0.05), E2:toWorld(ang(0,0,90)))
+    holoColor(10, vec(200))
+    holoModel(10, "hq_sphere")
+    holoParent(10, 98)
+    holoMaterial(10,"models/debug/debugwhite")
+
+    holoCreate(20, E2:toWorld(vec(1,3,0.5)), vec(0.02,0.01,0.12), E2:toWorld(ang(90,0,0)))
+    holoColor(20, vec(0,255,0))
+    holoModel(20, "models/sprops/triangles_thin/misc/t_ctri_24.mdl")
+    holoMaterial(20, "models/debug/debugwhite")
+    holoDisableShading(20, 1)
+    holoParent(20, 10)
+    
+    #Gears
+    #Gauge
+     holoCreate(11, E2:toWorld(vec(-3,0,0)), vec(0.5), E2:toWorld(ang(-90,0,0)))
+    holoModel(11, "models/sprops/trans/misc/gauge_1.mdl")
+    holoSkin(11, 4)
+    holoParent(11, E2)
+    
+    #Reverse
+    holoCreate(12, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(12, "models/sprops/misc/alphanum/alphanum_r.mdl")
+    holoDisableShading(12, 1)
+    holoAlpha(12, 0)
+    holoParent(12, E2)
+    holoMaterial(12,"models/debug/debugwhite")    
+    
+    #Gear 1
+    holoCreate(13, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(13, "models/sprops/misc/alphanum/alphanum_1.mdl")
+    holoDisableShading(13, 1)
+    holoAlpha(13, 0)
+    holoParent(13, E2)
+    holoMaterial(13,"models/debug/debugwhite")
+    
+    #Gear 2
+    holoCreate(14, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(14, "models/sprops/misc/alphanum/alphanum_2.mdl")
+    holoDisableShading(14, 1)
+    holoAlpha(14, 0)
+    holoParent(14, E2)
+    holoMaterial(14,"models/debug/debugwhite")
+    
+    #Gear 3
+    holoCreate(15, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(15, "models/sprops/misc/alphanum/alphanum_3.mdl")
+    holoDisableShading(15, 1)
+    holoAlpha(15, 0)
+    holoParent(15, E2)
+    holoMaterial(15,"models/debug/debugwhite")
+    
+    #Gear 4
+    holoCreate(16, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(16, "models/sprops/misc/alphanum/alphanum_4.mdl")
+    holoDisableShading(16, 1)
+    holoAlpha(16, 0)
+    holoParent(16, E2)
+    holoMaterial(16,"models/debug/debugwhite")
+    
+    #Gear 5
+    holoCreate(17, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(17, "models/sprops/misc/alphanum/alphanum_5.mdl")
+    holoDisableShading(17, 1)
+    holoAlpha(17, 0)
+    holoParent(17, E2)
+    holoMaterial(17,"models/debug/debugwhite")
+    
+    #Gear 6
+    holoCreate(18, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(18, "models/sprops/misc/alphanum/alphanum_6.mdl")
+    holoDisableShading(18, 1)
+    holoAlpha(18, 0)
+    holoParent(18, E2)
+    holoMaterial(18,"models/debug/debugwhite")    
+    
+    #Gear 7
+    holoCreate(19, E2:toWorld(vec(-3,0.1,0.2)), vec(0.1), E2:toWorld(ang(0,-90,90)))
+    holoModel(19, "models/sprops/misc/alphanum/alphanum_7.mdl")
+    holoDisableShading(19, 1)
+    holoAlpha(19, 0)
+    holoParent(19, E2)
+    holoMaterial(19,"models/debug/debugwhite")
+        
+}
+
+interval(100)
+
+if(changed(RPM))
+{
+    holoAng(1, E2:toWorld(ang(0,RPMMax,5000) - ang(0,RPMAdj,0)))
+}
+
+for(N=12,19,1){
+    
+    holoAlpha(N,0)    
+    
+}
+
+if(Gear==1){
+    
+    holoAlpha(12,255)
+    
+}
+
+elseif(Gear==2){
+    
+    holoAlpha(13,255)
+    
+}
+
+elseif(Gear==3){
+    
+    holoAlpha(14,255)
+    
+}
+
+elseif(Gear==4){
+    
+    holoAlpha(15,255)
+    
+}
+
+elseif(Gear==5){
+    
+    holoAlpha(16,255)
+    
+}
+
+elseif(Gear==6){
+    
+    holoAlpha(17,255)
+    
+}
+
+elseif(Gear==7){
+    
+    holoAlpha(18,255)
+    
+}
+
+if(changed(Speed))
+{
+    if(Unit == "km/h")
+    {
+        Adjustment = toUnit(Unit, Speed)*1.75 # Adjust our needle rotation for accurate analog reading
+        holoAng(10, E2:toWorld(ang(0,-Adjustment,0)))
+    }
+    else # mph adjustment
+    {
+        Adjustment = toUnit(Unit, Speed)*1.75 # Apparently the adjustment is the same as km/h. Keeping variable just in case.
+        holoAng(10, E2:toWorld(ang(0,-Adjustment,0)))
+        
+        }
+}
+if(RPM>=SwitchValue){
+holoColor(12, vec(255,0,0))
+holoColor(13, vec(255,0,0))
+holoColor(14, vec(255,0,0))
+holoColor(15, vec(255,0,0))
+holoColor(16, vec(255,0,0))
+holoColor(17, vec(255,0,0))
+holoColor(18, vec(255,0,0))
+holoColor(19, vec(255,0,0))
+}
+if(RPM<=SwitchValue){
+holoColor(12, vec(0,255,0))
+holoColor(13, vec(0,255,0))
+holoColor(14, vec(0,255,0))
+holoColor(15, vec(0,255,0))
+holoColor(16, vec(0,255,0))
+holoColor(17, vec(0,255,0))
+holoColor(18, vec(0,255,0))
+holoColor(19, vec(0,255,0))
+}
+
+
+

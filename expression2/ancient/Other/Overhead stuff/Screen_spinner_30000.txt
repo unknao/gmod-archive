@@ -1,0 +1,21 @@
+@name Screen spinner 30000
+@inputs
+@persist S:entity Rot
+if(first()){
+entity():propNotSolid(1)
+entity():setAlpha(0)
+}
+
+interval(100)
+if(!S){
+findByClass("gmod_wire_textscreen")
+findSortByDistance(owner():pos())
+if(find() & find():owner() == owner()){
+S = find()
+}}
+
+Rot = Rot+10*1
+R = Rot
+S:setPos(owner():pos()+vec(0,0,75))
+S:setAng(ang(0,R,0))
+

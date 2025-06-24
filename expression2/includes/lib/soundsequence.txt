@@ -1,0 +1,59 @@
+@name soundsequence
+@strict
+
+#Soundsequence lib made by unknao, the successor to the pre-lambda timer non-strict soundchain lib.
+
+#[Data table structure:
+    table(
+        array(Name, Duration, Pitch, Volume, SoundLevel), first sound
+        array(Name, Duration, Pitch, Volume, SoundLevel), ... repeat ad infinitum
+    )
+    if not provided any variables or 0s after the name, the <name> sound will play with default parameters, see below.
+    #Duration doesnt have to conform to the actual duration of the sound.
+]#
+function entity:soundSequence(Name:string, Data:table){
+    let Counter = 1
+    let DS = Data[Counter, array]
+    let TimerName = "SS_" + This:id() + "_" + Name
+    
+    #If not provided parameters, have fallback default parameters.
+    let SoundName = DS[1, string]
+    let Duration = DS[2, number] if(!Duration){ Duration = soundDuration(SoundName) } #doing it this way is less ops
+    let Pitch = DS[3, number] ?: 100
+    let Volume = DS[4, number] ?: 1
+    let SoundLevel = DS[5, number] ?: 70
+    
+    This:emitSound(SoundName , SoundLevel, Pitch, Volume)
+    
+    if(timerExists(TimerName)){
+        stoptimer(TimerName)
+    }
+    timer(TimerName, Duration, Data:count() - 1, function(){
+        Counter++
+        let DS = Data[Counter, array]
+    
+        let SoundName = DS[1, string]
+        let Duration = DS[2, number] if(!Duration){ Duration = soundDuration(SoundName) }
+        let Pitch = DS[3, number] ?: 100
+        let Volume = DS[4, number] ?: 1
+        let SoundLevel = DS[5, number] ?: 70
+        This:emitSound(SoundName , SoundLevel, Pitch, Volume)
+        timerSetDelay(TimerName, Duration)
+    })
+}
+
+function entity:stopSoundSequence(Name:string){
+    let TimerName = "SS_" + This:id() + "_" + Name
+    if(timerExists(TimerName)){
+        stoptimer(TimerName)
+    }
+}
+
+#[entity():soundSequence("helloworld", table(
+    array("vo/k_lab/br_tele_02.wav"),
+    array("vo/k_lab/br_tele_03.wav"),
+    array("vo/k_lab/br_tele_05.wav"),
+    array("vo/k_lab/br_significant.wav"),
+    array("vo/k_lab/br_thereheis.wav")
+))
+]#

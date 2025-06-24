@@ -1,0 +1,26 @@
+@name bricker final form
+@persist Rot Tog Walk
+interval(20)
+
+Walk = owner():keyWalk()
+W = owner():keyForward()
+Shift = owner():keySprint()
+
+if(changed(Walk) & Walk){
+Tog = !Tog
+}
+if(changed(!Tog) & Tog){
+print(_HUD_PRINTCENTER,"High speed Activated")}
+if(changed(Tog) & !Tog){
+print(_HUD_PRINTCENTER,"High speed Deactivated")}
+if(Tog){
+if(W & Shift){
+owner():applyPlayerForce(owner():eye()*50000)
+}}
+
+
+if(owner():keyJump())
+{
+owner():applyPlayerForce(vec(0,0,1)*50)
+
+}

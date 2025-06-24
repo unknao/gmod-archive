@@ -1,0 +1,20 @@
+@name weeewooo
+@persist I
+interval(500)
+I = !I
+
+if(first()){
+entity():setAlpha(0)
+P = findPlayerByName("william")
+holoCreate(1, P:toWorld(vec(0,0,0)), vec(1), P:toWorld(ang(0,0,0)))
+holoAlpha(1, 0)
+holoParentAttachment(1, P, "torso")
+holoEntity(1):soundPlay(1,0,"synth/square.wav")
+}
+if(changed(I==1)){
+soundPitch(1,100)
+}
+
+if(I==0){
+soundPitch(1, 1000)
+}

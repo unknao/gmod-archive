@@ -1,0 +1,94 @@
+@name Projector
+@outputs C
+@persist C A R D W B
+interval(10)
+if(first()){
+holoCreate(1, entity():toWorld(vec(0,0,100)), vec(6,0.5,0.5), entity():toWorld(ang()))
+holoColor(1, vec(100))
+holoParent(1, entity())
+
+holoCreate(2, holoEntity(1):toWorld(vec(0,0,0)), vec(0.25), holoEntity(1):toWorld(ang()))
+holoColor(2, vec(100))
+holoAlpha(2, 50)
+holoParent(2, 1)
+
+holoCreate(3, holoEntity(2):toWorld(vec(6,0,0)), vec(1,0.25,0.25), holoEntity(2):toWorld(ang()))
+holoColor(3, vec(100))
+holoParent(3, 2)
+
+holoCreate(4, holoEntity(1):toWorld(vec(0,0,0)), vec(0.25), holoEntity(1):toWorld(ang()))
+holoColor(4, vec(100))
+holoParent(4, 1)
+
+holoCreate(5, holoEntity(4):toWorld(vec(-6,0,0)), vec(1,0.25,0.25), holoEntity(4):toWorld(ang()))
+holoColor(5, vec(100))
+holoParent(5, 4)
+
+holoCreate(6, holoEntity(1):toWorld(vec(0,0,0)), vec(5.5,0.1,0.1), holoEntity(1):toWorld(ang()))
+holoParent(6, 1)
+
+holoCreate(7, holoEntity(6):toWorld(vec(0,0.3,0)), vec(1,0.3,1), holoEntity(1):toWorld(ang()))
+holoMaterial(7, "models/debug/debugwhite")
+holoColor(7, vec())
+holoModel(7, "models/sprops/misc/alphanum/alphanum_a.mdl")
+holoAlpha(7, 0)
+holoParent(7, 6)
+
+holoCreate(8, holoEntity(6):toWorld(vec(11,0.3,0)), vec(1,0.3,1), holoEntity(1):toWorld(ang()))
+holoMaterial(8, "models/debug/debugwhite")
+holoColor(8, vec())
+holoModel(8, "models/sprops/misc/alphanum/alphanum_g.mdl")
+holoAlpha(8, 0)
+holoParent(8, 6)
+
+holoCreate(9, holoEntity(6):toWorld(vec(-10,0.3,0)), vec(1,0.3,1), holoEntity(1):toWorld(ang()))
+holoMaterial(9, "models/debug/debugwhite")
+holoColor(9, vec())
+holoModel(9, "models/sprops/misc/alphanum/alphanum_y.mdl")
+holoAlpha(9, 0)
+holoParent(9, 6)
+
+timer("stretch",1000)
+}
+if(clk("stretch")){
+A = 1}
+
+if(A){
+C = clamp(C,0,89)+1
+
+holoAng(2, holoEntity(1):toWorld(ang(C,0,0)))
+holoAng(4, holoEntity(1):toWorld(ang(-C,0,0)))
+holoPos(2, holoEntity(1):toWorld(vec(C*0.38366666666,0,0)))
+holoPos(4, holoEntity(1):toWorld(vec(-C*0.38366666666,0,0)))
+}
+if(changed(A) & A){
+timer("reel",3100)}
+
+if(clk("reel")){
+A = 0
+R = 1}
+if(R){
+D = clamp(D,0,89)+1
+
+holoPos(6, holoEntity(1):toWorld(vec(0,0,-D/3.5)))
+holoScale(6, vec(5.5,0.1,D*0.05))
+}
+if(changed(R) & R){
+timer("words",3500)}
+
+if(clk("words")){
+R = 0
+W = 1}
+
+if(W){
+B = clamp(B,0,245)+10
+
+holoAlpha(7, B)
+holoAlpha(8, B)
+holoAlpha(9, B)}
+
+if(changed(W) & W){
+timer("end",2500)}
+
+if(clk("end")){
+W = 0}

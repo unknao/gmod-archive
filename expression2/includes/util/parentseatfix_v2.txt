@@ -1,0 +1,33 @@
+@name parentseatfix v2
+@inputs Base:entity
+@strict
+
+if(->Base){ #Reset everything first
+    foreach(_:number, E:entity = Base:getConnectedEntities()){
+        if(E:owner() != owner()){ continue }
+        if(E:getClass() != "prop_vehicle_prisoner_pod"){ continue }
+            
+        E:lockPod(0)   
+    }
+}
+
+event playerEnteredVehicle(_:entity, Vehicle:entity){
+    if(Vehicle:owner() != owner()){ exit() }
+    if(Vehicle:parent() != Base){ exit() }
+    
+    Vehicle:lockPod(1)  
+}
+
+event playerLeftVehicle(_:entity, Vehicle:entity){
+    if(Vehicle:owner() != owner()){ exit() }
+    if(Vehicle:parent() != Base){ exit() }
+    
+    if(timerExists("PSF" + Vehicle:id())){
+        timerRestart("PSF" + Vehicle:id())
+        exit()
+    }
+    
+    timer("PSF" + Vehicle:id(), 0.5, 1, function(){
+        Vehicle:lockPod(0)
+    })  
+}

@@ -1,0 +1,43 @@
+@name propness
+@outputs Tog
+@persist E:entity Vec:vector Tog
+if(first()){
+entity():propDraw(0)
+entity():propNotSolid(1)
+Tog = 0}
+
+interval(20)
+if(owner():weapon():type() == "none"){
+
+if(changed(owner():keyAttack2())& owner():keyAttack2()& !E & owner():aimEntity()){
+E = owner():aimEntity()
+E:propDrag(0)
+if(E:isFrozen()){
+#E:constraintBreak()
+E:setAng(ang(random(-5,5),random(-5,5),random(-5,5)))
+E:propFreeze(0)
+E:soundPlay(1,0.5,"physics/metal/metal_sheet_impact_bullet2.wav")}}
+
+if(changed(E) & E){
+Tog = 1
+E:propNotSolid(1)}
+
+if(Tog){
+Vec = ((owner():boxCenterW()+vec(0,0,70)+owner():right()*80-E:pos())-E:vel()/10)*E:mass()}
+
+if(!Tog){
+Vec = (owner():aimPos()-E:pos())*999
+E:propNotSolid(0)
+timer("1",20)
+if(clk("1")){
+E = noentity()
+Vec = ((owner():boxCenterW()+vec(0,0,70)+owner():right()*80-E:pos())-E:vel()/10)*E:mass()}}
+
+if(E){
+E:applyForce(Vec+$Vec*5)
+if(changed(owner():keyAttack1()) & owner():keyAttack1()){
+Tog = 0}
+}}else{
+E:propNotSolid(0)
+E = noentity()
+Rdy = 0}

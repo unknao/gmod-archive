@@ -1,0 +1,51 @@
+@name Muh rockets vee two
+@outputs Ply:array
+@persist [E Ent]:entity [A Ply]:array Rdy Var S
+interval(100)
+if(first()){
+propSpawnUndo(1)
+#entity():propDraw(0)
+Rdy = 1
+Var=1
+S=1
+function entity:faceAng(Ang:angle,Pow)
+{
+This:applyTorque((This:toLocal(rotationVector(quat(Ang)/quat(This))+This:pos())*Pow - This:angVelVector())*Pow*This:inertia())
+}
+Ply=array(findPlayerByName("python"))
+propSpawnUndo(0)}
+
+if(Ply:count()){
+if(A:count()<=20&Rdy){
+E = propSpawn("models/props_phx/ww2bomb.mdl",entity():pos()+entity():up()*100,0)
+E:propGravity(0)
+E:propNotSolid(1)
+E:setAng(E:toWorld(ang(-90,0,0)))
+E:setColor(hsv2rgb((360/10)*randint(0,36),1,1))
+E["e",entity]=Ply[Var,entity]
+holoCreate(S,E:toWorld(vec(-20,0,7)),vec(0.01))
+holoModel(S,"models/buildables/sentry3_rockets.mdl")
+holoParent(S,E)
+
+A:pushEntity(E)    
+Var++
+S++
+if(Var>Ply:count()){Var=1}
+Rdy = 0
+timer("cld",300)
+}}
+
+
+
+if(clk("cld")){
+Rdy = 1}
+
+foreach(I,E:entity=A){
+E:applyForce(E:forward()*2000000-(E:vel()*0.8)*E:mass())
+E:faceAng((E["e",entity]:boxCenterW()-E:pos()):toAngle(),15)
+if(E:pos():distance(E["e",entity]:pos())<128){
+E:propBreak()
+}
+if(!Ply:count()){E:propBreak()}
+if(!E){A:remove(I)}
+}

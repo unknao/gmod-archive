@@ -1,0 +1,44 @@
+@name make ballular 
+@trigger none
+@strict
+
+propSpawnUndo(0)
+enableConstraintUndo(0)
+entity():setMass(50000)
+
+let E = propSpawn("models/Combine_Helicopter/helicopter_bomb01.mdl", entity():toWorld(vec(0, 0, 100)), ang(), 0)
+E:makeSpherical(16)
+E:propPhysicalMaterial("jalopytire")
+
+let S = seatSpawn("", E:toWorld(vec(0, 0, 15)), E:toWorld(ang()), 0)
+S:noCollideAll(1)
+
+ballsocket(E, vec(), S, 0)
+ballsocket(entity(), _VECTOR_ORIGIN, S, vec(-0.01), vec(0.01), _VECTOR_ORIGIN, 1)
+
+Driver = S:driver()
+event playerEnteredVehicle(Player:entity, Vehicle:entity) {
+    if(Vehicle != S){ exit() }
+    
+    Driver = Player
+    E:soundPlay("loop", 0, "vehicles/apc/apc_start_loop3.wav")
+    E:emitSoundStop("vehicles/apc/apc_shutdown.wav")
+}
+
+event playerLeftVehicle(Player:entity, Vehicle:entity) {
+    if(Vehicle != S){ exit() }
+    
+    Driver = noentity()
+    E:emitSound("vehicles/apc/apc_shutdown.wav")
+    soundStop("loop", 0.2)
+}
+
+event tick(){
+    if(!Driver){ exit() }
+    
+    let Dir = vec(Driver:keyForward() - Driver:keyBack(), Driver:keyLeft() - Driver:keyRight(), 0):rotate(Driver:eyeAngles()):normalized()
+    let Cross = vec(0, 0, 1):cross(Dir):normalized()
+    
+    E:applyTorque((E:toLocalAxis(Cross) * 1000000 * tickInterval() - E:angVelVector() * 10) * E:inertia())
+    soundPitch("loop", 100 + E:angVelVector():length() * 0.02, 0.2)
+}

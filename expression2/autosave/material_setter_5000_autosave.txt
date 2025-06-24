@@ -1,0 +1,115 @@
+@name Material Setter 5000
+@persist Enabled Material:string SelectedEntities:table SELECT_COLOR:vector
+
+#[
+    Material Setter 5000 by unknao.
+    An easier way to set invalid (or valid) materials on props in bulk.
+    Usage:
+        E - if pressed whilst looking at the e2, toggle the e2 on or off,
+        if pressed while looking at anything else that you own, select it for material change
+        R - Clear entity selection
+        Alt - Apply material to selected entities
+        Ctrl - Print the material of the prop that youre looking at directly
+    Chat commands:
+        !m <materialname> - Sets the material to be applied
+]#
+
+if(first()){
+    Enabled = 0
+    SelectedEntities = table()
+    SELECT_COLOR = vec(255, 100, 255)
+    printColor(SELECT_COLOR, "Material Setter 5000 by unknao. Check the E2 for the chat commands & usage")
+}
+
+function entity:markSelected(N:number){
+    if(N){
+        This["_OldColor", vector4] = This:getColor4()
+        This:setColor(SELECT_COLOR)
+    }
+    elseif(!N & This["_OldColor", vector4]){
+        This:setColor(This["_OldColor", vector4])
+        This["_OldColor", vector4] = vec4()
+    }
+}
+
+
+
+event chat(Player:entity, Message:string, _:number){
+    hideChat(0)
+    if(Player == owner() & Message:sub(1, 2):lower() == "!m" & Enabled){
+        Material = Message:sub(4)
+        hint("Material '" + Material + "' selected.", 2)
+        hideChat(1)
+    }
+}
+
+event keyPressed(Player:entity, _:string, Down:number, KeyBind:string){
+    if(Player == owner() & Down){
+        local AimEnt = owner():aimEntity()
+        switch(KeyBind){
+            case "use",
+                if(AimEnt == entity()){
+                    Enabled = !Enabled
+                    printColor(SELECT_COLOR, "Material Setter 5000 " + (Enabled ? "Enabled." : "Disabled."))
+                    entity():emitSound(Enabled ? "buttons/button6.wav" : "buttons/button5.wav", 70, 150)
+                    break
+                }
+                if(!Enabled){ break }
+                if(AimEnt:owner() != owner()){
+                    hint("Can't select other peoples' props!", 1.5)
+                    break
+                }
+                
+                local ID = AimEnt:id():toString()
+                
+                if(SelectedEntities[ID, entity]){
+                    AimEnt:markSelected(0)
+                    SelectedEntities:remove(ID)
+                    hint("Removed " + AimEnt:toString() + " from selection.", 1.5)
+                    owner():emitSound("buttons/button16.wav", 70, 60)
+                    break
+                }
+                
+                SelectedEntities[ID, entity] = AimEnt
+                AimEnt:markSelected(1)
+                hint("Added " + AimEnt:toString() + " to selection.", 1.5)
+                owner():emitSound("buttons/button16.wav", 70, 100)
+            break
+            
+            case "reload",
+                if(Enabled & SelectedEntities:count()){
+                    hint("Cleared " + SelectedEntities:count() + " from selection.", 1.5)
+                    foreach(_:string, E:entity = SelectedEntities){
+                        E:markSelected(0)
+                    }
+                    SelectedEntities:clear()
+                    owner():emitSound("buttons/button15.wav")
+                }
+            break
+            
+            case "walk",
+                if(Enabled & SelectedEntities:count()){
+                    foreach(_:string, E:entity = SelectedEntities){
+                        E:setMaterial(Material)
+                        E:markSelected(0)
+                    }
+                    hint("Set Material to '" + Material + "' on " + SelectedEntities:count() + " entities.", 3)
+                    SelectedEntities:clear()
+                    owner():emitSound("buttons/button14.wav")
+                }
+            break
+            
+            case "duck",
+                if(Enabled){
+                    printColor(SELECT_COLOR, AimEnt:toString() + " Material: " + AimEnt:getMaterial())
+                }
+            break
+        }
+    }
+}
+
+event removed(_:number) {
+    foreach(_:string, E:entity = SelectedEntities){
+        E:markSelected(0)
+    }  
+}

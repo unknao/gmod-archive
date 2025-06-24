@@ -1,0 +1,32 @@
+@name name
+@outputs Active
+@persist A:array S M:entity Active
+runOnTick(1)
+
+if(first()){
+Active=1
+findIncludePlayerProps(owner())
+}
+S+=0.2
+findByClass("acf_gun")
+A=findToArray()
+
+if(!M){
+findByClass("acf_ammo")
+if(find()){
+entity():createWire(M,"Active","Active")
+M=find()}}
+
+if(changed(A:count())){
+foreach(I,E:entity=A){
+E:propNotSolid(0)
+E:acfLinkTo(M,1)
+}}
+foreach(I,E:entity=A){
+E:setPos(owner():pos()+vec(sin((360/A:count()*I)+S)*100,cos((360/A:count()*I)+S)*100,150))
+E:setAng((owner():aimPos()-E:pos()):toAngle())
+E:acfFire(owner():keyAttack2())
+}
+if(M){
+M:setPos(owner():pos()+vec(0,0,150))
+}

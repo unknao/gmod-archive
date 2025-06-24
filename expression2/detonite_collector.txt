@@ -1,0 +1,64 @@
+@name detonite collector
+@strict
+@trigger none
+
+#ma_bomb_v2
+concmd("gm_spawnsent ma_bomb_v2")
+Det = noentity()
+DetList = array()
+N = 0
+let Primed = 0
+
+event entityCreated(E:entity) {
+    if(!E:isValid()){ exit() }
+    if(Det:isValid() & E:type() == "mining_ore" & N < 5 & Det["Action", number] < curtime()){
+        Det["Action", number] = curtime()
+        N++
+        Det:setPos(E:boxCenterW() + E:vel())
+        if(N == 5){
+            timer(0.5, function(){
+                DetList:pushEntity(Det)
+                Det:setPos(entity():toWorld(vec(0, 0, DetList:count())))
+                Det = entity(0) 
+                if(DetList:count() == players():count()){
+                    foreach(_:number, E:entity = DetList){
+                        let W = E:wirelink()
+                        E:propNotSolid(1)
+                        E:propDraw(0)
+                        W["Detonate", number] = 1
+                    }
+                    timer(1, function(){
+                        Primed = 1
+                    })
+                }else{
+                    concmd("gm_spawnsent ma_bomb_v2")
+                    N = 0
+                }
+            })
+        }
+        exit()
+    }
+    
+    if(E:owner() != owner()){ exit() }
+    if(E:type() != "ma_bomb_v2"){ exit() }
+    
+    E:propFreeze(1)
+    E:setPos(entity():toWorld(vec(0, 0, DetList:count())))
+    E:setAng(ang())
+    Det = E
+}
+
+
+event tick(){
+    if(!Primed){ exit() }
+    
+    let Count = 0
+    foreach(I:number, E:entity = players()){
+        let Bomb = DetList[I, entity]
+        if(!Bomb:isValid()){ continue }
+        Count++
+        Bomb:setPos(E:boxCenterW() + E:vel() * tickInterval())
+    }
+    
+    if(!Count){ selfDestruct() }
+}

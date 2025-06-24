@@ -1,0 +1,13 @@
+@name nno
+@persist Dir:vector
+interval(100)
+findInSphere(entity():pos(),500)
+Targ = findToArray()
+
+foreach(I,T:entity=Targ){
+
+if(T:aimEntity() == entity()){
+Dir = entity():pos()+randvec(-20,20)
+if(Dir:isInWorld()){entity():setPos(Dir)}
+}}
+
